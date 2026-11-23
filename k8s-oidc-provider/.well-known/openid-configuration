@@ -1,0 +1,7 @@
+{
+  "issuer": "https://nykenkung.github.io/Cloud-Native_LLMOps_Infra/k8s-oidc-provider",
+  "jwks_uri": "https://nykenkung.github.io/Cloud-Native_LLMOps_Infra/k8s-oidc-provider/jwks.json",
+  "response_types_supported": ["id_token"],
+  "subject_types_supported": ["public"],
+  "id_token_signing_alg_values_supported": ["RS256"]
+}
