@@ -1,0 +1,3 @@
+write-kubeconfig-mode: "0644"
+kube-apiserver-arg:
+  - "service-account-issuer=https://nykenkung.github.io/Cloud-Native_LLMOps_Infrastructure/K8s-OIDC-Provider"
