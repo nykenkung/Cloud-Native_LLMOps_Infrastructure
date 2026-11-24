@@ -28,7 +28,7 @@
 
 | Tier | Service Name | Public Zero-Trust Access | Internal Cluster DNS | Authentication & Credentials Source |
 | :--- | :--- | :--- | :--- | :--- |
-| **Frontend** | **Open-WebUI Portal** | [open-webui.kung.nyc](https://open-webui.kung.nyc) | `open-webui-svc.open-webui.svc:8080` | **Demo Accoun:**<br/>• Email: `test@test.com`<br/>• Password: `test` |
+| **Frontend** | **Open-WebUI Portal** | [open-webui.kung.nyc](https://open-webui.kung.nyc) | `open-webui-svc.open-webui.svc:8080` | **Demo Account:**<br/>• Email: `test@test.com`<br/>• Password: `test` |
 | **Gateway** | **LiteLLM Gateway** | [api.kung.nyc](https://api.kung.nyc) | `litellm.litellm.svc:4000` | Bearer Token managed via ESO (`my-cisc4900-config`) |
 | **Inference**| **llama.cpp ROCm** | *Internal Protected* | `llamacpp-rocm-svc.llamacpp-rocm.svc:8080` | Internal Bearer Token synced via ESO |
 | **Vector DB**| **Qdrant Vector DB** | [qdrant.kung.nyc](https://qdrant.kung.nyc/dashboard) | `qdrant.qdrant.svc:6333` | Read/Write API Key synced via ESO |
