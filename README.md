@@ -28,13 +28,13 @@
 
 | Tier | Service Name | Public Zero-Trust Access | Internal Cluster DNS | Authentication & Credentials Source |
 | :--- | :--- | :--- | :--- | :--- |
-| **Frontend** | **Open-WebUI Portal** | [open-webui.kung.nyc](https://open-webui.kung.nyc) | `open-webui-svc.open-webui.svc:8080` | **Demo Account:**<br/>• Email: `test@test.com`<br/>• Password: `test` |
-| **Gateway** | **LiteLLM Gateway** | [api.kung.nyc](https://api.kung.nyc) | `litellm.litellm.svc:4000` | Bearer Token managed via ESO (`my-cisc4900-config`) |
+| **Frontend** | **Open-WebUI Portal** | [https://open-webui.kung.nyc](https://open-webui.kung.nyc) | `open-webui-svc.open-webui.svc:8080` | **Demo Account:**<br/>• Email: `test@test.com`<br/>• Password: `test` |
+| **Gateway** | **LiteLLM Gateway** | [https://api.kung.nyc](https://api.kung.nyc) | `litellm.litellm.svc:4000` | Bearer Token managed via ESO (`my-cisc4900-config`) |
 | **Inference**| **llama.cpp ROCm** | *Internal Protected* | `llamacpp-rocm-svc.llamacpp-rocm.svc:8080` | Internal Bearer Token synced via ESO |
-| **Vector DB**| **Qdrant Vector DB** | [qdrant.kung.nyc](https://qdrant.kung.nyc/dashboard) | `qdrant.qdrant.svc:6333` | Read/Write API Key synced via ESO |
-| **GitOps** | **Argo CD UI** | [argocd.kung.nyc](https://argocd.kung.nyc) | `argocd-server.argocd.svc:443` | Admin password managed via Bcrypt ESO patch |
-| **Security** | **Falco Sidekick UI**| [falco.kung.nyc](https://falco.kung.nyc) | `falco-falcosidekick-ui.falco.svc:2801` | Basic Auth synced via ESO (`my-cisc4900-config`) |
-| **Monitor** | **Grafana LGTM** | [grafana.kung.nyc](https://grafana.kung.nyc) | `lgtm-prometheus-grafana.grafana.svc:80` | Admin credentials synced via ESO |
+| **Vector DB**| **Qdrant Vector DB** | [https://qdrant.kung.nyc](https://qdrant.kung.nyc/dashboard) | `qdrant.qdrant.svc:6333` | Read/Write API Key synced via ESO |
+| **GitOps** | **Argo CD UI** | [https://argocd.kung.nyc](https://argocd.kung.nyc) | `argocd-server.argocd.svc:443` | Admin password managed via Bcrypt ESO patch |
+| **Security** | **Falco Sidekick UI**| [https://falco.kung.nyc](https://falco.kung.nyc) | `falco-falcosidekick-ui.falco.svc:2801` | Basic Auth synced via ESO (`my-cisc4900-config`) |
+| **Monitor** | **Grafana LGTM** | [https://grafana.kung.nyc](https://grafana.kung.nyc) | `lgtm-prometheus-grafana.grafana.svc:80` | Admin credentials synced via ESO |
 | **Metrics** | **Prometheus Core** | *Internal Protected* | `lgtm-prometheus-kube-prome-prometheus.grafana.svc:9090` | ServiceMonitor metrics scraping endpoints |
 | **Mesh VPN** | **Tailscale Operator**| *Tailnet Virtual IP* | `tailscale-pg-0.tailscale.svc` | Operator OAuth Secret synced via ESO |
 
