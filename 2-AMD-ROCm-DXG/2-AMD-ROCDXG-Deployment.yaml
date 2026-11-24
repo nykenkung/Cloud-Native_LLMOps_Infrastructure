@@ -1,0 +1,57 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: amd-rocdxg-deploy
+  namespace: amd-rocdxg
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: amd-rocdxg-pod
+  template:
+    metadata:
+      labels:
+        app: amd-rocdxg-pod
+    spec:
+      containers:
+      - name: amd-rocdxg-container
+        image: rocm/pytorch:latest
+        command: ["sleep", "infinity"]
+        env:
+        - name: HSA_ENABLE_DXG_DETECTION
+          value: "1"
+        - name: HSA_OVERRIDE_GFX_VERSION
+          value: "11.0.2"
+        - name: LD_LIBRARY_PATH
+          value: "/usr/local/lib/python3.12/dist-packages/_rocm_sdk_core/lib:/usr/local/lib/python3.12/dist-packages/_rocm_sdk_devel/lib:/usr/lib/wsl/lib:/opt/rocm/lib:/opt/rocm/lib64"
+        volumeMounts:
+        - mountPath: /dev/dxg
+          name: dxg
+        - mountPath: /usr/lib/wsl/lib
+          name: wsl
+        - mountPath: /usr/lib/librocdxg.so
+          name: rocdxg
+        - mountPath: /opt/llamacpp-rocm
+          name: llamacpp-rocm
+        - mountPath: /mnt/HuggingFace-Models
+          name: huggingface-models
+        securityContext:
+          privileged: true
+          allowPrivilegeEscalation: true
+      volumes:
+      - hostPath:
+          path: /dev/dxg
+        name: dxg
+      - hostPath:
+          path: /usr/lib/wsl/lib
+        name: wsl
+      - hostPath:
+          path: /opt/rocm/lib/librocdxg.so
+          type: File
+        name: rocdxg
+      - hostPath:
+          path: /home/kenkung/llamacpp-rocm
+        name: llamacpp-rocm
+      - hostPath:
+          path: /home/kenkung/HuggingFace-Models
+        name: huggingface-models
