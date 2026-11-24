@@ -1,0 +1,9 @@
+apiVersion: tailscale.com/v1alpha1
+kind: ProxyGroup
+metadata:
+  name: tailscale-pg
+spec:
+  type: ingress
+  replicas: 1
+  tags:
+    - tag:k8s-operator
