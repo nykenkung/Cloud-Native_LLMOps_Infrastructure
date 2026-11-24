@@ -391,26 +391,8 @@ flowchart TD
 │   │   └── openid-configuration          # OpenID Connect Discovery JSON metadata document
 │   └── jwks.json                         # Public JSON Web Key Set containing K3s ServiceAccount public keys
 │
-└── <b>(0) ~ (18) Operations Runbooks:</b>
-    ├── (0)Installation-Testing.txt       # Master automated menu and validation runbook
-    ├── (1)Hardware-OS-Configuration.txt  # System setup, kernel tuning, and inotify parameters runbook
-    ├── (2)AMD-ROCm-DXG.txt               # AMD Strix Halo GPU virtualization and verification runbook
-    ├── (3)Kubernetes.txt                 # K3s cluster installation and OIDC configuration runbook
-    ├── (4)Helm.txt                       # Helm 3 setup and repository initialization runbook
-    ├── (5)External-Secrets-Operator.txt  # GCP WIF and ESO 6-stage disaster recovery runbook
-    ├── (6)Tailscale-Operator.txt         # Tailscale mesh VPN setup and proxy group runbook
-    ├── (7)Cloudflare-Tunnel.txt          # Cloudflare Zero Trust dual-replica tunnel runbook
-    ├── (8)Ingress-Nginx.txt              # Ingress-Nginx controller setup and hostNetwork runbook
-    ├── (9)JuiceFS-CSI-Driver.txt         # Distributed POSIX JuiceFS storage setup runbook
-    ├── (10)CloudNativePG-DB.txt          # High-Availability PostgreSQL operator runbook
-    ├── (11)Qdrant-Vector-DB.txt          # Qdrant semantic vector database setup runbook
-    ├── (12)ArgoCD-GitOps.txt             # Argo CD GitOps continuous delivery runbook
-    ├── (13)Falco-Security.txt            # Falco modern eBPF threat monitoring setup runbook
-    ├── (14)Grafana-Prometheus-Stack.txt  # Prometheus & Grafana LGTM stack setup runbook
-    ├── (15)KEDA-Autoscaler.txt           # KEDA event-driven autoscaling runbook
-    ├── (16)LLaMAcpp-ROCm.txt             # llama.cpp ROCm GPU inference engine runbook
-    ├── (17)LiteLLM-Gateway.txt           # LiteLLM multi-model gateway & database runbook
-    └── (18)Open-WebUI.txt                # Open-WebUI enterprise portal & RAG setup runbook
+└──── .nojekyll                          # Skips the Jekyll build step when deploying pre-built static files
+    └── README.md                          # Main introductory document for this project
 </pre>
 
 ---
