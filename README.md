@@ -44,7 +44,7 @@
 
 **CISC4900 Cloud-Native Scalable AI Infrastructure** is an enterprise-grade private cloud platform designed for production-level Large Language Model (LLM) serving, semantic search, and Retrieval-Augmented Generation (RAG). 
 
-Operating on physical AMD hardware (**AMD Ryzen APU with Radeon 8060S Strix Halo gfx1151 GPU, 96GB Unified Host RAM, and ~62GB shared VRAM allocation**), the platform completely removes dependency on third-party commercial AI APIs (e.g., OpenAI, Anthropic), saving organizations hundreds of thousands of dollars annually while ensuring complete data sovereignty and zero telemetry leaks.
+Operating on physical AMD hardware (**AMD Ryzen APU with Radeon 8060S Strix Halo gfx1151 GPU, 128GB Unified Host RAM, and ~62GB shared VRAM allocation**), the platform completely removes dependency on third-party commercial AI APIs (e.g., OpenAI, Anthropic), saving organizations hundreds of thousands of dollars annually while ensuring complete data sovereignty and zero telemetry leaks.
 
 ### Key Architectural Pillars
 
@@ -81,7 +81,7 @@ This project was developed incrementally over a 45-week timeline, solving comple
 ```
 January 16, 2026 [Project Kickoff]
  ├─ Initialized CISC 4900 Capstone repository and defined system architecture.
- ├─ Configured baseline Windows 11 host with AMD Strix Halo APU (96GB unified memory).
+ ├─ Configured baseline Windows 11 host with AMD Strix Halo APU (128GB unified memory).
  │
 January 23, 2026 [WSL2 Linux Kernel & OS Tuning]
  ├─ Deployed Ubuntu 24.04 LTS on WSL2 with customized Linux Kernel 6.6+.
@@ -197,7 +197,7 @@ flowchart TD
 
     subgraph InferenceLayer["4. Hardware Accelerated Inference"]
         LlamaROCm["llama.cpp ROCm Server<br/>(GPU Accelerated Inference)"]:::aiStyle
-        AMD_GPU["AMD Radeon 8060S GPU<br/>(62GB Shared VRAM / 96GB RAM)"]:::aiStyle
+        AMD_GPU["AMD Radeon 8060S GPU<br/>(62GB Shared VRAM / 128GB RAM)"]:::aiStyle
         Qdrant["Qdrant Vector Database<br/>(HNSW Semantic Search)"]:::aiStyle
     end
 
