@@ -28,8 +28,8 @@
 ## 📑 Live Services & Endpoints Registry
 
 | Tier | Service Name | Public Zero-Trust Access | Internal Cluster DNS | Authentication & Credentials Source |
-| :--- | :--- | :--- | :--- | :--- | :--- |
-| **Frontend** | **Open-WebUI Portal** | [open-webui.kung.nyc](https://open-webui.kung.nyc) | `http://open-webui.192.168.1.3.sslip.io` | `open-webui-svc.open-webui.svc:8080` | **Demo Accoun:**<br/>• Email: `test@test.com`<br/>• Password: `test` |
+| :--- | :--- | :--- | :--- | :--- |
+| **Frontend** | **Open-WebUI Portal** | [open-webui.kung.nyc](https://open-webui.kung.nyc) | `open-webui-svc.open-webui.svc:8080` | **Demo Accoun:**<br/>• Email: `test@test.com`<br/>• Password: `test` |
 | **Gateway** | **LiteLLM Gateway** | [api.kung.nyc](https://api.kung.nyc) | `litellm.litellm.svc:4000` | Bearer Token managed via ESO (`my-cisc4900-config`) |
 | **Inference**| **llama.cpp ROCm** | *Internal Protected* | `llamacpp-rocm-svc.llamacpp-rocm.svc:8080` | Internal Bearer Token synced via ESO |
 | **Vector DB**| **Qdrant Vector DB** | [qdrant.kung.nyc](https://qdrant.kung.nyc/dashboard) | `qdrant.qdrant.svc:6333` | Read/Write API Key synced via ESO |
@@ -75,7 +75,7 @@ Operating on physical AMD hardware (**AMD Ryzen APU with Radeon 8060S Strix Halo
 
 ---
 
-## 📅 Engineering & Development Log (Jan 10 – Nov 22, 2026)
+## 📅 Engineering & Development Log (January 16 - November 24, 2026)
 
 This project was developed incrementally over a 45-week timeline, solving complex systems engineering, hardware acceleration, zero-trust security, and cloud-native orchestration challenges:
 
@@ -160,7 +160,7 @@ November 21, 2026 [Cross-Cloud Keyless SecretOps Transformation]
 November 24, 2026 [GitOps Finalization & Comprehensive Verification Suite]
  ├─ Transitioned all application deployments to Argo CD v3.6.2 with Server-Side Apply.
  ├─ Built and verified 10-tier automated testing benchmark suite (Test 101 through Test 110).
- ├─ Achieved 100% test pass rate across E2E inference, security penetration, and failover resilience.
+ └─ Achieved 100% test pass rate across E2E inference, security penetration, and failover resilience.
 ```
 
 ---
@@ -246,7 +246,7 @@ flowchart TD
 <pre>
 <b>Cloud-Native_LLMOps_Infrastructure</b>
 │
-├── <b>00-Installation-Testing/</b>        # Deployment orchestration and verification benchmarks
+├── <b>00-Installation-Testing/</b>              # Deployment orchestration and verification benchmarks
 │   ├── Copy-SSH.bat                      # Silent individual file transfer script from Windows to WSL2 server
 │   ├── 00-Menu.sh                        # 4-column master interactive CLI console (Steps 1~18 & Tests 100~110)
 │   ├── 01-Hardware-OS-Configuration.sh   # Configures /etc/wsl.conf, ~/.bashrc, inotify limits and apt utilities
