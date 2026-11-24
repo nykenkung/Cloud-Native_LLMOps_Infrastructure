@@ -5,9 +5,8 @@
   ██║     ██║╚════██║██║     ╚════██║╔═════██╗████╔╝██║████╔╝██║╚════╝██║     ██║     ██║╚██╔╝██║██║   ██║██╔═══╝ ╚════██║
   ╚██████╗██║███████║╚██████╗     ██║╚██████╔╝╚██████╔╝╚██████╔╝      ███████╗███████╗██║ ╚═╝ ██║╚██████╔╝██║     ███████║
    ╚═════╝╚═╝╚══════╝ ╚═════╝     ╚═╝ ╚═════╝  ╚═════╝  ╚═════╝       ╚══════╝╚══════╝╚═╝     ╚═╝ ╚═════╝ ╚═╝     ╚══════╝
-
-                            <b>**Brooklyn College - CISC 4900 Project - Suen Ming Kung**</b>
-
+                                    <b>Brooklyn College - CISC 4900 Project</b>
+                                                <b>Suen Ming Kung</b>
                                   <b>Cloud-Native Scalable AI Infrastructure</b>
                <i>Enterprise-Grade LLMOps, Zero-Trust GitOps, AMD ROCm Hardware Accelerated AI Platform</i>
 </pre>
