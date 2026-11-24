@@ -1,0 +1,21 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: litellm-postgres
+  namespace: litellm
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "256MB"
+  bootstrap:
+    initdb:
+      database: litellm-db
+      owner: kenkung
+      secret:
+        name: my-litellm-postgres-config
+  monitoring:
+    enablePodMonitor: true

@@ -21,9 +21,12 @@ fi
 fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
 
 do_install() {
+  local DIR="$HOME/09-JuiceFS-CSI-Driver"
+  [ ! -d "$DIR" ] && DIR="$HOME/9-JuiceFS-CSI-Driver"
+
   sudo mount --make-shared / 2>/dev/null || true
   helm upgrade --install juicefs-csi-driver juicefs/juicefs-csi-driver -n kube-system || true
-  kubectl apply -f "$HOME/9-JuiceFS-CSI-Driver" || true
+  kubectl apply -f "$DIR" || true
   echo "=== [9 Installation Finished Successfully] ==="
 }
 

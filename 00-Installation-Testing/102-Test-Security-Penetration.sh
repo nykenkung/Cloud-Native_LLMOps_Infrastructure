@@ -22,6 +22,8 @@ if ! kubectl get nodes >/dev/null 2>&1; then
   fail_exit "[FAIL] Cannot connect to Kubernetes cluster via KUBECONFIG=${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 fi
 
+LITELLM_API_KEY="${LITELLM_API_KEY:-$(kubectl get secret -n litellm my-litellm-postgres-config -o jsonpath='{.data.master-key}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
+
 LITELLM_IP=$(kubectl get svc -n litellm litellm -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
              kubectl get svc -n litellm -l app.kubernetes.io/name=litellm -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
 QDRANT_IP=$(kubectl get svc -n qdrant qdrant -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
@@ -115,7 +117,7 @@ echo "--- 3. API Gateway Malformed Input & Fuzzing Defense Pen-Test ---"
 if [ -n "$LITELLM_IP" ]; then
   # 3.1 SQL Injection payload fuzzing on LiteLLM Gateway
   SQLI_RES=$(curl -s -o /dev/null -w "%{http_code}" --max-time 5 \
-    -H "Authorization: Bearer 2561" \
+    -H "Authorization: Bearer ${LITELLM_API_KEY}" \
     -H "Content-Type: application/json" \
     -d '{"model": "default'\'' OR 1=1 --", "messages": [{"role": "user", "content": "ping"}]}' \
     "http://${LITELLM_IP}:4000/v1/chat/completions" 2>/dev/null || echo "000")

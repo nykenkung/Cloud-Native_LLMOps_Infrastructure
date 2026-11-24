@@ -23,10 +23,13 @@ fi
 fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
 
 do_install() {
+  local DIR="$HOME/08-Ingress-Nginx"
+  [ ! -d "$DIR" ] && DIR="$HOME/8-Ingress-Nginx"
+
   for ns in argocd falco grafana litellm open-webui qdrant; do
     kubectl create namespace "$ns" --dry-run=client -o yaml | kubectl apply -f - || true
   done
-  kubectl apply -f "$HOME/8-Ingress-Nginx/1-Ingress-Nginx-Namespace.yaml" || true
+  kubectl apply -f "$DIR/1-Ingress-Nginx-Namespace.yaml" || true
   helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
     -n ingress-nginx --create-namespace \
     --set controller.service.type=ClusterIP \

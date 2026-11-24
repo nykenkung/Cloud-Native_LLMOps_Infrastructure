@@ -21,15 +21,18 @@ fi
 fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
 
 do_install() {
+  local DIR="$HOME/01-Hardware-OS-Configuration"
+  [ ! -d "$DIR" ] && DIR="$HOME/1-Hardware-OS-Configuration"
+
   echo "--- Installing /etc/wsl.conf ---"
-  if [ -f "$HOME/1-Hardware-OS-Configuration/wsl.conf" ]; then
-    sudo cp "$HOME/1-Hardware-OS-Configuration/wsl.conf" /etc/wsl.conf
+  if [ -f "$DIR/wsl.conf" ]; then
+    sudo cp "$DIR/wsl.conf" /etc/wsl.conf
     sudo chmod 644 /etc/wsl.conf
     echo "[OK] /etc/wsl.conf installed"
   fi
-  if [ -f "$HOME/1-Hardware-OS-Configuration/.bashrc" ]; then
+  if [ -f "$DIR/.bashrc" ]; then
     echo "--- Installing ~/.bashrc ---"
-    cp "$HOME/1-Hardware-OS-Configuration/.bashrc" "$HOME/.bashrc"
+    cp "$DIR/.bashrc" "$HOME/.bashrc"
     echo "[OK] ~/.bashrc installed"
   fi
   echo "--- Installing base utilities ---"

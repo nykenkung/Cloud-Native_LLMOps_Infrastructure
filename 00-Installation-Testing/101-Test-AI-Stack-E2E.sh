@@ -22,6 +22,10 @@ if ! kubectl get nodes >/dev/null 2>&1; then
   fail_exit "[FAIL] Cannot connect to Kubernetes cluster via KUBECONFIG=${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 fi
 
+QDRANT_API_KEY="${QDRANT_API_KEY:-$(kubectl get secret -n qdrant my-qdrant-config -o jsonpath='{.data.MY-QDRANT-KEY}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
+LITELLM_API_KEY="${LITELLM_API_KEY:-$(kubectl get secret -n litellm my-litellm-postgres-config -o jsonpath='{.data.master-key}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
+LLAMA_API_KEY="${LLAMA_API_KEY:-$(kubectl get secret -n llamacpp-rocm llamacpp-api-key -o jsonpath='{.data.api-key}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
+
 # 1. Qdrant Vector Database Test
 echo ""
 echo "--- 1. Testing Qdrant Vector Database ---"
@@ -36,9 +40,9 @@ if [ -n "$QDRANT_IP" ]; then
   echo "Qdrant ClusterIP: $QDRANT_IP:6333"
   echo "Qdrant /healthz: $QDRANT_HEALTH"
   
-  COLLECTIONS=$(curl -s --max-time 5 -H "api-key: 2561" "http://${QDRANT_IP}:6333/collections" 2>/dev/null || echo "failed")
+  COLLECTIONS=$(curl -s --max-time 5 -H "api-key: ${QDRANT_API_KEY}" "http://${QDRANT_IP}:6333/collections" 2>/dev/null || echo "failed")
   if echo "$COLLECTIONS" | grep -q "result"; then
-    echo "[OK] Qdrant Collections API (authenticated with Key 2561): OK"
+    echo "[OK] Qdrant Collections API (authenticated): OK"
   else
     fail_exit "[FAIL] Qdrant Collections API: $COLLECTIONS"
   fi
@@ -57,10 +61,10 @@ if [ -n "$LLAMA_IP" ]; then
   LLAMA_HEALTH=$(curl -s --max-time 5 "http://${LLAMA_IP}:8080/health" 2>/dev/null || echo "failed")
   if echo "$LLAMA_HEALTH" | grep -qi "ok\|status"; then
     echo "[OK] llama.cpp /health: $LLAMA_HEALTH"
-    TARGET_M=$(curl -s --max-time 5 -H "Authorization: Bearer 2561" "http://${LLAMA_IP}:8080/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | grep -i "0.5b\|fast\|mini" | head -n 1 | sed 's/"id":"//;s/"//')
-    [ -z "$TARGET_M" ] && TARGET_M=$(curl -s --max-time 5 -H "Authorization: Bearer 2561" "http://${LLAMA_IP}:8080/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | head -n 1 | sed 's/"id":"//;s/"//')
+    TARGET_M=$(curl -s --max-time 5 -H "Authorization: Bearer ${LLAMA_API_KEY}" "http://${LLAMA_IP}:8080/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | grep -i "0.5b\|fast\|mini" | head -n 1 | sed 's/"id":"//;s/"//')
+    [ -z "$TARGET_M" ] && TARGET_M=$(curl -s --max-time 5 -H "Authorization: Bearer ${LLAMA_API_KEY}" "http://${LLAMA_IP}:8080/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | head -n 1 | sed 's/"id":"//;s/"//')
     [ -z "$TARGET_M" ] && TARGET_M="qwen2.5-0.5b-instruct"
-    LLAMA_TEST=$(curl -s --max-time 30 -H "Authorization: Bearer 2561" \
+    LLAMA_TEST=$(curl -s --max-time 30 -H "Authorization: Bearer ${LLAMA_API_KEY}" \
       -H "Content-Type: application/json" \
       -d "{\"model\": \"${TARGET_M}\", \"prompt\": \"Hello\", \"n_predict\": 5}" \
       "http://${LLAMA_IP}:8080/completion" 2>/dev/null || echo "error")
@@ -90,7 +94,7 @@ if [ -n "$LITELLM_IP" ]; then
   fi
   echo "LiteLLM /health/liveliness: $LITELLM_HEALTH"
   
-  MODELS_LIST=$(curl -s --max-time 5 -H "Authorization: Bearer 2561" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null || echo "failed")
+  MODELS_LIST=$(curl -s --max-time 5 -H "Authorization: Bearer ${LITELLM_API_KEY}" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null || echo "failed")
   if echo "$MODELS_LIST" | grep -q "data"; then
     echo "[OK] LiteLLM /v1/models (authenticated with Master Key): OK"
   else

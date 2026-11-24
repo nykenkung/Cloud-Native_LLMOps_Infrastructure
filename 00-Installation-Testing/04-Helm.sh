@@ -26,10 +26,13 @@ do_install() {
   else
     echo "Helm 3 is already installed."
   fi
-  if [ -f "$HOME/4-Helm/init-helm-repos.sh" ]; then
+  local DIR="$HOME/04-Helm"
+  [ ! -d "$DIR" ] && DIR="$HOME/4-Helm"
+
+  if [ -f "$DIR/init-helm-repos.sh" ]; then
     echo "Initializing official Helm chart repositories..."
-    chmod +x "$HOME/4-Helm/init-helm-repos.sh"
-    bash "$HOME/4-Helm/init-helm-repos.sh"
+    chmod +x "$DIR/init-helm-repos.sh"
+    bash "$DIR/init-helm-repos.sh"
   fi
   echo "=== [4 Installation Finished Successfully] ==="
 }

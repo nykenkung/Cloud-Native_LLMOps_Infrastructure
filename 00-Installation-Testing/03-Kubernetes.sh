@@ -20,6 +20,15 @@ fi
 fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
 
 do_install() {
+  local DIR="$HOME/03-Kubernetes"
+  [ ! -d "$DIR" ] && DIR="$HOME/3-Kubernetes"
+
+  if [ -f "$DIR/config.yaml" ]; then
+    echo "Installing /etc/rancher/k3s/config.yaml..."
+    sudo mkdir -p /etc/rancher/k3s
+    sudo cp "$DIR/config.yaml" /etc/rancher/k3s/config.yaml
+  fi
+
   if ! command -v k3s >/dev/null 2>&1; then
     echo "Installing K3s (without Traefik)..."
     curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik --write-kubeconfig-mode 644" sh -
@@ -27,9 +36,10 @@ do_install() {
     echo "K3s is already installed."
   fi
   mkdir -p "$HOME/.kube"
-  if [ -f "$HOME/3-Kubernetes/k3s.yaml" ]; then
-    echo "Installing ~/.kube/config from 3-Kubernetes/k3s.yaml..."
-    cp "$HOME/3-Kubernetes/k3s.yaml" "$HOME/.kube/config"
+  if [ -f "$DIR/k3s.yaml" ]; then
+    echo "Installing ~/.kube/config from k3s.yaml..."
+    cp "$DIR/k3s.yaml" "$HOME/.kube/config"
+    sudo cp "$DIR/k3s.yaml" /etc/rancher/k3s/k3s.yaml 2>/dev/null || true
   elif [ -f "/etc/rancher/k3s/k3s.yaml" ]; then
     echo "Installing ~/.kube/config from /etc/rancher/k3s/k3s.yaml..."
     sudo cp /etc/rancher/k3s/k3s.yaml "$HOME/.kube/config"
@@ -58,6 +68,10 @@ do_test() {
     echo "[OK] All core kube-system pods are Running/Completed"
   else
     fail_exit "[FAIL] Found $NON_RUNNING non-running pods in kube-system"
+  fi
+  ISSUER=$(kubectl get --raw /.well-known/openid-configuration 2>/dev/null | grep -o '"issuer":"[^"]*"' || true)
+  if [ -n "$ISSUER" ]; then
+    echo "[OK] OIDC Issuer configured: $ISSUER"
   fi
   echo "=== [3 Verification Completed Successfully] ==="
 }

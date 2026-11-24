@@ -21,12 +21,15 @@ fi
 fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
 
 do_install() {
+  local DIR="$HOME/02-AMD-ROCm-DXG"
+  [ ! -d "$DIR" ] && DIR="$HOME/2-AMD-ROCm-DXG"
+
   if [ ! -e "/dev/dxg" ]; then
     echo "[WARNING] /dev/dxg not detected! Ensure WSL2 DXG virtualization is enabled."
   fi
-  if ls "$HOME/2-AMD-ROCm-DXG/"*rocdxg*.deb 1>/dev/null 2>&1; then
+  if ls "$DIR/"*rocdxg*.deb 1>/dev/null 2>&1; then
     echo "Installing librocdxg package..."
-    sudo dpkg -i "$HOME/2-AMD-ROCm-DXG/"*rocdxg*.deb || sudo apt-get install -f -y
+    sudo dpkg -i "$DIR/"*rocdxg*.deb || sudo apt-get install -f -y
   fi
   sudo mkdir -p /opt/rocm/lib
   if [ -f "/usr/lib/librocdxg.so" ]; then
@@ -34,7 +37,7 @@ do_install() {
   fi
   if command -v kubectl >/dev/null 2>&1; then
     echo "Deploying AMD ROCm Diagnostic Pod..."
-    kubectl apply -f "$HOME/2-AMD-ROCm-DXG" || true
+    kubectl apply -f "$DIR" || true
   fi
   echo "=== [2 Installation Finished Successfully] ==="
 }

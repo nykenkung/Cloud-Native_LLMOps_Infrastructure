@@ -21,12 +21,15 @@ fi
 fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
 
 do_install() {
-  kubectl apply -f "$HOME/6-Tailscale-Operator/1-Tailscale-Namespace.yaml" || true
-  kubectl apply -f "$HOME/6-Tailscale-Operator/My-Tailscale-ExternalSecret.yaml" || true
+  local DIR="$HOME/06-Tailscale-Operator"
+  [ ! -d "$DIR" ] && DIR="$HOME/6-Tailscale-Operator"
+
+  kubectl apply -f "$DIR/1-Tailscale-Namespace.yaml" || true
+  kubectl apply -f "$DIR/My-Tailscale-ExternalSecret.yaml" || true
   helm upgrade --install tailscale-operator tailscale/tailscale-operator \
     -n tailscale --create-namespace \
     --set oauth.secret=operator-oauth || true
-  kubectl apply -f "$HOME/6-Tailscale-Operator/2-Tailscale-ProxyGroup.yaml" || true
+  kubectl apply -f "$DIR/2-Tailscale-ProxyGroup.yaml" || true
   echo "=== [6 Installation Finished Successfully] ==="
 }
 

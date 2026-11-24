@@ -14,15 +14,15 @@ SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 get_script() {
   local num=$1
   case "$num" in
-    1) echo "1-Hardware-OS-Configuration.sh" ;;
-    2) echo "2-AMD-ROCm-DXG.sh" ;;
-    3) echo "3-Kubernetes.sh" ;;
-    4) echo "4-Helm.sh" ;;
-    5) echo "5-External-Secrets-Operator.sh" ;;
-    6) echo "6-Tailscale-Operator.sh" ;;
-    7) echo "7-Cloudflare-Tunnel.sh" ;;
-    8) echo "8-Ingress-Nginx.sh" ;;
-    9) echo "9-JuiceFS-CSI-Driver.sh" ;;
+    1) [ -f "$SCRIPT_DIR/01-Hardware-OS-Configuration.sh" ] && echo "01-Hardware-OS-Configuration.sh" || echo "1-Hardware-OS-Configuration.sh" ;;
+    2) [ -f "$SCRIPT_DIR/02-AMD-ROCm-DXG.sh" ] && echo "02-AMD-ROCm-DXG.sh" || echo "2-AMD-ROCm-DXG.sh" ;;
+    3) [ -f "$SCRIPT_DIR/03-Kubernetes.sh" ] && echo "03-Kubernetes.sh" || echo "3-Kubernetes.sh" ;;
+    4) [ -f "$SCRIPT_DIR/04-Helm.sh" ] && echo "04-Helm.sh" || echo "4-Helm.sh" ;;
+    5) [ -f "$SCRIPT_DIR/05-External-Secrets-Operator.sh" ] && echo "05-External-Secrets-Operator.sh" || echo "5-External-Secrets-Operator.sh" ;;
+    6) [ -f "$SCRIPT_DIR/06-Tailscale-Operator.sh" ] && echo "06-Tailscale-Operator.sh" || echo "6-Tailscale-Operator.sh" ;;
+    7) [ -f "$SCRIPT_DIR/07-Cloudflare-Tunnel.sh" ] && echo "07-Cloudflare-Tunnel.sh" || echo "7-Cloudflare-Tunnel.sh" ;;
+    8) [ -f "$SCRIPT_DIR/08-Ingress-Nginx.sh" ] && echo "08-Ingress-Nginx.sh" || echo "8-Ingress-Nginx.sh" ;;
+    9) [ -f "$SCRIPT_DIR/09-JuiceFS-CSI-Driver.sh" ] && echo "09-JuiceFS-CSI-Driver.sh" || echo "9-JuiceFS-CSI-Driver.sh" ;;
     10) echo "10-CloudNativePG-DB.sh" ;;
     11) echo "11-Qdrant-Vector-DB.sh" ;;
     12) echo "12-ArgoCD-GitOps.sh" ;;

@@ -22,6 +22,9 @@ if ! kubectl get nodes >/dev/null 2>&1; then
   fail_exit "[FAIL] Cannot connect to Kubernetes cluster via KUBECONFIG=${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 fi
 
+QDRANT_API_KEY="${QDRANT_API_KEY:-$(kubectl get secret -n qdrant my-qdrant-config -o jsonpath='{.data.MY-QDRANT-KEY}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
+LITELLM_API_KEY="${LITELLM_API_KEY:-$(kubectl get secret -n litellm my-litellm-postgres-config -o jsonpath='{.data.master-key}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
+
 QDRANT_IP=$(kubectl get svc -n qdrant qdrant -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
             kubectl get svc -n qdrant -l app.kubernetes.io/name=qdrant -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
 LITELLM_IP=$(kubectl get svc -n litellm litellm -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
@@ -37,9 +40,9 @@ echo "Qdrant Endpoint: http://${QDRANT_IP}:6333"
 # Step 1: Initialize temporary evaluation collection
 echo ""
 echo "--- 1. Initializing Benchmark Collection ($COLLECTION_NAME) ---"
-curl -s -X DELETE -H "api-key: 2561" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
+curl -s -X DELETE -H "api-key: ${QDRANT_API_KEY}" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
 
-INIT_RES=$(curl -s -X PUT -H "api-key: 2561" -H "Content-Type: application/json" \
+INIT_RES=$(curl -s -X PUT -H "api-key: ${QDRANT_API_KEY}" -H "Content-Type: application/json" \
   -d '{"vectors": {"size": 4, "distance": "Cosine"}}' \
   "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}")
 
@@ -81,7 +84,7 @@ UPSERT_PAYLOAD='{
   ]
 }'
 
-UPSERT_RES=$(curl -s -X PUT -H "api-key: 2561" -H "Content-Type: application/json" \
+UPSERT_RES=$(curl -s -X PUT -H "api-key: ${QDRANT_API_KEY}" -H "Content-Type: application/json" \
   -d "$UPSERT_PAYLOAD" \
   "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}/points?wait=true")
 
@@ -100,7 +103,7 @@ SEARCH_PAYLOAD='{
   "with_payload": true
 }'
 
-SEARCH_RES=$(curl -s -X POST -H "api-key: 2561" -H "Content-Type: application/json" \
+SEARCH_RES=$(curl -s -X POST -H "api-key: ${QDRANT_API_KEY}" -H "Content-Type: application/json" \
   -d "$SEARCH_PAYLOAD" \
   "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}/points/search")
 
@@ -114,7 +117,7 @@ echo "Cosine Similarity Score: $SCORE"
 if [ "$(echo "$SCORE > 0.85" | python3 -c "import sys; print(1 if eval(input()) else 0)")" -eq 1 ]; then
   echo "[OK] Vector Similarity Search Accuracy: 100% (High Confidence)"
 else
-  curl -s -X DELETE -H "api-key: 2561" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
+  curl -s -X DELETE -H "api-key: ${QDRANT_API_KEY}" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
   fail_exit "[FAIL] Retrieval score below threshold ($SCORE <= 0.85)"
 fi
 
@@ -138,14 +141,14 @@ if [ "$LLAMA_READY" = "true" ] && [ -n "$LITELLM_IP" ]; then
   if [ -n "$1" ]; then
     ACTIVE_MODEL="$1"
   else
-    ACTIVE_MODEL=$(curl -s --max-time 5 -H "Authorization: Bearer 2561" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | grep -i "0.5b\|fast\|mini" | head -n 1 | sed 's/"id":"//;s/"//')
+    ACTIVE_MODEL=$(curl -s --max-time 5 -H "Authorization: Bearer ${LITELLM_API_KEY}" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | grep -i "0.5b\|fast\|mini" | head -n 1 | sed 's/"id":"//;s/"//')
     if [ -z "$ACTIVE_MODEL" ]; then
-      ACTIVE_MODEL=$(curl -s --max-time 5 -H "Authorization: Bearer 2561" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | head -n 1 | sed 's/"id":"//;s/"//')
+      ACTIVE_MODEL=$(curl -s --max-time 5 -H "Authorization: Bearer ${LITELLM_API_KEY}" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | head -n 1 | sed 's/"id":"//;s/"//')
     fi
   fi
   [ -z "$ACTIVE_MODEL" ] && ACTIVE_MODEL="qwen2.5-0.5b-instruct"
   RAG_RESPONSE=$(curl -s --max-time 30 \
-    -H "Authorization: Bearer 2561" \
+    -H "Authorization: Bearer ${LITELLM_API_KEY}" \
     -H "Content-Type: application/json" \
     -d "{\"model\": \"${ACTIVE_MODEL}\", \"messages\": [{\"role\": \"user\", \"content\": \"${RAG_PROMPT}\"}], \"max_tokens\": 30}" \
     "http://${LITELLM_IP}:4000/v1/chat/completions" 2>/dev/null || echo "error")
@@ -159,7 +162,7 @@ if [ "$LLAMA_READY" = "true" ] && [ -n "$LITELLM_IP" ]; then
   if echo "$ANSWER" | grep -qi "8060S\|Radeon"; then
     echo "[PASS] Ground Truth Verification: Model answered accurately based on retrieved vector context!"
   else
-    curl -s -X DELETE -H "api-key: 2561" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
+    curl -s -X DELETE -H "api-key: ${QDRANT_API_KEY}" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
     fail_exit "[FAIL] Ground Truth Verification failed: Model answer did not match expected context (Answer: $ANSWER)"
   fi
 else
@@ -169,7 +172,7 @@ else
 fi
 
 # Cleanup
-curl -s -X DELETE -H "api-key: 2561" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
+curl -s -X DELETE -H "api-key: ${QDRANT_API_KEY}" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
 
 echo ""
 echo "=================================================================="

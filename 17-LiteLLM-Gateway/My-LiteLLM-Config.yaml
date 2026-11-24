@@ -1,0 +1,17 @@
+model_list:
+  - model_name: "*"
+    litellm_params:
+      model: openai/*
+      api_base: http://llamacpp-rocm-svc.llamacpp-rocm.svc:8080/v1
+      api_key: os.environ/LITELLM_MASTER_KEY
+
+general_settings:
+  master_key: os.environ/LITELLM_MASTER_KEY
+  database_url: os.environ/DATABASE_URL
+  store_model_in_db: false
+
+litellm_settings:
+  check_provider_endpoint: true
+  request_timeout: 300
+  success_callback: ["prometheus"]
+  failure_callback: ["prometheus"]

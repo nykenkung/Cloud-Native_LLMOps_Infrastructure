@@ -22,6 +22,8 @@ if ! kubectl get nodes >/dev/null 2>&1; then
   fail_exit "[FAIL] Cannot connect to Kubernetes cluster via KUBECONFIG=${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 fi
 
+export LITELLM_API_KEY="${LITELLM_API_KEY:-$(kubectl get secret -n litellm my-litellm-postgres-config -o jsonpath='{.data.master-key}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
+
 LITELLM_IP=$(kubectl get svc -n litellm litellm -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
              kubectl get svc -n litellm -l app.kubernetes.io/name=litellm -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
 LLAMA_IP=$(kubectl get svc -n llamacpp-rocm llamacpp-rocm-svc -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
@@ -41,7 +43,7 @@ if [ -n "$LLAMA_IP" ]; then
   fi
 fi
 
-SECRET_NEEDLE="STRIX-HALO-8060S-2561"
+SECRET_NEEDLE="STRIX-HALO-8060S-VALIDATED"
 
 if [ "$LLAMA_READY" = "false" ]; then
   echo ""
@@ -71,13 +73,14 @@ echo "=== Starting Live Needle-In-A-Haystack (NIAH) Benchmark ==="
 
 python3 - "$1" <<EOF
 import sys
+import os
 import urllib.request
 import json
 import time
 
 url = "http://${LITELLM_IP}:4000/v1/chat/completions"
 headers = {
-    "Authorization": "Bearer 2561",
+    "Authorization": f"Bearer {os.environ.get('LITELLM_API_KEY', '')}",
     "Content-Type": "application/json"
 }
 
@@ -98,9 +101,9 @@ if not model_name:
 if not model_name:
     model_name = "qwen2.5-0.5b-instruct"
 
-needle = "The secret master recovery token for CISC4900 is 'STRIX-HALO-8060S-2561'."
+needle = "The secret master recovery token for CISC4900 is 'STRIX-HALO-8060S-VALIDATED'."
 question = "What is the secret master recovery token for CISC4900? Answer with only the token string."
-expected = "STRIX-HALO-8060S-2561"
+expected = "STRIX-HALO-8060S-VALIDATED"
 
 context_sizes = [4000, 8000, 16000, 24000]
 depths = [0.25, 0.50, 0.75]

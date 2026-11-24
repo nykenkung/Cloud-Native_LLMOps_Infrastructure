@@ -22,6 +22,8 @@ if ! kubectl get nodes >/dev/null 2>&1; then
   fail_exit "[FAIL] Cannot connect to Kubernetes cluster via KUBECONFIG=${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 fi
 
+export LITELLM_API_KEY="${LITELLM_API_KEY:-$(kubectl get secret -n litellm my-litellm-postgres-config -o jsonpath='{.data.master-key}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
+
 LITELLM_IP=$(kubectl get svc -n litellm litellm -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
              kubectl get svc -n litellm -l app.kubernetes.io/name=litellm -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
 LLAMA_IP=$(kubectl get svc -n llamacpp-rocm llamacpp-rocm-svc -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
@@ -66,20 +68,20 @@ if [ -n "$1" ]; then
   ACTIVE_MODEL="$1"
 else
   # Prefer lightweight model for benchmark speed if present, fallback to first available
-  ACTIVE_MODEL=$(curl -s --max-time 5 -H "Authorization: Bearer 2561" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | grep -i "0.5b\|fast\|mini" | head -n 1 | sed 's/"id":"//;s/"//')
+  ACTIVE_MODEL=$(curl -s --max-time 5 -H "Authorization: Bearer ${LITELLM_API_KEY}" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | grep -i "0.5b\|fast\|mini" | head -n 1 | sed 's/"id":"//;s/"//')
   if [ -z "$ACTIVE_MODEL" ]; then
-    ACTIVE_MODEL=$(curl -s --max-time 5 -H "Authorization: Bearer 2561" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | head -n 1 | sed 's/"id":"//;s/"//')
+    ACTIVE_MODEL=$(curl -s --max-time 5 -H "Authorization: Bearer ${LITELLM_API_KEY}" "http://${LITELLM_IP}:4000/v1/models" 2>/dev/null | grep -o '"id":"[^"]*"' | head -n 1 | sed 's/"id":"//;s/"//')
   fi
 fi
 [ -z "$ACTIVE_MODEL" ] && ACTIVE_MODEL="qwen2.5-0.5b-instruct"
 
 python3 - "$ACTIVE_MODEL" "$LITELLM_IP" <<EOF
-import sys, urllib.request, json, time
+import sys, os, urllib.request, json, time
 
 model = sys.argv[1]
 litellm_ip = sys.argv[2]
 url = f"http://{litellm_ip}:4000/v1/chat/completions"
-headers = {"Authorization": "Bearer 2561", "Content-Type": "application/json"}
+headers = {"Authorization": f"Bearer {os.environ.get('LITELLM_API_KEY', '')}", "Content-Type": "application/json"}
 
 for words in [1000, 4000, 8000, 16000, 32000]:
     print(f"\n--- Testing Context Window: ~{words} words (model: {model}) ---")

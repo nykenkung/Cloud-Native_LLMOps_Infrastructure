@@ -1,0 +1,21 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: open-webui-postgres
+  namespace: open-webui
+spec:
+  instances: 1
+  storage:
+    size: 2Gi
+  postgresql:
+    parameters:
+      max_connections: "100"
+      shared_buffers: "256MB"
+  bootstrap:
+    initdb:
+      database: open-webui-db
+      owner: kenkung
+      secret:
+        name: my-open-webui-postgres-config
+  monitoring:
+    enablePodMonitor: true

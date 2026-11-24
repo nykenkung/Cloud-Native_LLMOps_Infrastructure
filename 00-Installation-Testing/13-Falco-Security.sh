@@ -22,6 +22,7 @@ fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
 
 do_install() {
   kubectl apply -f "$HOME/13-Falco-Security/1-Falco-Namespace.yaml" || true
+  kubectl apply -f "$HOME/13-Falco-Security/My-Falco-ExternalSecret.yaml" || true
   helm upgrade --install falco falcosecurity/falco \
     -n falco --create-namespace \
     -f "$HOME/13-Falco-Security/My-Falco-Config.yaml" || true

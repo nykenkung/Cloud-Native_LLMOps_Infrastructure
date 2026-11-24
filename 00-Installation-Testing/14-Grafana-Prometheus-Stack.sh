@@ -25,6 +25,7 @@ fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
 
 do_install() {
   kubectl apply -f "$HOME/14-Grafana-Prometheus-Stack/1-Grafana-Namespace.yaml" || true
+  kubectl apply -f "$HOME/14-Grafana-Prometheus-Stack/My-Grafana-ExternalSecret.yaml" || true
   helm upgrade --install lgtm-prometheus prometheus-community/kube-prometheus-stack \
     -n grafana --create-namespace \
     --set grafana.enabled=true \
