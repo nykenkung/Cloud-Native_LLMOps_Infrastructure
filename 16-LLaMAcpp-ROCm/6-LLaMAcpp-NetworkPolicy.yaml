@@ -1,0 +1,23 @@
+apiVersion: networking.k8s.io/v1
+kind: NetworkPolicy
+metadata:
+  name: llamacpp-rocm-np
+  namespace: llamacpp-rocm
+spec:
+  podSelector:
+    matchLabels:
+      app: llamacpp-rocm
+  policyTypes:
+    - Ingress
+  ingress:
+    - from:
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: litellm
+      - namespaceSelector:
+          matchLabels:
+            kubernetes.io/metadata.name: grafana
+      - podSelector: {}
+      ports:
+        - protocol: TCP
+          port: 8080

@@ -1,0 +1,135 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: llamacpp-rocm-deploy
+  namespace: llamacpp-rocm
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: llamacpp-rocm
+  strategy:
+    type: Recreate
+  template:
+    metadata:
+      labels:
+        app: llamacpp-rocm
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "8080"
+        prometheus.io/path: "/metrics"
+    spec:
+      terminationGracePeriodSeconds: 60
+      containers:
+      - name: llamacpp-server
+        image: ghcr.io/ggml-org/llama.cpp:server-rocm
+        command:
+          - "/bin/sh"
+          - "-c"
+        args:
+          - |
+            export PATH="/app:$PATH"
+            export LD_LIBRARY_PATH="/app:$LD_LIBRARY_PATH"
+            mkdir -p /opt/rocm/lib 2>/dev/null || true
+            ln -sf /usr/lib/librocdxg.so /opt/rocm/lib/librocdxg.so 2>/dev/null || true
+            mkdir -p /models/gguf
+            cd /models/gguf
+            rm -f /models/gguf/*.gguf
+            find /models -maxdepth 4 -type f -name "*.gguf" ! -path "/models/gguf*" 2>/dev/null | while IFS= read -r f; do
+              ln -sf "$f" "/models/gguf/$(basename "$f")" 2>/dev/null || true
+            done
+            exec /app/llama-server \
+              --models-dir /models/gguf \
+              --models-max 1 \
+              --host 0.0.0.0 \
+              --port 8080 \
+              --api-key "$(cat /secrets/api-key)" \
+              -ngl 10 \
+              -c 32768 \
+              -n 4096 \
+              -t 8 \
+              --timeout 300 \
+              -fa auto \
+              --parallel 1 \
+              --context-shift \
+              --metrics
+        ports:
+        - name: http
+          containerPort: 8080
+          protocol: TCP
+        env:
+        - name: HSA_ENABLE_DXG_DETECTION
+          value: "1"
+        - name: HSA_OVERRIDE_GFX_VERSION
+          value: "11.0.2"
+        - name: ROCBLAS_USE_HIPBLASLT
+          value: "1"
+        - name: LD_LIBRARY_PATH
+          value: "/app:/usr/lib/wsl/lib:/opt/rocm/lib:/opt/rocm/lib64"
+        - name: LLAMA_ARG_THINK
+          value: "deepseek-legacy"
+        - name: LLAMA_ARG_REASONING
+          value: "on"
+        volumeMounts:
+        - name: dxg
+          mountPath: /dev/dxg
+        - name: wsl-lib
+          mountPath: /usr/lib/wsl/lib
+        - name: rocdxg
+          mountPath: /usr/lib/librocdxg.so
+        - name: models
+          mountPath: /models
+        - name: api-key
+          mountPath: /secrets
+          readOnly: true
+        livenessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 120
+          periodSeconds: 30
+          timeoutSeconds: 10
+          failureThreshold: 3
+        readinessProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 30
+          periodSeconds: 10
+          timeoutSeconds: 5
+          failureThreshold: 5
+        startupProbe:
+          httpGet:
+            path: /health
+            port: http
+          initialDelaySeconds: 10
+          periodSeconds: 10
+          timeoutSeconds: 10
+          failureThreshold: 30
+        resources:
+          requests:
+            memory: "4Gi"
+            cpu: "2"
+          limits:
+            memory: "64Gi"
+            cpu: "16"
+        securityContext:
+          privileged: true
+          allowPrivilegeEscalation: true
+      volumes:
+      - name: dxg
+        hostPath:
+          path: /dev/dxg
+      - name: wsl-lib
+        hostPath:
+          path: /usr/lib/wsl/lib
+      - name: rocdxg
+        hostPath:
+          path: /opt/rocm/lib/librocdxg.so
+          type: File
+      - name: models
+        hostPath:
+          path: /home/kenkung/HuggingFace-Models
+      - name: api-key
+        secret:
+          secretName: llamacpp-api-key

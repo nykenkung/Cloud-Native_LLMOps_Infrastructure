@@ -1,0 +1,12 @@
+apiVersion: v1
+kind: PersistentVolumeClaim
+metadata:
+  name: llamacpp-model-pvc
+  namespace: llamacpp-rocm
+spec:
+  accessModes:
+    - ReadWriteMany
+  storageClassName: cloudflare-juicefs-sc
+  resources:
+    requests:
+      storage: 10Gi
