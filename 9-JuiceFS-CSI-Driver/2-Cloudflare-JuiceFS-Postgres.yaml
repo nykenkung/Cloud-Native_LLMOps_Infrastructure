@@ -1,0 +1,22 @@
+apiVersion: postgresql.cnpg.io/v1
+kind: Cluster
+metadata:
+  name: cloudflare-juicefs-postgres
+  namespace: kube-system
+spec:
+  instances: 1
+  imageName: ghcr.io/cloudnative-pg/postgresql:17.2
+  bootstrap:
+    initdb:
+      database: cloudflare-juicefs
+      owner: kenkung
+      secret:
+        name: my-cloudflare-juicefs-config
+  storage:
+    size: 5Gi
+  monitoring:
+    enablePodMonitor: true
+  postgresql:
+    parameters:
+      shared_buffers: 256MB
+      max_connections: "100"
