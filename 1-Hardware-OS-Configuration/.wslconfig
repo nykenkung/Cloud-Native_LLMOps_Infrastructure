@@ -1,0 +1,10 @@
+[wsl2]
+memory=96GB
+processors=24
+swap=0
+
+[experimental]
+autoMemoryReclaim=gradual
+sparseVhd=true
+networkingMode=mirrored
+dnsTunneling=true
