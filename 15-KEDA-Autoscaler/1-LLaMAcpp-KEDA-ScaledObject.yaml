@@ -1,0 +1,33 @@
+apiVersion: keda.sh/v1alpha1
+kind: ScaledObject
+metadata:
+  name: llamacpp-rocm-scaler
+  namespace: llamacpp-rocm
+spec:
+  scaleTargetRef:
+    apiVersion: apps/v1
+    kind: Deployment
+    name: llamacpp-rocm-deploy
+  minReplicaCount: 1
+  maxReplicaCount: 1
+  cooldownPeriod: 300
+  pollingInterval: 15
+  advanced:
+    horizontalPodAutoscalerConfig:
+      behavior:
+        scaleUp:
+          stabilizationWindowSeconds: 0
+          policies:
+          - type: Percent
+            value: 100
+            periodSeconds: 15
+        scaleDown:
+          stabilizationWindowSeconds: 300
+  triggers:
+  - type: prometheus
+    metadata:
+      serverAddress: http://lgtm-prometheus-kube-prome-prometheus.grafana.svc.cluster.local:9090
+      metricName: llamacpp_requests_processing
+      query: sum(llamacpp_requests_processing{namespace="llamacpp-rocm"})
+      threshold: "1"
+      activationThreshold: "0"
