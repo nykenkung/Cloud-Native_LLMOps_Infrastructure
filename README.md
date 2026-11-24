@@ -1,15 +1,3 @@
-<!-- ============================================================================== -->
-<!-- CISC 4900 CAPSTONE PROJECT - CLOUD-NATIVE SCALABLE AI INFRASTRUCTURE          -->
-<!-- ============================================================================== -->
-
-<div align="center">
-
-| **Course** | **Institution** | **Author** | **Project Start Date** | **Target Architecture** |
-| :---: | :---: | :---: | :---: | :---: |
-| **CISC 4900 Project** | **Brooklyn College**<br/>Department of Computer & Information Science | **Suen Ming Kung** | **January 10, 2026** | **AMD ROCm 6.x / K3s Kubernetes** |
-
-</div>
-
 <pre align="center">
    ██████╗██╗███████╗ ██████╗██╗  ██╗ ██████╗  ██████╗  ██████╗       ██╗     ██╗     ███╗   ███╗ ██████╗ ██████╗ ███████╗
   ██╔════╝██║██╔════╝██╔════╝██║  ██║██╔═══██ ██╔═████╗██╔═████╗      ██║     ██║     ████╗ ████║██╔═══██╗██╔══██╗██╔════╝
@@ -17,8 +5,11 @@
   ██║     ██║╚════██║██║     ╚════██║╔═════██╗████╔╝██║████╔╝██║╚════╝██║     ██║     ██║╚██╔╝██║██║   ██║██╔═══╝ ╚════██║
   ╚██████╗██║███████║╚██████╗     ██║╚██████╔╝╚██████╔╝╚██████╔╝      ███████╗███████╗██║ ╚═╝ ██║╚██████╔╝██║     ███████║
    ╚═════╝╚═╝╚══════╝ ╚═════╝     ╚═╝ ╚═════╝  ╚═════╝  ╚═════╝       ╚══════╝╚══════╝╚═╝     ╚═╝ ╚═════╝ ╚═╝     ╚══════╝
+
+                            <b>**Brooklyn College - CISC 4900 Project - Suen Ming Kung**</b>
+
                                   <b>Cloud-Native Scalable AI Infrastructure</b>
-               <i>Enterprise-Grade LLMOps, Zero-Trust GitOps, and AMD ROCm Hardware Accelerated AI Platform</i>
+               <i>Enterprise-Grade LLMOps, Zero-Trust GitOps, AMD ROCm Hardware Accelerated AI Platform</i>
 </pre>
 
 <p align="center">
@@ -36,17 +27,17 @@
 
 ## 📑 Live Services & Endpoints Registry
 
-| Tier | Service Name | Public Zero-Trust Access | Local LAN Direct Access | Internal Cluster DNS | Authentication & Credentials Source |
+| Tier | Service Name | Public Zero-Trust Access | Internal Cluster DNS | Authentication & Credentials Source |
 | :--- | :--- | :--- | :--- | :--- | :--- |
-| **Frontend** | **Open-WebUI Portal** | [open-webui.kung.nyc](https://open-webui.kung.nyc) | `http://open-webui.192.168.1.3.sslip.io` | `open-webui-svc.open-webui.svc:8080` | **Demo Account (7-Day Evaluation):**<br/>• Email: `test@test.com`<br/>• Password: `test` |
-| **Gateway** | **LiteLLM Gateway** | [api.kung.nyc](https://api.kung.nyc) | `http://api.192.168.1.3.sslip.io` | `litellm.litellm.svc:4000` | Bearer Token managed via ESO (`my-cisc4900-config`) |
-| **Inference**| **llama.cpp ROCm** | *Internal Protected* | *Internal Protected* | `llamacpp-rocm-svc.llamacpp-rocm.svc:8080` | Internal Bearer Token synced via ESO |
-| **Vector DB**| **Qdrant Vector DB** | [qdrant.kung.nyc](https://qdrant.kung.nyc/dashboard) | `http://qdrant.192.168.1.3.sslip.io/dashboard` | `qdrant.qdrant.svc:6333` | Read/Write API Key synced via ESO |
-| **GitOps** | **Argo CD UI** | [argocd.kung.nyc](https://argocd.kung.nyc) | `http://argocd.192.168.1.3.sslip.io` | `argocd-server.argocd.svc:443` | Admin password managed via Bcrypt ESO patch |
-| **Security** | **Falco Sidekick UI**| [falco.kung.nyc](https://falco.kung.nyc) | `http://falco.192.168.1.3.sslip.io` | `falco-falcosidekick-ui.falco.svc:2801` | Basic Auth synced via ESO (`my-cisc4900-config`) |
-| **Monitor** | **Grafana LGTM** | [grafana.kung.nyc](https://grafana.kung.nyc) | `http://grafana.192.168.1.3.sslip.io` | `lgtm-prometheus-grafana.grafana.svc:80` | Admin credentials synced via ESO |
-| **Metrics** | **Prometheus Core** | *Internal Protected* | *Internal Protected* | `lgtm-prometheus-kube-prome-prometheus.grafana.svc:9090` | ServiceMonitor metrics scraping endpoints |
-| **Mesh VPN** | **Tailscale Operator**| *Tailnet Virtual IP* | *100.x.y.z subnet* | `tailscale-pg-0.tailscale.svc` | Operator OAuth Secret synced via ESO |
+| **Frontend** | **Open-WebUI Portal** | [open-webui.kung.nyc](https://open-webui.kung.nyc) | `http://open-webui.192.168.1.3.sslip.io` | `open-webui-svc.open-webui.svc:8080` | **Demo Accoun:**<br/>• Email: `test@test.com`<br/>• Password: `test` |
+| **Gateway** | **LiteLLM Gateway** | [api.kung.nyc](https://api.kung.nyc) | `litellm.litellm.svc:4000` | Bearer Token managed via ESO (`my-cisc4900-config`) |
+| **Inference**| **llama.cpp ROCm** | *Internal Protected* | `llamacpp-rocm-svc.llamacpp-rocm.svc:8080` | Internal Bearer Token synced via ESO |
+| **Vector DB**| **Qdrant Vector DB** | [qdrant.kung.nyc](https://qdrant.kung.nyc/dashboard) | `qdrant.qdrant.svc:6333` | Read/Write API Key synced via ESO |
+| **GitOps** | **Argo CD UI** | [argocd.kung.nyc](https://argocd.kung.nyc) | `argocd-server.argocd.svc:443` | Admin password managed via Bcrypt ESO patch |
+| **Security** | **Falco Sidekick UI**| [falco.kung.nyc](https://falco.kung.nyc) | `falco-falcosidekick-ui.falco.svc:2801` | Basic Auth synced via ESO (`my-cisc4900-config`) |
+| **Monitor** | **Grafana LGTM** | [grafana.kung.nyc](https://grafana.kung.nyc) | `lgtm-prometheus-grafana.grafana.svc:80` | Admin credentials synced via ESO |
+| **Metrics** | **Prometheus Core** | *Internal Protected* | `lgtm-prometheus-kube-prome-prometheus.grafana.svc:9090` | ServiceMonitor metrics scraping endpoints |
+| **Mesh VPN** | **Tailscale Operator**| *Tailnet Virtual IP* | `tailscale-pg-0.tailscale.svc` | Operator OAuth Secret synced via ESO |
 
 ---
 
@@ -89,87 +80,87 @@ Operating on physical AMD hardware (**AMD Ryzen APU with Radeon 8060S Strix Halo
 This project was developed incrementally over a 45-week timeline, solving complex systems engineering, hardware acceleration, zero-trust security, and cloud-native orchestration challenges:
 
 ```
-2026-01-10 [Project Kickoff]
- │ ├── Initialized CISC 4900 Capstone repository and defined system architecture.
- │ └── Configured baseline Windows 11 host with AMD Strix Halo APU (96GB unified memory).
+January 16, 2026 [Project Kickoff]
+ ├─ Initialized CISC 4900 Capstone repository and defined system architecture.
+ ├─ Configured baseline Windows 11 host with AMD Strix Halo APU (96GB unified memory).
  │
-2026-01-24 [WSL2 Linux Kernel & OS Tuning]
- │ ├── Deployed Ubuntu 24.04 LTS on WSL2 with customized Linux Kernel 6.6+.
- │ └── Resolved eBPF inotify limit crashes by configuring /etc/sysctl.d/99-inotify.conf.
+January 23, 2026 [WSL2 Linux Kernel & OS Tuning]
+ ├─ Deployed Ubuntu 24.04 LTS on WSL2 with customized Linux Kernel 6.6+.
+ ├─ Resolved eBPF inotify limit crashes by configuring /etc/sysctl.d/99-inotify.conf.
  │
-2026-02-14 [AMD ROCm & DXG Virtualization Passthrough]
- │ ├── Mapped /dev/dxg virtualization device from Windows host into WSL2 user space.
- │ ├── Integrated librocdxg.so abstraction layer with ROCm 6.x runtime.
- │ └── Built and verified AMD ROCm Diagnostic Pod to ensure GPU compute availability.
+January 30, 2026 [AMD ROCm & DXG Virtualization Passthrough]
+ ├─ Mapped /dev/dxg virtualization device from Windows host into WSL2 user space.
+ ├─ Integrated librocdxg.so abstraction layer with ROCm 6.x runtime.
+ ├─ Built and verified AMD ROCm Diagnostic Pod to ensure GPU compute availability.
  │
-2026-03-07 [K3s Cluster & Networking Foundation]
- │ ├── Installed lightweight K3s cluster; disabled default Traefik to eliminate routing conflicts.
- │ ├── Configured Kubeconfig permissions (0644) and persistent ~/.bashrc environment variables.
- │ └── Deployed Ingress-Nginx with hostNetwork binding for local sslip.io wildcard resolution.
+February 13, 2026 [K3s Cluster & Networking Foundation]
+ ├─ Installed lightweight K3s cluster; disabled default Traefik to eliminate routing conflicts.
+ ├─ Configured Kubeconfig permissions (0644) and persistent ~/.bashrc environment variables.
+ ├─ Deployed Ingress-Nginx with hostNetwork binding for local sslip.io wildcard resolution.
  │
-2026-03-28 [Helm Package Ecosystem Standardization]
- │ ├── Standardized on Helm 3 for declarative upstream package management.
- │ └── Created automated initialization scripts for 9 official community repositories.
+February 20, 2026 [Helm Package Ecosystem Standardization]
+ ├─ Standardized on Helm 3 for declarative upstream package management.
+ ├─ Created automated initialization scripts for 9 official community repositories.
  │
-2026-04-18 [High-Availability Database Layer]
- │ ├── Deployed CloudNativePG Operator v1.25.0 to manage declarative PostgreSQL 16 instances.
- │ └── Engineered automated primary-standby streaming replication with self-healing failover.
+February 28, 2026 [High-Availability Database Layer]
+ ├─ Deployed CloudNativePG Operator v1.25.0 to manage declarative PostgreSQL 16 instances.
+ ├─ Engineered automated primary-standby streaming replication with self-healing failover.
  │
-2026-05-16 [Distributed POSIX Storage with Cloudflare R2]
- │ ├── Deployed JuiceFS CSI Driver to decouple model weights from local ephemeral container disks.
- │ └── Connected JuiceFS to Cloudflare R2 object storage, providing S3-compatible shared storage.
+March 14, 2026 [Distributed POSIX Storage with Cloudflare R2]
+ ├─ Deployed JuiceFS CSI Driver to decouple model weights from local ephemeral container disks.
+ ├─ Connected JuiceFS to Cloudflare R2 object storage, providing S3-compatible shared storage.
  │
-2026-06-13 [Semantic Vector Database Integration]
- │ ├── Deployed Qdrant Vector DB with native HNSW indexing for high-recall vector search.
- │ └── Configured payload-based access control and exposed the administrative dashboard via Ingress.
+March 21, 2026 [Semantic Vector Database Integration]
+ ├─ Deployed Qdrant Vector DB with native HNSW indexing for high-recall vector search.
+ ├─ Configured payload-based access control and exposed the administrative dashboard via Ingress.
  │
-2026-07-11 [Hardware-Accelerated llama.cpp ROCm Serving]
- │ ├── Compiled llama.cpp with ROCm gfx1151 support targeting AMD Radeon 8060S.
- │ ├── Solved out-of-memory kernel panics by tuning shared VRAM allocation to 62GB.
- │ └── Engineered a dynamic GGUF symlink router to mount weights without container rebuilds.
+March 28, 2026 [Hardware-Accelerated llama.cpp ROCm Serving]
+ ├─ Compiled llama.cpp with ROCm gfx1151 support targeting AMD Radeon 8060S.
+ ├─ Solved out-of-memory kernel panics by tuning shared VRAM allocation to 62GB.
+ ├─ Engineered a dynamic GGUF symlink router to mount weights without container rebuilds.
  │
-2026-08-08 [Enterprise AI Gateway Orchestration]
- │ ├── Deployed LiteLLM Gateway as an OpenAI-compatible multi-model routing proxy.
- │ ├── Connected LiteLLM to dedicated CloudNativePG PostgreSQL cluster for session audit logs.
- │ └── Implemented dynamic model fallback pipelines and token rate-limiting controls.
+April 11, 2026 [Enterprise AI Gateway Orchestration]
+ ├─ Deployed LiteLLM Gateway as an OpenAI-compatible multi-model routing proxy.
+ ├─ Connected LiteLLM to dedicated CloudNativePG PostgreSQL cluster for session audit logs.
+ ├─ Implemented dynamic model fallback pipelines and token rate-limiting controls.
  │
-2026-09-05 [Production Conversational AI Portal & RAG]
- │ ├── Deployed Open-WebUI chat portal with dedicated PostgreSQL persistence.
- │ ├── Integrated Qdrant hybrid search directly into the Open-WebUI knowledge base engine.
- │ └── Enforced Kubernetes NetworkPolicy zero-trust micro-isolation around frontend pods.
+April 25, 2026 [Production Conversational AI Portal & RAG]
+ ├─ Deployed Open-WebUI chat portal with dedicated PostgreSQL persistence.
+ ├─ Integrated Qdrant hybrid search directly into the Open-WebUI knowledge base engine.
+ ├─ Enforced Kubernetes NetworkPolicy zero-trust micro-isolation around frontend pods.
  │
-2026-09-26 [Zero-Trust Remote Perimeter (Tailscale Mesh)]
- │ ├── Deployed Tailscale Kubernetes Operator with ProxyGroup routing.
- │ └── Enabled encrypted, authorized remote developer access via WireGuard mesh networking.
+June 6, 2026 [Zero-Trust Remote Perimeter (Tailscale Mesh)]
+ ├─ Deployed Tailscale Kubernetes Operator with ProxyGroup routing.
+ ├─ Enabled encrypted, authorized remote developer access via WireGuard mesh networking.
  │
-2026-10-17 [Public Ingress via Cloudflare Zero Trust Tunnel]
- │ ├── Deployed dual-replica cloudflared tunnel pods connecting outbound to Cloudflare edge.
- │ ├── Configured CNAME routing for *.kung.nyc without opening any inbound firewall ports.
- │ └── Implemented an automated CronJob to synchronize Kubernetes Ingress records with Cloudflare DNS.
+July 25, 2026 [Public Ingress via Cloudflare Zero Trust Tunnel]
+ ├─ Deployed dual-replica cloudflared tunnel pods connecting outbound to Cloudflare edge.
+ ├─ Configured CNAME routing for *.kung.nyc without opening any inbound firewall ports.
+ ├─ Implemented an automated CronJob to synchronize Kubernetes Ingress records with Cloudflare DNS.
  │
-2026-10-31 [Runtime Threat Defense with Modern eBPF]
- │ ├── Integrated Falco runtime security using modern eBPF driver probes.
- │ └── Deployed Falcosidekick Web UI to capture and visualize container security violations.
+August 8, 2026 [Runtime Threat Defense with Modern eBPF]
+ ├─ Integrated Falco runtime security using modern eBPF driver probes.
+ ├─ Deployed Falcosidekick Web UI to capture and visualize container security violations.
  │
-2026-11-07 [Full-Stack Observability Stack (LGTM)]
- │ ├── Deployed Prometheus and Grafana monitoring stack via Prometheus Community Helm Chart.
- │ └── Designed a custom Grafana dashboard tracking ROCm GPU VRAM, queue depth, TPS, and TTFT.
+October 17, 2026 [Full-Stack Observability Stack (LGTM)]
+ ├─ Deployed Prometheus and Grafana monitoring stack via Prometheus Community Helm Chart.
+ ├─ Designed a custom Grafana dashboard tracking ROCm GPU VRAM, queue depth, TPS, and TTFT.
  │
-2026-11-14 [Event-Driven Dynamic Autoscaling (KEDA)]
- │ ├── Deployed KEDA autoscaler to dynamically monitor HTTP inference queue depth.
- │ └── Configured ScaledObject to scale llama.cpp worker instances based on concurrent load.
+November 14, 2026 [Event-Driven Dynamic Autoscaling (KEDA)]
+ ├─ Deployed KEDA autoscaler to dynamically monitor HTTP inference queue depth.
+ ├─ Configured ScaledObject to scale llama.cpp worker instances based on concurrent load.
  │
-2026-11-20 [Cross-Cloud Keyless SecretOps Transformation]
- │ ├── Overcame GCP organization key restrictions (iam.disableServiceAccountKeyCreation).
- │ ├── Published K3s OIDC discovery endpoints (.well-known and jwks.json) via GitHub Pages.
- │ ├── Configured Google Cloud Workload Identity Federation (WIF) and Service Account Impersonation.
- │ ├── Deployed External Secrets Operator (ESO) connected to ClusterSecretStore: gcp-secret-store.
- │ └── Consolidated all 29 credentials into single GCP Secret my-cisc4900-config (Free-Tier compliant).
+November 21, 2026 [Cross-Cloud Keyless SecretOps Transformation]
+ ├─ Overcame GCP organization key restrictions (iam.disableServiceAccountKeyCreation).
+ ├─ Published K3s OIDC discovery endpoints (.well-known and jwks.json) via GitHub Pages.
+ ├─ Configured Google Cloud Workload Identity Federation (WIF) and Service Account Impersonation.
+ ├─ Deployed External Secrets Operator (ESO) connected to ClusterSecretStore: gcp-secret-store.
+ ├─ Consolidated all 29 credentials into single GCP Secret my-cisc4900-config (Free-Tier compliant).
  │
-2026-11-22 [GitOps Finalization & Comprehensive Verification Suite]
- │ ├── Transitioned all application deployments to Argo CD v3.6.2 with Server-Side Apply.
- │ ├── Built and verified 10-tier automated testing benchmark suite (Test 101 through Test 110).
- │ └── Achieved 100% test pass rate across E2E inference, security penetration, and failover resilience.
+November 24, 2026 [GitOps Finalization & Comprehensive Verification Suite]
+ ├─ Transitioned all application deployments to Argo CD v3.6.2 with Server-Side Apply.
+ ├─ Built and verified 10-tier automated testing benchmark suite (Test 101 through Test 110).
+ ├─ Achieved 100% test pass rate across E2E inference, security penetration, and failover resilience.
 ```
 
 ---
@@ -255,9 +246,9 @@ flowchart TD
 <pre>
 <b>Cloud-Native_LLMOps_Infrastructure</b>
 │
-├── <b>00-Installation-Testing/</b>              # Deployment orchestration and verification benchmarks
-│   ├── <a href="file:///e:/CISC4900/00-Installation-Testing/Copy-SSH.bat">Copy-SSH.bat</a>                  # Silent individual file transfer script from Windows to WSL2 server
-│   ├── <a href="file:///e:/CISC4900/00-Installation-Testing/00-Menu.sh">00-Menu.sh</a>                    # 4-column master interactive CLI console (Steps 1~18 & Tests 100~110)
+├── <b>00-Installation-Testing/</b>        # Deployment orchestration and verification benchmarks
+│   ├── Copy-SSH.bat                      # Silent individual file transfer script from Windows to WSL2 server
+│   ├── 00-Menu.sh                        # 4-column master interactive CLI console (Steps 1~18 & Tests 100~110)
 │   ├── 01-Hardware-OS-Configuration.sh   # Configures /etc/wsl.conf, ~/.bashrc, inotify limits and apt utilities
 │   ├── 02-AMD-ROCm-DXG.sh                # Verifies /dev/dxg, configures librocdxg.so, and tests ROCm diagnostic pod
 │   ├── 03-Kubernetes.sh                  # Installs K3s, configures Kubeconfig and public OIDC issuer parameters
@@ -694,7 +685,7 @@ To set up passwordless SSH authentication between your Windows client and the WS
 1. **Windows Silent Sync:**
    Execute the silent batch synchronizer from your local repository:
    ```cmd
-   E:\CISC4900\00-Installation-Testing\Copy-SSH.bat
+   D:\Cloud-Native_LLMOps_Infrastructure\00-Installation-Testing\Copy-SSH.bat
    ```
 2. **Launch Master Interactive Console on Ubuntu Server:**
    ```bash
@@ -705,7 +696,7 @@ To set up passwordless SSH authentication between your Windows client and the WS
 
 ---
 
-### Phase 3: Bootstrapping Local Air-Gapped AI Stack (Offline Mode)
+### Phase 3: Bootstrapping Local Air-Gapped AI Stack
 Before enabling cloud integrations, you can initialize the core AI inference stack in completely offline local mode:
 1. **Initialize Local Secrets for Databases & Microservices:**
    Generate baseline credentials for PostgreSQL, Qdrant, and LiteLLM:
@@ -716,10 +707,10 @@ Before enabling cloud integrations, you can initialize the core AI inference sta
 
    # Create local database secrets
    kubectl create secret generic my-litellm-postgres-config -n litellm \
-     --from-literal=username="kenkung" \
-     --from-literal=password="2561" \
+     --from-literal=username="<username>" \
+     --from-literal=password="<password>" \
      --from-literal=database="litellm" \
-     --from-literal=database-url="postgresql://kenkung:2561@litellm-postgres-rw:5432/litellm"
+     --from-literal=database-url="postgresql://<username>:<password>@litellm-postgres-rw:5432/litellm"
    ```
 2. **Accessing Local Endpoints Directly on LAN:**
    All services can be reached via `*.192.168.1.3.sslip.io` through Nginx Ingress without external internet connectivity.
@@ -958,7 +949,7 @@ INSERT INTO test_heartbeat (timestamp, payload) VALUES (NOW(), 'cisc4900-acid-te
 
 ## 📜 License & Academic Compliance
 
-This project is submitted in partial fulfillment of the requirements for the **CISC 4900 Capstone Project** at **Brooklyn College of the City University of New York (CUNY)**.
+This project is submitted in partial fulfillment of the requirements for the **CISC 4900 Project** at **Brooklyn College of the City University of New York (CUNY)**.
 
 * **Codebase & Architecture:** Released under the [MIT License](https://opensource.org/licenses/MIT).
 * **Model Weights:** Google Gemma 4, Qwen 3.6, and Meta Muse Glimmer weights are governed by their respective community terms of use and open-weights distribution agreements.
