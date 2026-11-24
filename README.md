@@ -247,7 +247,7 @@ flowchart TD
 │
 ├── <b>00-Installation-Testing/</b>              # Deployment orchestration and verification benchmarks
 │   ├── Copy-SSH.bat                      # Silent individual file transfer script from Windows to WSL2 server
-│   ├── 00-Menu.sh                        # 4-column master interactive CLI console (Steps 1~18 & Tests 100~110)
+│   ├── Menu.sh                           # 4-column master interactive CLI console (Steps 1~18 & Tests 100~110)
 │   ├── 01-Hardware-OS-Configuration.sh   # Configures /etc/wsl.conf, ~/.bashrc, inotify limits and apt utilities
 │   ├── 02-AMD-ROCm-DXG.sh                # Verifies /dev/dxg, configures librocdxg.so, and tests ROCm diagnostic pod
 │   ├── 03-Kubernetes.sh                  # Installs K3s, configures Kubeconfig and public OIDC issuer parameters
@@ -672,7 +672,7 @@ To set up passwordless SSH authentication between your Windows client and the WS
    ```bash
    ssh WSL_SSH
    cd ~/00-Installation-Testing
-   ./00-Menu.sh
+   ./Menu.sh
    ```
 
 ---
