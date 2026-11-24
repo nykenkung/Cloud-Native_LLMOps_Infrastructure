@@ -1,0 +1,142 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: grafana-llamacpp-rocm
+  namespace: grafana
+  labels:
+    grafana_dashboard: "1"
+data:
+  grafana-llamacpp-rocm.json: |
+    {
+      "annotations": { "list": [] },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 1,
+      "id": null,
+      "links": [],
+      "panels": [
+        {
+          "title": "LLM Request Status",
+          "type": "stat",
+          "gridPos": { "h": 4, "w": 6, "x": 0, "y": 0 },
+          "targets": [
+            {
+              "expr": "llamacpp_requests_processing{namespace=\"llamacpp-rocm\"}",
+              "legendFormat": "Processing"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 2 },
+                  { "color": "red", "value": 4 }
+                ]
+              }
+            }
+          }
+        },
+        {
+          "title": "Request Latency (P50/P95/P99)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 4 },
+          "targets": [
+            {
+              "expr": "histogram_quantile(0.50, sum(rate(llamacpp_request_duration_seconds_bucket{namespace=\"llamacpp-rocm\"}[5m])) by (le))",
+              "legendFormat": "P50"
+            },
+            {
+              "expr": "histogram_quantile(0.95, sum(rate(llamacpp_request_duration_seconds_bucket{namespace=\"llamacpp-rocm\"}[5m])) by (le))",
+              "legendFormat": "P95"
+            },
+            {
+              "expr": "histogram_quantile(0.99, sum(rate(llamacpp_request_duration_seconds_bucket{namespace=\"llamacpp-rocm\"}[5m])) by (le))",
+              "legendFormat": "P99"
+            }
+          ]
+        },
+        {
+          "title": "Token Throughput (tok/s)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 4 },
+          "targets": [
+            {
+              "expr": "rate(llamacpp_prompt_tokens_total{namespace=\"llamacpp-rocm\"}[5m])",
+              "legendFormat": "Prompt tok/s"
+            },
+            {
+              "expr": "rate(llamacpp_tokens_predicted_total{namespace=\"llamacpp-rocm\"}[5m])",
+              "legendFormat": "Gen tok/s"
+            }
+          ]
+        },
+        {
+          "title": "KV Cache Usage Ratio",
+          "type": "gauge",
+          "gridPos": { "h": 4, "w": 6, "x": 6, "y": 0 },
+          "targets": [
+            {
+              "expr": "llamacpp_kv_cache_usage_ratio{namespace=\"llamacpp-rocm\"}",
+              "legendFormat": "KV Cache %"
+            }
+          ],
+          "fieldConfig": {
+            "defaults": {
+              "max": 1,
+              "thresholds": {
+                "steps": [
+                  { "color": "green", "value": null },
+                  { "color": "yellow", "value": 0.7 },
+                  { "color": "red", "value": 0.9 }
+                ]
+              },
+              "unit": "percentunit"
+            }
+          }
+        },
+        {
+          "title": "LiteLLM API Request Rate",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 0, "y": 12 },
+          "targets": [
+            {
+              "expr": "sum(rate(litellm_llm_api_latency_metric_count{namespace=\"litellm\"}[5m])) by (model)",
+              "legendFormat": "{{model}}"
+            }
+          ]
+        },
+        {
+          "title": "LiteLLM Token Usage",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 12, "x": 12, "y": 12 },
+          "targets": [
+            {
+              "expr": "sum(increase(litellm_input_tokens_total{namespace=\"litellm\"}[1h])) by (model)",
+              "legendFormat": "Input - {{model}}"
+            },
+            {
+              "expr": "sum(increase(litellm_output_tokens_total{namespace=\"litellm\"}[1h])) by (model)",
+              "legendFormat": "Output - {{model}}"
+            }
+          ]
+        },
+        {
+          "title": "Pod Memory Usage (GB)",
+          "type": "timeseries",
+          "gridPos": { "h": 8, "w": 24, "x": 0, "y": 20 },
+          "targets": [
+            {
+              "expr": "container_memory_working_set_bytes{namespace=~\"llamacpp-rocm|litellm|open-webui\", container!=\"\"} / 1024 / 1024 / 1024",
+              "legendFormat": "{{namespace}}/{{pod}} RAM (GB)"
+            }
+          ]
+        }
+      ],
+      "schemaVersion": 39,
+      "tags": ["llm", "llamacpp", "rocm", "cisc4900"],
+      "templating": { "list": [] },
+      "time": { "from": "now-1h", "to": "now" },
+      "title": "CISC4900 LLaMAcpp ROCm Dashboard",
+      "uid": "cisc4900-llamacpp-rocm"
+    }
