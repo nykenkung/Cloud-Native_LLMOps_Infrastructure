@@ -391,8 +391,8 @@ flowchart TD
 │   │   └── openid-configuration          # OpenID Connect Discovery JSON metadata document
 │   └── jwks.json                         # Public JSON Web Key Set containing K3s ServiceAccount public keys
 │
-└──── .nojekyll                          # Skips the Jekyll build step when deploying pre-built static files
-    └── README.md                          # Main introductory document for this project
+└───── .nojekyll                        # Skips the Jekyll build step when deploying pre-built static files
+    └── README.md                         # Main introductory document for this project
 </pre>
 
 ---
