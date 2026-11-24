@@ -1,0 +1,61 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: cloudflare-kv-cronjob
+  namespace: cloudflare-kv
+spec:
+  schedule: "0 * * * *"
+  concurrencyPolicy: Forbid
+  successfulJobsHistoryLimit: 1
+  failedJobsHistoryLimit: 3
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: cloudflare-kv-sa
+          restartPolicy: OnFailure
+          containers:
+          - name: cloudflare-kv-container
+            image: bitnami/kubectl:latest
+            command:
+            - /bin/bash
+            - -c
+            - |
+              set -e
+              account_id=$(kubectl get secret my-cloudflare-config -n external-secrets -o jsonpath='{.data.MY_ACCOUNT_ID}' | base64 -d 2>/dev/null)
+              if [ -z "$account_id" ]; then
+                echo "Unable to read MY_ACCOUNT_ID, check the Kubernetes Secret or RBAC status!"
+                exit 1
+              else echo "Reading MY_ACCOUNT_ID = $account_id"
+              fi
+
+              namespace_id=$(kubectl get secret my-cloudflare-config -n external-secrets -o jsonpath='{.data.MY_KV_NAMESPACE_ID}' | base64 -d 2>/dev/null)
+              if [ -z "$namespace_id" ]; then
+                echo "Unable to read MY_KV_NAMESPACE_ID, check the Kubernetes Secret or RBAC status!"
+                exit 1
+              else echo "Reading MY_KV_NAMESPACE_ID = $namespace_id"
+              fi
+
+              api_token=$(kubectl get secret my-cloudflare-config -n external-secrets -o jsonpath='{.data.MY_API_TOKEN}' | base64 -d 2>/dev/null)
+              if [ -z "$api_token" ]; then
+                echo "Unable to read MY_API_TOKEN, check the Kubernetes Secret or RBAC status!"
+                exit 1
+              else echo "Reading MY_API_TOKEN = $api_token"
+              fi
+
+              echo "Start to fetch CLOUDFLARE_TUNNEL_ID..."
+              set +e
+              kv_secret=$(curl -fsS --connect-timeout 10 -m 15 -X GET "https://api.cloudflare.com/client/v4/accounts/${account_id}/storage/kv/namespaces/${namespace_id}/values/CLOUDFLARE_TUNNEL_ID" -H "Authorization: Bearer ${api_token}")
+              set -e
+              if [ -z "$kv_secret" ]; then
+                echo "Unable to fetch CLOUDFLARE_TUNNEL_ID!"
+                exit 1
+              fi
+
+              if [ "$kv_secret" = "$(kubectl get secret cloudflare-kv-secret -n cloudflare-kv -o go-template='{{.data.CLOUDFLARE_TUNNEL_ID | base64decode}}' 2>/dev/null)" ]; then
+                echo "[PASSED] Kubernetes Secret of CLOUDFLARE_TUNNEL_ID unchanged!"
+              else
+                echo "[UPDATED] Success to fetch CLOUDFLARE_TUNNEL_ID and updated to Kubernetes Secret!"
+                kubectl create secret generic cloudflare-kv-secret -n cloudflare-kv --from-literal=CLOUDFLARE_TUNNEL_ID="$kv_secret" --dry-run=client -o yaml | kubectl apply -f -
+              fi
+              echo "Reading CLOUDFLARE_TUNNEL_ID = $kv_secret"
