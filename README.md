@@ -280,8 +280,7 @@ flowchart TD
 │
 ├── <b>01-Hardware-OS-Configuration/</b>         # Host environment settings
 │   ├── .bashrc                           # User shell profile declaring KUBECONFIG and Linux environment variables
-│   ├── wsl.conf                          # WSL2 boot configuration (systemd enabled, automount options)
-│   └── .cloudflared/                     # Cloudflare tunnel credential credentials JSON and ingress config.yaml
+│   └── wsl.conf                          # WSL2 boot configuration (systemd enabled, automount options)
 │
 ├── <b>02-AMD-ROCm-DXG/</b>                      # AMD GPU acceleration and verification
 │   ├── 1-AMD-ROCDXG-Namespace.yaml       # Namespace definition for ROCm diagnostic workloads
