@@ -287,8 +287,7 @@ flowchart TD
 │   └── 2-AMD-ROCDXG-Deployment.yaml      # Pod mounting /dev/dxg and librocdxg.so to test GPU compute
 │
 ├── <b>03-Kubernetes/</b>                        # K3s cluster master configuration
-│   ├── config.yaml                       # K3s API server configuration declaring public OIDC Issuer endpoint
-│   └── k3s.yaml                          # Pre-generated Kubeconfig configured with loopback address and 0644 access
+│   └── config.yaml                       # K3s API server configuration declaring public OIDC Issuer endpoint
 │
 ├── <b>04-Helm/</b>                              # Helm client package configuration
 │   └── init-helm-repos.sh                # Shell script registering 9 upstream Helm repositories

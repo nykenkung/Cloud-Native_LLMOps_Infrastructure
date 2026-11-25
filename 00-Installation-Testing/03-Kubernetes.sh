@@ -4,15 +4,15 @@
 #  Lightweight K3s, kubeconfig & ~/.bashrc Integration
 #
 #  Simple Installation Command:
-#    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik --write-kubeconfig-mode 644" sh -
-#    mkdir -p ~/.kube && cp /etc/rancher/k3s/k3s.yaml ~/.kube/config
+#    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik" sh -
+#    mkdir -p ~/.kube && sudo install -m 600 -o $USER /etc/rancher/k3s/k3s.yaml ~/.kube/config
 # =====================================================================
 set -e
 
 if [ -z "$KUBECONFIG" ]; then
-  if [ -f "$HOME/.kube/config" ]; then
+  if [ -r "$HOME/.kube/config" ]; then
     export KUBECONFIG="$HOME/.kube/config"
-  elif [ -f "/etc/rancher/k3s/k3s.yaml" ]; then
+  elif [ -r "/etc/rancher/k3s/k3s.yaml" ]; then
     export KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
   fi
 fi
@@ -31,26 +31,26 @@ do_install() {
 
   if ! command -v k3s >/dev/null 2>&1; then
     echo "Installing K3s (without Traefik)..."
-    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik --write-kubeconfig-mode 644" sh -
+    curl -sfL https://get.k3s.io | INSTALL_K3S_EXEC="--disable traefik" sh -
   else
     echo "K3s is already installed."
   fi
   mkdir -p "$HOME/.kube"
-  if [ -f "$DIR/k3s.yaml" ]; then
-    echo "Installing ~/.kube/config from k3s.yaml..."
-    cp "$DIR/k3s.yaml" "$HOME/.kube/config"
-    sudo cp "$DIR/k3s.yaml" /etc/rancher/k3s/k3s.yaml 2>/dev/null || true
-  elif [ -f "/etc/rancher/k3s/k3s.yaml" ]; then
+  if sudo test -f "/etc/rancher/k3s/k3s.yaml"; then
     echo "Installing ~/.kube/config from /etc/rancher/k3s/k3s.yaml..."
-    sudo cp /etc/rancher/k3s/k3s.yaml "$HOME/.kube/config"
+    sudo install -m 600 -o "$(id -u)" -g "$(id -g)" /etc/rancher/k3s/k3s.yaml "$HOME/.kube/config"
+  else
+    fail_exit "[FAIL] /etc/rancher/k3s/k3s.yaml not found after K3s installation."
   fi
-  sudo chmod 644 /etc/rancher/k3s/k3s.yaml 2>/dev/null || true
-  sudo chown $(id -u):$(id -g) "$HOME/.kube/config" 2>/dev/null || true
-  chmod 600 "$HOME/.kube/config" 2>/dev/null || true
   export KUBECONFIG="$HOME/.kube/config"
   if ! grep -q "KUBECONFIG" "$HOME/.bashrc"; then
     echo 'export KUBECONFIG=$HOME/.kube/config' >> "$HOME/.bashrc"
   fi
+  echo "Exporting K3s OIDC metadata (openid-configuration & jwks.json)..."
+  mkdir -p "$HOME/K8s-OIDC-Provider/.well-known"
+  kubectl get --raw /.well-known/openid-configuration > "$HOME/K8s-OIDC-Provider/.well-known/openid-configuration"
+  kubectl get --raw /openid/v1/jwks > "$HOME/K8s-OIDC-Provider/jwks.json"
+  echo -e "\033[1;33m[NOTE] Please push ~/K8s-OIDC-Provider/ to GitHub Pages before running [5] External Secrets Operator, [6] Tailscale Operator, [7] Cloudflare Tunnel, [9] JuiceFS CSI Driver, [11] Qdrant Vector DB, [12] Argo CD GitOps, [13] Falco Security, [14] Grafana / Prometheus, [16] llama.cpp ROCm, [17] LiteLLM Gateway, [18] Open-WebUI.\033[0m"
   echo "=== [3 Installation Finished Successfully] ==="
 }
 

@@ -10,14 +10,6 @@
 # =====================================================================
 set -e
 
-if [ -z "$KUBECONFIG" ]; then
-  if [ -f "$HOME/.kube/config" ]; then
-    export KUBECONFIG="$HOME/.kube/config"
-  elif [ -f "/etc/rancher/k3s/k3s.yaml" ]; then
-    export KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
-  fi
-fi
-
 fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
 
 do_install() {

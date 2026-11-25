@@ -4,7 +4,7 @@ set TARGET=WSL_SSH
 
 ssh %TARGET% "mkdir -p ~/.cloudflared ~/00-Installation-Testing ~/01-Hardware-OS-Configuration ~/02-AMD-ROCm-DXG ~/03-Kubernetes ~/04-Helm ~/05-External-Secrets-Operator ~/06-Tailscale-Operator ~/07-Cloudflare-Tunnel ~/08-Ingress-Nginx ~/09-JuiceFS-CSI-Driver ~/10-CloudNativePG-DB ~/11-Qdrant-Vector-DB ~/12-ArgoCD-GitOps ~/13-Falco-Security ~/14-Grafana-Prometheus-Stack ~/15-KEDA-Autoscaler ~/16-LLaMAcpp-ROCm ~/17-LiteLLM-Gateway ~/18-Open-WebUI ~/HuggingFace-Models && sudo mkdir -p /etc/rancher/k3s && sudo chown -R $(id -un):$(id -gn) /etc/rancher/k3s"
 
-scp "%ORGIN%\00-Installation-Testing\00-Menu.sh" %TARGET%:~/00-Installation-Testing/
+scp "%ORGIN%\00-Installation-Testing\Menu.sh" %TARGET%:~/00-Installation-Testing/
 scp "%ORGIN%\00-Installation-Testing\01-Hardware-OS-Configuration.sh" %TARGET%:~/00-Installation-Testing/
 scp "%ORGIN%\00-Installation-Testing\02-AMD-ROCm-DXG.sh" %TARGET%:~/00-Installation-Testing/
 scp "%ORGIN%\00-Installation-Testing\03-Kubernetes.sh" %TARGET%:~/00-Installation-Testing/
@@ -44,7 +44,6 @@ scp "%ORGIN%\02-AMD-ROCm-DXG\1-AMD-ROCDXG-Namespace.yaml" %TARGET%:~/02-AMD-ROCm
 scp "%ORGIN%\02-AMD-ROCm-DXG\2-AMD-ROCDXG-Deployment.yaml" %TARGET%:~/02-AMD-ROCm-DXG/
 
 scp "%ORGIN%\03-Kubernetes\config.yaml" %TARGET%:/etc/rancher/k3s/
-scp "%ORGIN%\03-Kubernetes\k3s.yaml" %TARGET%:/etc/rancher/k3s/
 
 scp "%ORGIN%\04-Helm\init-helm-repos.sh" %TARGET%:~/04-Helm/
 
@@ -123,6 +122,8 @@ scp "%ORGIN%\18-Open-WebUI\5-OpenWebUI-NetworkPolicy.yaml" %TARGET%:~/18-Open-We
 scp "%ORGIN%\18-Open-WebUI\6-Open-WebUI-Ingress.yaml" %TARGET%:~/18-Open-WebUI/
 scp "%ORGIN%\18-Open-WebUI\My-OpenWebUI-Config.yaml" %TARGET%:~/18-Open-WebUI/
 scp "%ORGIN%\18-Open-WebUI\My-OpenWebUI-ExternalSecret.yaml" %TARGET%:~/18-Open-WebUI/
+
+scp "%ORGIN%\README.md" %TARGET%:~/
 
 ssh %TARGET% "chmod +x ~/00-Installation-Testing/*.sh"
 pause
