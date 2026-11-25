@@ -20,9 +20,6 @@ MODELS=(
   "Qwen/Qwen2.5-0.5B-Instruct-GGUF qwen2.5-0.5b-instruct-q4_k_m.gguf"
   "bartowski/Muse-Glimmer-30B-GGUF Muse-Glimmer-30B-Q4_K_M.gguf"
   "bartowski/google_gemma-4-31B-it-GGUF google_gemma-4-31B-it-Q4_K_M.gguf"
-  "unsloth/MiniMax-H3-GGUF qwen3vl_32b_minimax_h3-Q4_K_M.gguf"
-  "unsloth/Qwen-Image-2.1-Turbo-GGUF qwen-image-2.1-turbo-Q8_0.gguf"
-  "bluryar/VoxCPM-GGUF voxcpm-0.5b-q4_k_m.gguf"
 )
 
 BASE_DIR="$HOME/HuggingFace-Models"
