@@ -737,7 +737,7 @@ To set up passwordless SSH authentication between your Windows client and the WS
    (Windows) ssh WSL_SSH
    (Ubuntu) ~/00-Installation-Testing/Menu.sh
    ```
-   * **Multi-Task CLI Mode:** `Menu.sh` accepts strictly `0 to 18` (`Install`), `A to S` (`Test`), `A+ to S+` (`Restart`), `A- to S-` (`Uninstall`), `91` (`91-Check-Pod-Status.sh`), `92` (`92-Reveal-ESO-Secrets.sh`), and `100-110` (Benchmarks), supporting space-separated sequential pipelines (e.g., `~/00-Installation-Testing/Menu.sh 91 101 110`). Each module script (`01` to `18`) independently accepts `-install`, `-test`, `-restart`, and `-uninstall`.
+   * **Multi-Task CLI Mode:** `Menu.sh` accepts strictly `0 to 18` (`Install`), `A to S` (`Test`), `A+ to S+` (`Restart`), `A- to S-` (`Uninstall`), `91` (`91-Check-Pod-Status.sh`), `92` (`92-Reveal-ESO-Secrets.sh`), and `100-110` (`Benchmarks`), supporting space-separated sequential pipelines (e.g., `~/00-Installation-Testing/Menu.sh 91 101 110`). Each module script (`01` to `18`) independently accepts `-install`, `-test`, `-restart`, and `-uninstall`.
 
 ---
 
@@ -766,7 +766,6 @@ Before enabling cloud integrations, you can initialize the core AI inference sta
 To establish zero-trust remote access:
 1. **Cloudflare Tunnel Deployment:**
    With External Secrets Operator (ESO) enabled, deploy `07-Cloudflare-Tunnel/My-Cloudflare-Tunnel-ExternalSecret.yaml` (or run `~/00-Installation-Testing/07-Cloudflare-Tunnel.sh -install`) so ESO automatically syncs `cf_tunnel_id` from GCP Secret Manager (`my-cisc4900-config`) into Kubernetes Secret `cloudflare-kv-secret` (`CLOUDFLARE_TUNNEL_ID`).
-   *(Air-gapped bootstrap fallback only, before GCP ESO is configured:)*
    ```bash
    kubectl create secret generic cloudflare-kv-secret -n cloudflare-kv \
      --from-literal=CLOUDFLARE_TUNNEL_ID="<your_cloudflare_tunnel_jwt>"
