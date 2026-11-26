@@ -765,7 +765,7 @@ Before enabling cloud integrations, you can initialize the core AI inference sta
 ### Phase 4: Enabling Cloudflare Zero Trust & Tailscale Mesh Ingress
 To establish zero-trust remote access:
 1. **Cloudflare Tunnel Deployment:**
-   With External Secrets Operator (ESO) enabled, deploy `07-Cloudflare-Tunnel/My-Cloudflare-Tunnel-ExternalSecret.yaml` (or run `~/00-Installation-Testing/07-Cloudflare-Tunnel.sh -install`) so ESO automatically syncs `cf_tunnel_id` from GCP Secret Manager (`my-cisc4900-config`) into Kubernetes Secret `cloudflare-kv-secret` (`CLOUDFLARE_TUNNEL_ID`).
+   With External Secrets Operator (ESO) enabled, deploy `07-Cloudflare-Tunnel/My-Cloudflare-Tunnel-ExternalSecret.yaml` (or run `~/00-Installation-Testing/07-Cloudflare-Tunnel.sh -install`) so ESO automatically syncs `cf_tunnel_id` from GCP Secret Manager (`my-cisc4900-config`) into Kubernetes Secret `cloudflare-kv-secret` (`CLOUDFLARE_TUNNEL_ID`):
    ```bash
    kubectl create secret generic cloudflare-kv-secret -n cloudflare-kv \
      --from-literal=CLOUDFLARE_TUNNEL_ID="<your_cloudflare_tunnel_jwt>"
