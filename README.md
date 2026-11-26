@@ -201,7 +201,6 @@ A unified control plane governs deployment, credential injection, runtime defens
 * **`Falco eBPF / Prometheus / Grafana`:** Provides **`eBPF / Metrics / Scaling (ServiceMonitors & KEDA)`** across the stack—capturing kernel-level threats in **`Falcosidekick UI (:2802)`**, scraping inference queue and cluster metrics in **`Prometheus (:9090) -> KEDA`** for event-driven scaling, and visualizing ROCm GPU/LLM telemetry in **`Grafana (:80, grafana.kung.nyc)`**.
 ```
 +=======================================================================================================+
-|                                                                                                       |
 |                                  [1] External Network & Cloud Services                                |
 |                                                                                                       |
 |  +---------------------+  +--------------------+  +----------------------+  +----------------------+  |
@@ -222,7 +221,6 @@ A unified control plane governs deployment, credential injection, runtime defens
                                     ^      |                   |                         |
                                     |      v                   v                         v
 +===================================|======|===================|=========================|==============+
-|                                                                                                       |
 |                                 [2] K3s Cluster: Zero-Trust Edge Ingress                              |
 |                                                                                                       |
 |  +-------------------------------------+  +--------------------------+  +--------------------------+  |
@@ -239,7 +237,6 @@ A unified control plane governs deployment, credential injection, runtime defens
              |                                           |                                  | Management
              v open-webui.kung.nyc                       v api.kung.nyc                     v  Portals*
 +============|===========================================|==================================|===========+
-|                                                                                           |           |
 |            [3] Application & AI API Gateway [Zero-Trust NetworkPolicy Enforced]           |  *qdrant  |
 |                                                                                           |           |
 |  +--------- [NP: Ingress Only] --------+   OpenAI API   +-- [NP: WebUI/Ingress Only] --+  |  *argocd  |
@@ -251,7 +248,6 @@ A unified control plane governs deployment, credential injection, runtime defens
             |             |                                        |             |
             v             v REST/gRPC API Key (:6333)              v             v Bearer Token
 +===========|=============|========================================|=============|======================+
-|           |             |                                        |             |                      |
 |           |             |   [4] Inference, Vector & Autoscaling  |             |                      |
 |           |             v                                        |             v                      |
 |           |   +---------+------------------------+               |  +----- [NP: LiteLLM Only] -----+  |
@@ -270,7 +266,6 @@ A unified control plane governs deployment, credential injection, runtime defens
             |                                                      |                          |
             v :5432                                                v :5432                    v RWX PVC
 +===========|======================================================|==========================|=========+
-|                                                                                                       |
 |                                  [5] High-Availability Storage & Databases                            |
 |                                                                                                       |
 |  +-------- [NP: App-Only :5432 | Direct Access BLOCKED] --------+       +--------------------------+  |
@@ -280,11 +275,10 @@ A unified control plane governs deployment, credential injection, runtime defens
 |  |                 - juicefs-postgres-rw:5432 (Metadata) <------+<------|      (Syncs to R2 S3)    |  |
 |  +--------------------------------------------------------------+       +--------------------------+  |
 |                                                                                                       |
-+===============:===============================:==================================:====================+
-                ^     GitOps Sync               ^    Hourly Secret Sync            ^ eBPF / Metrics
-                : (Server-Side Apply)           : (30 Keys -> K8s Secrets)         : & KEDA Scaling
-+===============:===============================:==================================:====================+
-|                                                                                                       |
++===========:=============================:================================:============================+
+            ^     GitOps Sync             ^    Hourly Secret Sync          ^ eBPF / Metrics
+            : (Server-Side Apply)         : (30 Keys -> K8s Secrets)       : & KEDA Scaling
++===========:=============================:================================:============================+
 |                                [6] GitOps, SecretOps, Security & Observability                        |
 |                                                                                                       |
 |  +-------------------------+  +--------------------------+  +--------------------------------------+  |
@@ -295,7 +289,6 @@ A unified control plane governs deployment, credential injection, runtime defens
 |  +-------------------------+  +--------------------------+  +--------------------------------------+  |
 |                                                                                                       |
 +=======================================================================================================+
-
            Legend: [NP: ...] = Kubernetes NetworkPolicy Zero-Trust Microsegmentation Boundary
 ```
 
