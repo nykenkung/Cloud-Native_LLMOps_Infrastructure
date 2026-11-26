@@ -58,7 +58,7 @@ Operating on physical AMD hardware (**AMD Ryzen AI Max+ 395 APU with Radeon 8060
 
 * **Declarative GitOps Continuous Delivery**
   
-  Managed end-to-end by Argo CD (`v3.6.2`). The entire infrastructure—from namespaces, storage classes, and database operators up to inference runtimes and web portals—is defined declaratively and reconciled automatically with Server-Side Apply in ordered sync waves.
+  Managed end-to-end by Argo CD (`v3.6.2`). The entire infrastructure, from namespaces, storage classes, and database operators up to inference runtimes and web portals, is defined declaratively and reconciled automatically with Server-Side Apply in ordered sync waves.
 
 * **Hardware-Accelerated Sovereign AI Inference**
   
@@ -394,7 +394,6 @@ flowchart TD
 │
 ├── .gitignore                            # Excludes local credentials (00-Installation-Testing/My-CISC4900-Config.json & 05-External-Secrets-Operator/wif-credentials.json)
 ├── .nojekyll                             # Skips the Jekyll build step when deploying pre-built static files
-├── CISC4900 Prompt.md                    # Master disaster-recovery prompt and operational reference
 └── README.md                             # Main introductory document for this project
 </pre>
 
@@ -677,16 +676,14 @@ To set up passwordless SSH authentication between your Windows client and the WS
 1. **Windows Silent Sync (and Clean Reset):**
    Execute the silent batch synchronizer from your local repository:
    ```cmd
-   E:\CISC4900\00-Installation-Testing\Copy-SSH.bat
+   (Windows) <Your folder>\Cloud-Native_LLMOps_Infrastructure\00-Installation-Testing\Copy-SSH.bat
    ```
-   *(To remove all synced `~/00`–`~/18` and `~/K8s-OIDC-Provider` directories on `WSL_SSH` before a clean re-sync, run `E:\CISC4900\00-Installation-Testing\Delete-SSH.bat`.)*
 2. **Launch Master Interactive Console on Ubuntu Server:**
    ```bash
-   ssh WSL_SSH
-   cd ~/00-Installation-Testing
-   ./Menu.sh
+   (Windows) ssh WSL_SSH
+   (Ubuntu) ~/00-Installation-Testing/Menu.sh
    ```
-   * **Multi-Task CLI Mode:** `Menu.sh` accepts strictly `0-18` (Install), `A-S` (Test), `A+-S+` (Re-apply & Rollover), `A--S-` (Uninstall), `91` (`91-Check-Pod-Status.sh`), `92` (`92-Reveal-ESO-Secrets.sh`), and `100-110` (Benchmarks), supporting space-separated sequential pipelines (e.g., `./Menu.sh 18 S+ S 91`). Each module script (`01`–`18`) independently accepts `-install`, `-test`, `-restart`, and `-uninstall`.
+   * **Multi-Task CLI Mode:** `Menu.sh` accepts strictly `0 to 18` (Install), `A to S` (Test), `A+ toS+` (Re-apply & Rollover), `A- to S-` (Uninstall), `91` (`91-Check-Pod-Status.sh`), `92` (`92-Reveal-ESO-Secrets.sh`), and `100-110` (Benchmarks), supporting space-separated sequential pipelines (e.g., `~/00-Installation-Testing/Menu.sh 91 101 110`). Each module script (`01` to `18`) independently accepts `-install`, `-test`, `-restart`, and `-uninstall`.
 
 ---
 
@@ -714,7 +711,7 @@ Before enabling cloud integrations, you can initialize the core AI inference sta
 ### Phase 4: Enabling Cloudflare Zero Trust & Tailscale Mesh Ingress
 To establish zero-trust remote access:
 1. **Cloudflare Tunnel Deployment:**
-   With External Secrets Operator (ESO) enabled, deploy `07-Cloudflare-Tunnel/My-Cloudflare-Tunnel-ExternalSecret.yaml` (or run `~/00-Installation-Testing/Menu.sh 7`) so ESO automatically syncs `cf_tunnel_id` from GCP Secret Manager (`my-cisc4900-config`) into Kubernetes Secret `cloudflare-kv-secret` (`CLOUDFLARE_TUNNEL_ID`).
+   With External Secrets Operator (ESO) enabled, deploy `07-Cloudflare-Tunnel/My-Cloudflare-Tunnel-ExternalSecret.yaml` (or run `~/00-Installation-Testing/07-Cloudflare-Tunnel.sh -install`) so ESO automatically syncs `cf_tunnel_id` from GCP Secret Manager (`my-cisc4900-config`) into Kubernetes Secret `cloudflare-kv-secret` (`CLOUDFLARE_TUNNEL_ID`).
    *(Air-gapped bootstrap fallback only, before GCP ESO is configured:)*
    ```bash
    kubectl create secret generic cloudflare-kv-secret -n cloudflare-kv \
@@ -761,7 +758,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
    * **Attribute Mapping:** `google.subject = assertion.sub`
    * **Service Account Impersonation Subject:** `system:serviceaccount:external-secrets:external-secrets`
    * **Token Path:** `/var/run/secrets/k8s-oidc/token`
-   * Save output as `05-External-Secrets-Operator/wif-credentials.json` *(excluded from Git via `.gitignore`; never commit to GitHub)*
+   * Save output as `05-External-Secrets-Operator/wif-credentials.json` *(excluded from Git via `.gitignore`)*
 
 5. **Apply WIF Configuration Secret in Kubernetes:**
    ```bash
@@ -835,7 +832,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
    3. Paste the JSON output (or upload `~/00-Installation-Testing/My-CISC4900-Config.json`) into **Secret value**, then click **Create secret** / **Add new version**. *(To stay within the GCP Free Tier limit of <= 6 active versions, disable or destroy older versions when rotating.)*
    4. Trigger an immediate cluster re-sync and verify all `ExternalSecret` resources are synced:
       ```bash
-      ~/00-Installation-Testing/Menu.sh F+
+      ~/00-Installation-Testing/05-External-Secrets-Operator.sh -restart
       kubectl get externalsecrets -A
       ```
       *(Note: If migrating `cloudflare-kv-secret` from an older manual secret on an existing cluster, delete the legacy secret after updating GCP Secret Manager so ESO takes ownership: `kubectl delete secret cloudflare-kv-secret -n cloudflare-kv --ignore-not-found && ~/00-Installation-Testing/07-Cloudflare-Tunnel.sh -restart`.)*
@@ -863,7 +860,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
 
 ### Test Execution & Diagnostic Procedures (Actual Verified Outputs: Test 101–110)
 
-#### 1. `101-Test-AI-Stack-E2E.sh` — End-to-End Inference Verification
+#### 1. `101-Test-AI-Stack-E2E.sh` - End-to-End Inference Verification
 ```bash
 ~/00-Installation-Testing/101-Test-AI-Stack-E2E.sh
 ```
@@ -905,7 +902,7 @@ Open-WebUI ClusterIP: 10.43.176.196:8080
 
 ---
 
-#### 2. `102-Test-Security-Penetration.sh` — Network Isolation & Threat Audit
+#### 2. `102-Test-Security-Penetration.sh` - Network Isolation & Threat Audit
 ```bash
 ~/00-Installation-Testing/102-Test-Security-Penetration.sh
 ```
@@ -942,7 +939,7 @@ Attempting unauthorized lateral connection: default pod -> litellm-postgres:5432
 
 ---
 
-#### 3. `103-Test-RAG-Benchmark.sh` — Qdrant Vector Search & Closed-Loop RAG QA
+#### 3. `103-Test-RAG-Benchmark.sh` - Qdrant Vector Search & Closed-Loop RAG QA
 ```bash
 ~/00-Installation-Testing/103-Test-RAG-Benchmark.sh
 ```
@@ -979,7 +976,7 @@ Total RAG Latency: 562 ms
 
 ---
 
-#### 4. `104-Test-Concurrency-Throughput.sh` — Concurrency, TPS & KEDA Autoscaling
+#### 4. `104-Test-Concurrency-Throughput.sh` - Concurrency, TPS & KEDA Autoscaling
 ```bash
 ~/00-Installation-Testing/104-Test-Concurrency-Throughput.sh
 ```
@@ -1024,7 +1021,7 @@ keda-hpa-llamacpp-rocm-scaler   Deployment/llamacpp-rocm-deploy   0/1 (avg)   1 
 
 ---
 
-#### 5. `105-Test-Context-Stress.sh` — Stepped Context Window (1K–32K) & ROCm VRAM Stress
+#### 5. `105-Test-Context-Stress.sh` - Stepped Context Window (1K–32K) & ROCm VRAM Stress
 ```bash
 ~/00-Installation-Testing/105-Test-Context-Stress.sh
 ```
@@ -1066,7 +1063,7 @@ Response Time: 13860 ms
 
 ---
 
-#### 6. `106-Test-Needle-In-Haystack.sh` — 32K NIAH Deep Memory Precision
+#### 6. `106-Test-Needle-In-Haystack.sh` - 32K NIAH Deep Memory Precision
 ```bash
 ~/00-Installation-Testing/106-Test-Needle-In-Haystack.sh
 ```
@@ -1101,7 +1098,7 @@ Context    | Depth    | Latency (s)  | Retrieval Status
 
 ---
 
-#### 7. `107-Test-LLM-Guardrails-OWASP.sh` — OWASP Top 10 for LLMs Security Audit
+#### 7. `107-Test-LLM-Guardrails-OWASP.sh` - OWASP Top 10 for LLMs Security Audit
 ```bash
 ~/00-Installation-Testing/107-Test-LLM-Guardrails-OWASP.sh
 ```
@@ -1131,7 +1128,7 @@ Summary: 4/4 Guardrail Defense Tests Passed.
 
 ---
 
-#### 8. `108-Test-Cluster-Security-Audit.sh` — Kubernetes RBAC, Pod Security & Secrets Audit
+#### 8. `108-Test-Cluster-Security-Audit.sh` - Kubernetes RBAC, Pod Security & Secrets Audit
 ```bash
 ~/00-Installation-Testing/108-Test-Cluster-Security-Audit.sh
 ```
@@ -1169,7 +1166,7 @@ Total Ingress Routes Configured: 6
 
 ---
 
-#### 9. `109-Test-Storage-Persistence-Failover.sh` — Storage CSI, CNPG Persistence & Resiliency
+#### 9. `109-Test-Storage-Persistence-Failover.sh` - Storage CSI, CNPG Persistence & Resiliency
 ```bash
 ~/00-Installation-Testing/109-Test-Storage-Persistence-Failover.sh
 ```
@@ -1208,7 +1205,7 @@ Total Cluster Pods: 49 | Unhealthy/Degraded: 0
 
 ---
 
-#### 10. `110-Test-LLM-CLI.sh` — Interactive LLM Model Selection & Multi-Turn CLI Chat
+#### 10. `110-Test-LLM-CLI.sh` - Interactive LLM Model Selection & Multi-Turn CLI Chat
 ```bash
 ~/00-Installation-Testing/110-Test-LLM-CLI.sh
 ```
