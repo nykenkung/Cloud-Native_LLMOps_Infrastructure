@@ -5,9 +5,9 @@
   ██║     ██║╚════██║██║     ╚════██║╔═════██╗████╔╝██║████╔╝██║╚════╝██║     ██║     ██║╚██╔╝██║██║   ██║██╔═══╝ ╚════██║
   ╚██████╗██║███████║╚██████╗     ██║╚██████╔╝╚██████╔╝╚██████╔╝      ███████╗███████╗██║ ╚═╝ ██║╚██████╔╝██║     ███████║
    ╚═════╝╚═╝╚══════╝ ╚═════╝     ╚═╝ ╚═════╝  ╚═════╝  ╚═════╝       ╚══════╝╚══════╝╚═╝     ╚═╝ ╚═════╝ ╚═╝     ╚══════╝
-                                      <i>Author: Suen Ming Kung</i>
-                      <b>CISC 4900 Project: Cloud-Native Scalable AI Infrastructure</b>
-         <b>Enterprise-Grade LLMOps, Zero-Trust GitOps, AMD ROCm Hardware Accelerated AI Platform</b>
+<i>Author: Suen Ming Kung</i>
+<b>CISC 4900 Project: Cloud-Native Scalable AI Infrastructure</b>
+<b>Enterprise-Grade LLMOps, Zero-Trust GitOps, AMD ROCm Hardware Accelerated AI Platform</b>
 </pre>
 
 <p align="center">
