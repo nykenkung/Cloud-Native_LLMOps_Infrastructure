@@ -241,23 +241,23 @@ A unified control plane governs deployment, credential injection, runtime defens
 |                                                                                           |           |
 |  +--------- [NP: Ingress Only] --------+   OpenAI API   +-- [NP: WebUI/Ingress Only] --+  |  *argocd  |
 |  |          Open-WebUI Portal          |    (/v1/*)     |       LiteLLM Gateway        |  |           |
-|  |   open-webui-svc.open-webui:8080    |--------------->|     litellm.litellm:4000     |  |  *falco   |
-|  +--------+-------------+--------------+                +--------+-------------+-------+  |           |
-|           |             |                                        |             |          |  *grafana |
-+===========|=============|========================================|=============|==========|===========+
-            |             |                                        |             |
-            v             v REST/gRPC API Key (:6333)              v             v Bearer Token
-+===========|=============|========================================|=============|======================+
-|           |             |   [4] Inference, Vector & Autoscaling  |             |                      |
-|           |             v                                        |             v                      |
-|           |   +---------+------------------------+               |  +----- [NP: LiteLLM Only] -----+  |
-|           |   |         Qdrant Vector DB         |               |  |    llama.cpp ROCm Server     |  |
-|           |   |        qdrant.qdrant:6333        |               |  |    llamacpp-rocm-svc:8080    |  |
-|           |   |     (HNSW | qdrant.kung.nyc)     |               |  |   (Lateral Access BLOCKED)   |  |
-|           |   +-------------+--------------------+               |  +---+-------------------+------+  |
-|           |                 |                                    |      |  /dev/dxg         |         |
-|           |                 v Persistent Volume                  |      v librocdxg.so      |         |
-|           |   +-------------+--------------------+               |  +---+----------------+  |         |
+|  |   open-webui-svc.open-webui:8080    +--------------->+     litellm.litellm:4000     |  |  *falco   |
+|  +--------+-------------+--------------+                +--------+-------+-------------+  |           |
+|           |             |                                        |       |                |  *grafana |
++===========|=============|========================================|=======|================|===========+
+            |             |                                        |       |
+            v             v REST/gRPC API Key (:6333)              v       v Bearer Token
++===========|=============|========================================|=======|============================+
+|           |             |   [4] Inference, Vector & Autoscaling  |       |                            |
+|           |             v                                        |       v                            |
+|           |   +---------+------------------------+               |  +----+- [NP: LiteLLM Only] ----+  |
+|           |   |         Qdrant Vector DB         |               |  |     llama.cpp ROCm Server    |  |
+|           |   |        qdrant.qdrant:6333        |               |  |     llamacpp-rocm-svc:8080   |  |
+|           |   |     (HNSW | qdrant.kung.nyc)     |               |  |    (Lateral Access BLOCKED)  |  |
+|           |   +---------+------------------------+               |  +----+------------------+------+  |
+|           |             |                                        |       |  /dev/dxg        |         |
+|           |             v Persistent Volume                      |       v librocdxg.so     |         |
+|           |   +---------+------------------------+               |  +----+---------------+  |         |
 |           |   |     Qdrant Local PVC (10Gi)      |               |  |  AMD Radeon 8060S  |  |         |
 |           |   |   (Persistent Vector Storage)    |               |  |  (128GB RAM / APU) |  |         |
 |           |   +----------------------------------+               |  +--------------------+  |         |
@@ -272,7 +272,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 |  |               CloudNativePG PostgreSQL 16 (HA)               |       |    JuiceFS CSI Storage   |  |
 |  |                 - open-webui-postgres-rw:5432                |       |    (cloudflare-juicefs)  |  |
 |  |                 - litellm-postgres-rw:5432                   |       |    /HuggingFace-Models   |  |
-|  |                 - juicefs-postgres-rw:5432 (Metadata) <------+<------|      (Syncs to R2 S3)    |  |
+|  |                 - juicefs-postgres-rw:5432 (Metadata) <------+<------+      (Syncs to R2 S3)    |  |
 |  +--------------------------------------------------------------+       +--------------------------+  |
 |                                                                                                       |
 +===========:=============================:================================:============================+
