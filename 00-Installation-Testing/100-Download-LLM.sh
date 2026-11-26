@@ -5,7 +5,7 @@
 #
 #  Simple Installation Command:
 #    pip install "huggingface_hub[cli]" --break-system-packages
-#    huggingface-cli download Qwen/Qwen2.5-0.5B-Instruct-GGUF qwen2.5-0.5b-instruct-q4_k_m.gguf --local-dir ~/HuggingFace-Models/GGUF
+#    HF_XET_HIGH_PERFORMANCE=1 huggingface-cli download Qwen/Qwen2.5-0.5B-Instruct-GGUF qwen2.5-0.5b-instruct-q4_k_m.gguf --local-dir ~/HuggingFace-Models/GGUF
 # =====================================================================
 set -uo pipefail
 
@@ -28,6 +28,8 @@ GGUF_DIR="$BASE_DIR/GGUF"
 # ==============================================================================
 # Environment Setup
 # ==============================================================================
+export HF_XET_HIGH_PERFORMANCE=1
+
 if [ ! -d "$GGUF_DIR" ] || [ ! -w "$GGUF_DIR" ]; then
   sudo mkdir -p "$GGUF_DIR" && sudo chown -R "$USER:$USER" "$BASE_DIR"
 fi
