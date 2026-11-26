@@ -2,8 +2,7 @@
 # =====================================================================
 #  [92] Export Consolidated ESO Secrets for GCP Secret Manager (JSON)
 #  Reconstructs the 'my-cisc4900-config' JSON payload from Kubernetes
-#  Secrets managed by ESO (and Cloudflare Tunnel Secret) matching
-#  !Secret_Backup/My-CISC4900-Config.json for upload to:
+#  Secrets managed by ESO and Cloudflare Tunnel Secret for upload to:
 #  Google Cloud Console -> Secret Manager -> my-cisc4900-config
 # =====================================================================
 set -euo pipefail
