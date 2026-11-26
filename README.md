@@ -683,7 +683,7 @@ To set up passwordless SSH authentication between your Windows client and the WS
    (Windows) ssh WSL_SSH
    (Ubuntu) ~/00-Installation-Testing/Menu.sh
    ```
-   * **Multi-Task CLI Mode:** `Menu.sh` accepts strictly `0 to 18` (Install), `A to S` (Test), `A+ toS+` (Re-apply & Rollover), `A- to S-` (Uninstall), `91` (`91-Check-Pod-Status.sh`), `92` (`92-Reveal-ESO-Secrets.sh`), and `100-110` (Benchmarks), supporting space-separated sequential pipelines (e.g., `~/00-Installation-Testing/Menu.sh 91 101 110`). Each module script (`01` to `18`) independently accepts `-install`, `-test`, `-restart`, and `-uninstall`.
+   * **Multi-Task CLI Mode:** `Menu.sh` accepts strictly `0 to 18` (`Install`), `A to S` (`Test`), `A+ to S+` (`Restart`), `A- to S-` (`Uninstall`), `91` (`91-Check-Pod-Status.sh`), `92` (`92-Reveal-ESO-Secrets.sh`), and `100-110` (Benchmarks), supporting space-separated sequential pipelines (e.g., `~/00-Installation-Testing/Menu.sh 91 101 110`). Each module script (`01` to `18`) independently accepts `-install`, `-test`, `-restart`, and `-uninstall`.
 
 ---
 
