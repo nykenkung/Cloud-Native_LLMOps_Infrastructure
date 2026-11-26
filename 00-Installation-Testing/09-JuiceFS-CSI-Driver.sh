@@ -3,10 +3,7 @@
 #  [9] JuiceFS CSI Driver
 #  Distributed POSIX Storage Driver & Cloudflare R2 StorageClass
 #
-#  Simple Installation Command:
-#    sudo mount --make-shared / 2>/dev/null || true
-#    helm upgrade --install juicefs-csi-driver juicefs/juicefs-csi-driver -n kube-system
-#    kubectl apply -f ~/9-JuiceFS-CSI-Driver
+#  Usage: ./09-JuiceFS-CSI-Driver.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -18,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   local DIR="$HOME/09-JuiceFS-CSI-Driver"
@@ -45,15 +42,30 @@ do_test() {
   echo "=== [9 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl rollout restart sts -n kube-system -l app.kubernetes.io/name=juicefs-csi-driver 2>/dev/null || true
+  kubectl rollout restart ds -n kube-system -l app.kubernetes.io/name=juicefs-csi-driver 2>/dev/null || true
+  kubectl rollout restart deploy -n kube-system -l app.kubernetes.io/name=juicefs-csi-driver 2>/dev/null || true
+  echo "=== [9 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  local DIR="$HOME/09-JuiceFS-CSI-Driver"
+  [ ! -d "$DIR" ] && DIR="$HOME/9-JuiceFS-CSI-Driver"
+
+  [ -d "$DIR" ] && kubectl delete -f "$DIR" --ignore-not-found 2>/dev/null || true
+  helm uninstall juicefs-csi-driver -n kube-system 2>/dev/null || true
+  echo "=== [9 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

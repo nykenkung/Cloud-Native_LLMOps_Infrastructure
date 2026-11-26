@@ -3,14 +3,11 @@
 #  [1] Hardware & OS Configuration
 #  WSL2 Ubuntu 24.04, /etc/wsl.conf, ~/.bashrc & Base Utilities
 #
-#  Simple Installation Command:
-#    sudo cp ~/1-Hardware-OS-Configuration/wsl.conf /etc/wsl.conf
-#    cp ~/1-Hardware-OS-Configuration/.bashrc ~/.bashrc
-#    sudo apt-get update -y && sudo apt-get install -y curl wget jq git ca-certificates gnupg openssh-server
+#  Usage: ./01-Hardware-OS-Configuration.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   local DIR="$HOME/01-Hardware-OS-Configuration"
@@ -55,7 +52,7 @@ do_test() {
     fail_exit "[FAIL] ~/.bashrc missing KUBECONFIG"
   fi
   for cmd in curl wget jq git ssh; do
-    if command -v $cmd >/dev/null 2>&1; then
+    if command -v "$cmd" >/dev/null 2>&1; then
       echo "[OK] Command $cmd is available"
     else
       fail_exit "[FAIL] Command $cmd not found"
@@ -64,15 +61,41 @@ do_test() {
   echo "=== [1 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  local DIR="$HOME/01-Hardware-OS-Configuration"
+  [ ! -d "$DIR" ] && DIR="$HOME/1-Hardware-OS-Configuration"
+
+  echo "--- Re-applying /etc/wsl.conf & ~/.bashrc ---"
+  if [ -f "$DIR/wsl.conf" ]; then
+    sudo cp "$DIR/wsl.conf" /etc/wsl.conf
+    sudo chmod 644 /etc/wsl.conf
+  fi
+  if [ -f "$DIR/.bashrc" ]; then
+    cp "$DIR/.bashrc" "$HOME/.bashrc"
+  fi
+  echo "--- Reloading sysctl & restarting SSH service ---"
+  sudo sysctl -w fs.inotify.max_user_instances=8192 >/dev/null 2>&1 || true
+  sudo sysctl -w fs.inotify.max_user_watches=1048576 >/dev/null 2>&1 || true
+  sudo sysctl --system >/dev/null 2>&1 || true
+  sudo systemctl restart ssh 2>/dev/null || sudo service ssh restart 2>/dev/null || true
+  echo "=== [1 Restart/Re-apply Completed Successfully] ==="
+}
+
+do_uninstall() {
+  echo "--- Cleaning up custom sysctl limits ---"
+  sudo rm -f /etc/sysctl.d/99-inotify.conf
+  sudo sysctl --system >/dev/null 2>&1 || true
+  echo -e "[NOTE] Base OS packages (curl, jq, git, ssh), ~/.bashrc, and /etc/wsl.conf were preserved for WSL2 stability."
+  echo "=== [1 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

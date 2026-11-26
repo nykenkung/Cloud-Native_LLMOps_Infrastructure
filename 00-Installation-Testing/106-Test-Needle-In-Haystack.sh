@@ -9,7 +9,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 echo "=================================================================="
 echo " [106] 32K Needle-In-A-Haystack (NIAH) Accuracy Benchmark"
@@ -62,7 +62,7 @@ if [ "$LLAMA_READY" = "false" ]; then
   echo ""
   echo "[NOTICE] llama.cpp is currently awaiting a model in /models."
   echo "         NIAH synthetic haystack generator and depth calculator are validated."
-  echo "         Once a model is loaded via ./0-Menu.sh 100, run this script to execute the live recall benchmark!"
+  echo "         Once a model is loaded via ./Menu.sh 100, run this script to execute the live recall benchmark!"
   exit 0
 fi
 
@@ -70,7 +70,7 @@ fi
 echo ""
 echo "=== Starting Live Needle-In-A-Haystack (NIAH) Benchmark ==="
 
-python3 - "$1" <<EOF
+PYTHONUNBUFFERED=1 python3 - "$1" <<EOF
 import sys
 import os
 import urllib.request

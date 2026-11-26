@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-set -e
+set -uo pipefail
 
-if [ -z "$KUBECONFIG" ]; then
+if [ -z "${KUBECONFIG:-}" ]; then
   if [ -r "$HOME/.kube/config" ]; then
     export KUBECONFIG="$HOME/.kube/config"
   elif [ -r "/etc/rancher/k3s/k3s.yaml" ]; then
@@ -21,15 +21,8 @@ LLAMA_API_KEY="${LLAMA_API_KEY:-$(kubectl get secret -n llamacpp-rocm llamacpp-a
 MAX_TOKENS=1024
 TEMPERATURE=0.7
 HISTORY_FILE="${HOME}/.llm-cli-history"
-
-# --- Colors ---
-RED='\033[0;31m'
-GREEN='\033[0;32m'
-YELLOW='\033[1;33m'
-CYAN='\033[0;36m'
-BOLD='\033[1m'
-DIM='\033[2m'
-RESET='\033[0m'
+LITELLM_BASE=""
+LLAMA_BASE=""
 
 # --- Resolve Service Endpoints ---
 resolve_endpoints() {
@@ -94,7 +87,7 @@ discover_models() {
         done <<< "$litellm_models"
       fi
     else
-      echo -e "${YELLOW}[WARN] LiteLLM (${LITELLM_BASE}) is not healthy — skipping${RESET}"
+      echo "[WARN] LiteLLM (${LITELLM_BASE}) is not healthy — skipping"
     fi
   fi
 
@@ -124,7 +117,7 @@ discover_models() {
         done <<< "$llama_models"
       fi
     else
-      echo -e "${YELLOW}[WARN] llama.cpp (${LLAMA_BASE}) is not healthy — skipping${RESET}"
+      echo "[WARN] llama.cpp (${LLAMA_BASE}) is not healthy — skipping"
     fi
   fi
 
@@ -155,12 +148,12 @@ discover_models() {
 # --- Model Selection Menu ---
 select_model() {
   echo ""
-  echo -e "${BOLD}=================================================================="
-  echo -e " [110] Interactive LLM CLI Chat"
-  echo -e "==================================================================${RESET}"
+  echo "=================================================================="
+  echo " [110] Interactive LLM CLI Chat"
+  echo "=================================================================="
 
   if [ ${#MODEL_LIST[@]} -eq 0 ]; then
-    echo -e "${RED}[FAIL] No models discovered from LiteLLM or llama.cpp.${RESET}"
+    echo "[FAIL] No models discovered from LiteLLM or llama.cpp."
     echo "       Ensure at least one backend is running with a loaded model."
     echo "       - LiteLLM: kubectl get pods -n litellm"
     echo "       - llama.cpp: kubectl get pods -n llamacpp-rocm"
@@ -168,24 +161,24 @@ select_model() {
   fi
 
   echo ""
-  echo -e "${CYAN}Available Models:${RESET}"
+  echo "Available Models:"
   echo ""
   local default_choice=1
   for i in "${!MODEL_LIST[@]}"; do
     local num=$((i + 1))
     local tag=""
     if [ "${MODEL_LIST[$i]}" = "qwen2.5-0.5b-instruct-q4_k_m" ]; then
-      tag=" ${YELLOW}(Default)${RESET}"
+      tag=" (Default)"
       default_choice=$num
     fi
-    printf "  ${GREEN}%2d)${RESET} %-40s ${DIM}[%s]${RESET}%b\n" "$num" "${MODEL_LIST[$i]}" "${SOURCE_LIST[$i]}" "$tag"
+    printf "  %2d) %-40s [%s]%s\n" "$num" "${MODEL_LIST[$i]}" "${SOURCE_LIST[$i]}" "$tag"
   done
   echo ""
 
   local choice
   while true; do
-    echo -ne "${BOLD}Select a model [1-${#MODEL_LIST[@]}, default: ${default_choice}]: ${RESET}"
-    read -r choice
+    echo -n "Select a model [1-${#MODEL_LIST[@]}, default: ${default_choice}]: "
+    read -r choice || exit 0
     if [ -z "$choice" ]; then
       choice="$default_choice"
     fi
@@ -194,7 +187,7 @@ select_model() {
       SELECTED_SOURCE="${SOURCE_LIST[$((choice - 1))]}"
       break
     else
-      echo -e "${RED}Invalid choice. Please enter a number between 1 and ${#MODEL_LIST[@]}.${RESET}"
+      echo "Invalid choice. Please enter a number between 1 and ${#MODEL_LIST[@]}."
     fi
   done
 
@@ -208,8 +201,8 @@ select_model() {
   fi
 
   echo ""
-  echo -e "${GREEN}[OK] Model: ${BOLD}${SELECTED_MODEL}${RESET}${GREEN} via ${SELECTED_SOURCE}${RESET}"
-  echo -e "${DIM}     Endpoint: ${API_BASE}/v1/chat/completions${RESET}"
+  echo "[OK] Model: ${SELECTED_MODEL} via ${SELECTED_SOURCE}"
+  echo "     Endpoint: ${API_BASE}/v1/chat/completions"
 }
 
 # --- Build JSON Payload ---
@@ -243,19 +236,20 @@ send_chat() {
   rm -f "$tmpfile"
 
   if [ "$curl_code" -eq 28 ]; then
-    echo -e "${RED}[ERROR] Request timed out (exceeded 180s). The model may still be generating or the backend is busy.${RESET}"
+    echo "[ERROR] Request timed out (exceeded 180s). The model may still be generating or the backend is busy."
     return 1
   elif [ "$curl_code" -ne 0 ]; then
-    echo -e "${RED}[ERROR] Network error: curl returned exit code ${curl_code}.${RESET}"
+    echo "[ERROR] Network error: curl returned exit code ${curl_code}."
     return 1
   fi
 
   if [ -z "$resp" ]; then
-    echo -e "${RED}[ERROR] Empty response received from API (HTTP ${http_code}).${RESET}"
+    echo "[ERROR] Empty response received from API (HTTP ${http_code})."
     return 1
   fi
 
   # Parse response using python
+  content=""
   if command -v python3 &>/dev/null; then
     content=$(python3 -c "
 import sys, json, re
@@ -275,18 +269,18 @@ try:
             embedded_reason = think_match.group(1).strip()
             answer_text = re.sub(r'<(?:think|thought|thinking)>.*?</(?:think|thought|thinking)>', '', text, flags=re.DOTALL).strip()
             if embedded_reason and answer_text:
-                print(f'\033[1;33m[Thinking Process]\033[0m\n\033[2m{embedded_reason}\033[0m\n\n\033[1;32m[Answer]\033[0m\n{answer_text}')
+                print(f'[Thinking Process]\n{embedded_reason}\n\n[Answer]\n{answer_text}')
             elif embedded_reason:
-                print(f'\033[1;33m[Thinking Process]\033[0m\n\033[2m{embedded_reason}\033[0m')
+                print(f'[Thinking Process]\n{embedded_reason}')
             else:
                 print(text)
         elif reasoning:
             reasoning = reasoning.strip()
             answer_text = text.strip()
             if reasoning and answer_text:
-                print(f'\033[1;33m[Thinking Process]\033[0m\n\033[2m{reasoning}\033[0m\n\n\033[1;32m[Answer]\033[0m\n{answer_text}')
+                print(f'[Thinking Process]\n{reasoning}\n\n[Answer]\n{answer_text}')
             elif reasoning:
-                print(f'\033[1;33m[Thinking Process]\033[0m\n\033[2m{reasoning}\033[0m')
+                print(f'[Thinking Process]\n{reasoning}')
             else:
                 print(answer_text)
         else:
@@ -299,7 +293,7 @@ except Exception as e:
   fi
 
   if [[ "$content" =~ ^API_ERROR:\ (.*) ]]; then
-    echo -e "${RED}[ERROR] ${BASH_REMATCH[1]}${RESET}"
+    echo "[ERROR] ${BASH_REMATCH[1]}"
   elif [ -n "$content" ]; then
     echo "$content"
   else
@@ -309,8 +303,8 @@ except Exception as e:
     if [ -n "$fallback" ]; then
       echo "$fallback"
     else
-      echo -e "${RED}[ERROR] HTTP ${http_code}: Failed to parse model response.${RESET}"
-      echo -e "${DIM}Raw output: ${resp}${RESET}"
+      echo "[ERROR] HTTP ${http_code}: Failed to parse model response."
+      echo "Raw output: ${resp}"
     fi
   fi
 }
@@ -318,21 +312,21 @@ except Exception as e:
 # --- Interactive Chat Loop ---
 run_chat() {
   echo ""
-  echo -e "${BOLD}=================================================================="
-  echo -e " LLM Interactive Chat Session"
-  echo -e "==================================================================${RESET}"
-  echo -e "${DIM} Model   : ${SELECTED_MODEL}"
-  echo -e " Backend : ${SELECTED_SOURCE} (${API_BASE})"
-  echo -e " Params  : max_tokens=${MAX_TOKENS}, temperature=${TEMPERATURE}"
-  echo -e ""
-  echo -e " Commands:"
-  echo -e "   /clear   - Clear conversation history and start fresh"
-  echo -e "   /model   - Switch to a different model"
-  echo -e "   /tokens  - Change max_tokens   (e.g. /tokens 4096)"
-  echo -e "   /temp    - Change temperature   (e.g. /temp 0.3)"
-  echo -e "   /history - Show conversation turn count"
-  echo -e "   /exit    - Exit the chat session"
-  echo -e "==================================================================${RESET}"
+  echo "=================================================================="
+  echo " LLM Interactive Chat Session"
+  echo "=================================================================="
+  echo " Model   : ${SELECTED_MODEL}"
+  echo " Backend : ${SELECTED_SOURCE} (${API_BASE})"
+  echo " Params  : max_tokens=${MAX_TOKENS}, temperature=${TEMPERATURE}"
+  echo ""
+  echo " Commands:"
+  echo "   /clear   - Clear conversation history and start fresh"
+  echo "   /model   - Switch to a different model"
+  echo "   /tokens  - Change max_tokens   (e.g. /tokens 4096)"
+  echo "   /temp    - Change temperature   (e.g. /temp 0.3)"
+  echo "   /history - Show conversation turn count"
+  echo "   /exit    - Exit the chat session"
+  echo "=================================================================="
   echo ""
 
   # Conversation history as a JSON array string
@@ -340,8 +334,8 @@ run_chat() {
   local turn=0
 
   while true; do
-    echo -ne "${GREEN}You [turn $((turn + 1))]: ${RESET}"
-    read -r user_input
+    echo -n "You [turn $((turn + 1))]: "
+    read -r user_input || break
 
     # Handle empty input
     if [ -z "$user_input" ]; then
@@ -352,13 +346,13 @@ run_chat() {
     case "$user_input" in
       /exit|/quit|/q)
         echo ""
-        echo -e "${CYAN}[INFO] Chat session ended. Goodbye!${RESET}"
+        echo "[INFO] Chat session ended. Goodbye!"
         break
         ;;
       /clear)
         messages="[]"
         turn=0
-        echo -e "${CYAN}[INFO] Conversation history cleared.${RESET}"
+        echo "[INFO] Conversation history cleared."
         echo ""
         continue
         ;;
@@ -366,7 +360,7 @@ run_chat() {
         select_model
         messages="[]"
         turn=0
-        echo -e "${CYAN}[INFO] Switched model. Conversation history cleared.${RESET}"
+        echo "[INFO] Switched model. Conversation history cleared."
         echo ""
         continue
         ;;
@@ -374,9 +368,9 @@ run_chat() {
         local new_tokens="${user_input#/tokens }"
         if [[ "$new_tokens" =~ ^[0-9]+$ ]]; then
           MAX_TOKENS=$new_tokens
-          echo -e "${CYAN}[INFO] max_tokens set to ${MAX_TOKENS}${RESET}"
+          echo "[INFO] max_tokens set to ${MAX_TOKENS}"
         else
-          echo -e "${RED}[ERROR] Invalid value. Usage: /tokens 4096${RESET}"
+          echo "[ERROR] Invalid value. Usage: /tokens 4096"
         fi
         continue
         ;;
@@ -384,18 +378,18 @@ run_chat() {
         local new_temp="${user_input#/temp }"
         if [[ "$new_temp" =~ ^[0-9]*\.?[0-9]+$ ]]; then
           TEMPERATURE=$new_temp
-          echo -e "${CYAN}[INFO] temperature set to ${TEMPERATURE}${RESET}"
+          echo "[INFO] temperature set to ${TEMPERATURE}"
         else
-          echo -e "${RED}[ERROR] Invalid value. Usage: /temp 0.3${RESET}"
+          echo "[ERROR] Invalid value. Usage: /temp 0.3"
         fi
         continue
         ;;
       /history)
-        echo -e "${CYAN}[INFO] Current conversation: ${turn} turn(s)${RESET}"
+        echo "[INFO] Current conversation: ${turn} turn(s)"
         continue
         ;;
       /help)
-        echo -e "${DIM}/clear /model /tokens N /temp N /history /exit${RESET}"
+        echo "/clear /model /tokens N /temp N /history /exit"
         continue
         ;;
     esac
@@ -423,14 +417,12 @@ print(json.dumps(msgs))
     local payload
     payload=$(build_payload "$messages")
 
-    echo -ne "${YELLOW}${DIM}(thinking...)${RESET}"
+    echo "(thinking...)"
 
     local reply
-    reply=$(send_chat "$payload")
+    reply=$(send_chat "$payload") || continue
 
-    # Clear "thinking..." and print reply
-    echo -ne "\r\033[K"
-    echo -e "${CYAN}AI: ${RESET}${reply}"
+    echo "AI: ${reply}"
     echo ""
 
     # Append assistant reply to history
@@ -468,15 +460,15 @@ main() {
   resolve_endpoints
 
   if [ -z "$LITELLM_BASE" ] && [ -z "$LLAMA_BASE" ]; then
-    echo -e "${RED}[FAIL] Neither LiteLLM nor llama.cpp service IP could be resolved.${RESET}"
+    echo "[FAIL] Neither LiteLLM nor llama.cpp service IP could be resolved."
     echo "       Ensure the services are deployed:"
     echo "         kubectl get svc -n litellm"
     echo "         kubectl get svc -n llamacpp-rocm"
     exit 1
   fi
 
-  [ -n "$LITELLM_BASE" ] && echo -e "  ${GREEN}✓${RESET} LiteLLM Gateway  : ${LITELLM_BASE}"
-  [ -n "$LLAMA_BASE" ]   && echo -e "  ${GREEN}✓${RESET} llama.cpp Direct : ${LLAMA_BASE}"
+  [ -n "$LITELLM_BASE" ] && echo "  ✓ LiteLLM Gateway  : ${LITELLM_BASE}"
+  [ -n "$LLAMA_BASE" ]   && echo "  ✓ llama.cpp Direct : ${LLAMA_BASE}"
 
   discover_models
   select_model

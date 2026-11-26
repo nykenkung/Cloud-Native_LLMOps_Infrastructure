@@ -3,11 +3,7 @@
 #  [11] Qdrant Vector Database
 #  High-Performance Vector Similarity Search Engine & Ingress
 #
-#  Simple Installation Command:
-#    kubectl apply -f ~/11-Qdrant-Vector-DB/1-Qdrant-Namespace.yaml
-#    kubectl apply -f ~/11-Qdrant-Vector-DB/My-Qdrant-Config.yaml
-#    helm upgrade --install qdrant qdrant/qdrant -n qdrant --create-namespace ...
-#    kubectl apply -f ~/11-Qdrant-Vector-DB/2-Qdrant-Ingress.yaml
+#  Usage: ./11-Qdrant-Vector-DB.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -19,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   kubectl apply -f "$HOME/11-Qdrant-Vector-DB/1-Qdrant-Namespace.yaml"
@@ -56,15 +52,30 @@ do_test() {
   echo "=== [11 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl get externalsecret -n qdrant --no-headers 2>/dev/null | awk '{print $1}' | while read -r name; do
+    [ -n "$name" ] && kubectl annotate externalsecret "$name" -n qdrant force-sync="$(date +%s)" --overwrite >/dev/null 2>&1 || true
+  done
+  kubectl rollout restart deploy -n qdrant 2>/dev/null || true
+  kubectl rollout restart sts -n qdrant 2>/dev/null || true
+  echo "=== [11 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  [ -d "$HOME/11-Qdrant-Vector-DB" ] && kubectl delete -f "$HOME/11-Qdrant-Vector-DB" --ignore-not-found 2>/dev/null || true
+  helm uninstall qdrant -n qdrant 2>/dev/null || true
+  kubectl delete ns qdrant --ignore-not-found 2>/dev/null || true
+  echo "=== [11 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

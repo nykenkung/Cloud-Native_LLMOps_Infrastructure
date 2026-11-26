@@ -3,8 +3,7 @@
 #  [16] llama.cpp ROCm Inference Engine
 #  AMD ROCm GPU Acceleration, Model Decoupling & Server Metrics
 #
-#  Simple Installation Command:
-#    kubectl apply -f ~/16-LLaMAcpp-ROCm
+#  Usage: ./16-LLaMAcpp-ROCm.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -16,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   kubectl apply -f "$HOME/16-LLaMAcpp-ROCm"
@@ -43,15 +42,29 @@ do_test() {
   echo "=== [16 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl get externalsecret -n llamacpp-rocm --no-headers 2>/dev/null | awk '{print $1}' | while read -r name; do
+    [ -n "$name" ] && kubectl annotate externalsecret "$name" -n llamacpp-rocm force-sync="$(date +%s)" --overwrite >/dev/null 2>&1 || true
+  done
+  kubectl rollout restart deploy -n llamacpp-rocm 2>/dev/null || true
+  kubectl rollout restart sts -n llamacpp-rocm 2>/dev/null || true
+  echo "=== [16 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  [ -d "$HOME/16-LLaMAcpp-ROCm" ] && kubectl delete -f "$HOME/16-LLaMAcpp-ROCm" --ignore-not-found 2>/dev/null || true
+  kubectl delete ns llamacpp-rocm --ignore-not-found 2>/dev/null || true
+  echo "=== [16 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

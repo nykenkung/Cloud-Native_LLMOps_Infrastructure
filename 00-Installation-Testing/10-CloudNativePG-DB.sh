@@ -3,10 +3,7 @@
 #  [10] CloudNativePG Database Operator
 #  Enterprise HA PostgreSQL Operator & CRD Controller
 #
-#  Simple Installation Command:
-#    kubectl apply -f ~/10-CloudNativePG-DB/1-CloudNativePG-Namespace.yaml
-#    kubectl apply --server-side -f https://raw.githubusercontent.com/cloudnative-pg/cloudnative-pg/main/releases/cnpg-1.25.0.yaml
-#    kubectl wait --namespace cnpg-system --for=condition=ready pod --selector=app.kubernetes.io/name=cloudnative-pg --timeout=90s
+#  Usage: ./10-CloudNativePG-DB.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -18,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   kubectl apply -f "$HOME/10-CloudNativePG-DB/1-CloudNativePG-Namespace.yaml" || true
@@ -48,15 +45,27 @@ do_test() {
   echo "=== [10 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl rollout restart deploy -n cnpg-system 2>/dev/null || true
+  echo "=== [10 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  if [ -f "$HOME/10-CloudNativePG-DB/2-CloudNativePG-Operator.yaml" ]; then
+    kubectl delete -f "$HOME/10-CloudNativePG-DB/2-CloudNativePG-Operator.yaml" --ignore-not-found 2>/dev/null || true
+  fi
+  kubectl delete ns cnpg-system --ignore-not-found 2>/dev/null || true
+  echo "=== [10 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

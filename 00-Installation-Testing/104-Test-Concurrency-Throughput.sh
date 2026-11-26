@@ -9,7 +9,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 echo "=================================================================="
 echo " [104] Multi-User Concurrency, Throughput & TTFT Benchmark"
@@ -101,14 +101,14 @@ EOF
   echo ""
   echo "[NOTICE] llama.cpp is currently awaiting a model in /models."
   echo "         Gateway concurrency benchmark passed with sub-millisecond routing latency."
-  echo "         Once a model is loaded via ./0-Menu.sh 100, this test will benchmark live TTFT & TPS!"
+  echo "         Once a model is loaded via ./Menu.sh 100, this test will benchmark live TTFT & TPS!"
   exit 0
 fi
 
 # Live LLM Concurrency & TTFT Benchmark
 echo ""
 echo "--- Live LLM Concurrency & Streaming Generation Benchmark ---"
-python3 - "$1" <<EOF
+PYTHONUNBUFFERED=1 python3 - "$1" <<EOF
 import sys
 import os
 import urllib.request
@@ -201,6 +201,7 @@ EOF
 
 echo ""
 echo "--- Checking GPU & KEDA Autoscaler Metrics ---"
+kubectl get scaledobject -n llamacpp-rocm 2>/dev/null || true
 kubectl get hpa -n llamacpp-rocm 2>/dev/null || true
 
 echo ""

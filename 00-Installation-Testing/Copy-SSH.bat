@@ -1,8 +1,7 @@
-@echo off
 set ORGIN=E:\CISC4900
 set TARGET=WSL_SSH
 
-ssh %TARGET% "mkdir -p ~/.cloudflared ~/00-Installation-Testing ~/01-Hardware-OS-Configuration ~/02-AMD-ROCm-DXG ~/03-Kubernetes ~/04-Helm ~/05-External-Secrets-Operator ~/06-Tailscale-Operator ~/07-Cloudflare-Tunnel ~/08-Ingress-Nginx ~/09-JuiceFS-CSI-Driver ~/10-CloudNativePG-DB ~/11-Qdrant-Vector-DB ~/12-ArgoCD-GitOps ~/13-Falco-Security ~/14-Grafana-Prometheus-Stack ~/15-KEDA-Autoscaler ~/16-LLaMAcpp-ROCm ~/17-LiteLLM-Gateway ~/18-Open-WebUI ~/HuggingFace-Models && sudo mkdir -p /etc/rancher/k3s && sudo chown -R $(id -un):$(id -gn) /etc/rancher/k3s"
+ssh %TARGET% "mkdir -p ~/00-Installation-Testing ~/01-Hardware-OS-Configuration ~/02-AMD-ROCm-DXG ~/03-Kubernetes ~/04-Helm ~/05-External-Secrets-Operator ~/06-Tailscale-Operator ~/07-Cloudflare-Tunnel ~/08-Ingress-Nginx ~/09-JuiceFS-CSI-Driver ~/10-CloudNativePG-DB ~/11-Qdrant-Vector-DB ~/12-ArgoCD-GitOps ~/13-Falco-Security ~/14-Grafana-Prometheus-Stack ~/15-KEDA-Autoscaler ~/16-LLaMAcpp-ROCm ~/17-LiteLLM-Gateway ~/18-Open-WebUI ~/K8s-OIDC-Provider/.well-known"
 
 scp "%ORGIN%\00-Installation-Testing\Menu.sh" %TARGET%:~/00-Installation-Testing/
 scp "%ORGIN%\00-Installation-Testing\01-Hardware-OS-Configuration.sh" %TARGET%:~/00-Installation-Testing/
@@ -23,6 +22,10 @@ scp "%ORGIN%\00-Installation-Testing\15-KEDA-Autoscaler.sh" %TARGET%:~/00-Instal
 scp "%ORGIN%\00-Installation-Testing\16-LLaMAcpp-ROCm.sh" %TARGET%:~/00-Installation-Testing/
 scp "%ORGIN%\00-Installation-Testing\17-LiteLLM-Gateway.sh" %TARGET%:~/00-Installation-Testing/
 scp "%ORGIN%\00-Installation-Testing\18-Open-WebUI.sh" %TARGET%:~/00-Installation-Testing/
+
+scp "%ORGIN%\00-Installation-Testing\91-Check-Pod-Status.sh" %TARGET%:~/00-Installation-Testing/
+scp "%ORGIN%\00-Installation-Testing\92-Reveal-ESO-Secrets.sh" %TARGET%:~/00-Installation-Testing/
+
 scp "%ORGIN%\00-Installation-Testing\100-Download-LLM.sh" %TARGET%:~/00-Installation-Testing/
 scp "%ORGIN%\00-Installation-Testing\101-Test-AI-Stack-E2E.sh" %TARGET%:~/00-Installation-Testing/
 scp "%ORGIN%\00-Installation-Testing\102-Test-Security-Penetration.sh" %TARGET%:~/00-Installation-Testing/
@@ -37,13 +40,11 @@ scp "%ORGIN%\00-Installation-Testing\110-Test-LLM-CLI.sh" %TARGET%:~/00-Installa
 
 scp "%ORGIN%\01-Hardware-OS-Configuration\.bashrc" %TARGET%:~/01-Hardware-OS-Configuration/
 scp "%ORGIN%\01-Hardware-OS-Configuration\wsl.conf" %TARGET%:~/01-Hardware-OS-Configuration/
-scp "%ORGIN%\01-Hardware-OS-Configuration\.cloudflared\b46a5faa-d46c-4544-acae-9154035d9b5e.json" %TARGET%:~/.cloudflared/
-scp "%ORGIN%\01-Hardware-OS-Configuration\.cloudflared\config.yaml" %TARGET%:~/.cloudflared/
 
 scp "%ORGIN%\02-AMD-ROCm-DXG\1-AMD-ROCDXG-Namespace.yaml" %TARGET%:~/02-AMD-ROCm-DXG/
 scp "%ORGIN%\02-AMD-ROCm-DXG\2-AMD-ROCDXG-Deployment.yaml" %TARGET%:~/02-AMD-ROCm-DXG/
 
-scp "%ORGIN%\03-Kubernetes\config.yaml" %TARGET%:/etc/rancher/k3s/
+scp "%ORGIN%\03-Kubernetes\config.yaml" %TARGET%:~/03-Kubernetes/
 
 scp "%ORGIN%\04-Helm\init-helm-repos.sh" %TARGET%:~/04-Helm/
 
@@ -63,7 +64,8 @@ scp "%ORGIN%\07-Cloudflare-Tunnel\5-Cloudflare-ES-RBAC.yaml" %TARGET%:~/07-Cloud
 scp "%ORGIN%\07-Cloudflare-Tunnel\6-Cloudflare-ES-RoleBinding.yaml" %TARGET%:~/07-Cloudflare-Tunnel/
 scp "%ORGIN%\07-Cloudflare-Tunnel\7-Cloudflare-KV-CronJob.yaml" %TARGET%:~/07-Cloudflare-Tunnel/
 scp "%ORGIN%\07-Cloudflare-Tunnel\8-Cloudflared-Tunnel-Deployment.yaml" %TARGET%:~/07-Cloudflare-Tunnel/
-scp "%ORGIN%\07-Cloudflare-Tunnel\My-Cloudflare-ExternalSecret.yaml" %TARGET%:~/07-Cloudflare-Tunnel/
+scp "%ORGIN%\07-Cloudflare-Tunnel\My-Cloudflare-KV-ExternalSecret.yaml" %TARGET%:~/07-Cloudflare-Tunnel/
+scp "%ORGIN%\07-Cloudflare-Tunnel\My-Cloudflare-Tunnel-ExternalSecret.yaml" %TARGET%:~/07-Cloudflare-Tunnel/
 
 scp "%ORGIN%\08-Ingress-Nginx\1-Ingress-Nginx-Namespace.yaml" %TARGET%:~/08-Ingress-Nginx/
 
@@ -81,6 +83,7 @@ scp "%ORGIN%\11-Qdrant-Vector-DB\My-Qdrant-ExternalSecret.yaml" %TARGET%:~/11-Qd
 scp "%ORGIN%\12-ArgoCD-GitOps\1-ArgoCD-Namespace.yaml" %TARGET%:~/12-ArgoCD-GitOps/
 scp "%ORGIN%\12-ArgoCD-GitOps\2-ArgoCD-Ingress.yaml" %TARGET%:~/12-ArgoCD-GitOps/
 scp "%ORGIN%\12-ArgoCD-GitOps\3-ArgoCD-Install.yaml" %TARGET%:~/12-ArgoCD-GitOps/
+scp "%ORGIN%\12-ArgoCD-GitOps\ArgoCD-App-External-Secrets.yaml" %TARGET%:~/12-ArgoCD-GitOps/
 scp "%ORGIN%\12-ArgoCD-GitOps\My-ArgoCD-ExternalSecret.yaml" %TARGET%:~/12-ArgoCD-GitOps/
 
 scp "%ORGIN%\13-Falco-Security\1-Falco-Namespace.yaml" %TARGET%:~/13-Falco-Security/
@@ -123,7 +126,8 @@ scp "%ORGIN%\18-Open-WebUI\6-Open-WebUI-Ingress.yaml" %TARGET%:~/18-Open-WebUI/
 scp "%ORGIN%\18-Open-WebUI\My-OpenWebUI-Config.yaml" %TARGET%:~/18-Open-WebUI/
 scp "%ORGIN%\18-Open-WebUI\My-OpenWebUI-ExternalSecret.yaml" %TARGET%:~/18-Open-WebUI/
 
-scp "%ORGIN%\README.md" %TARGET%:~/
+scp "%ORGIN%\K8s-OIDC-Provider\jwks.json" %TARGET%:~/K8s-OIDC-Provider/
+scp "%ORGIN%\K8s-OIDC-Provider\.well-known\openid-configuration" %TARGET%:~/K8s-OIDC-Provider/.well-known/
 
-ssh %TARGET% "chmod +x ~/00-Installation-Testing/*.sh"
+ssh %TARGET% "sed -i 's/\r$//' ~/00-Installation-Testing/*.sh ~/04-Helm/*.sh && chmod +x ~/00-Installation-Testing/*.sh ~/04-Helm/*.sh"
 pause

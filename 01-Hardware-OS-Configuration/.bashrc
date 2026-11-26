@@ -115,6 +115,7 @@ if ! shopt -oq posix; then
     . /etc/bash_completion
   fi
 fi
+[ -s "$HOME/.config/envman/load.sh" ] && source "$HOME/.config/envman/load.sh"
 export HSA_ENABLE_DXG_DETECTION=1
 export PATH=$PATH:/opt/rocm/bin
 export LD_LIBRARY_PATH=/usr/lib/wsl/lib:/opt/rocm/lib:/opt/rocm/lib64:$LD_LIBRARY_PATH

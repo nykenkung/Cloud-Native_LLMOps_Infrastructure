@@ -9,7 +9,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 echo "=================================================================="
 echo " [109] Storage CSI, Data Persistence & Self-Healing Benchmark"
@@ -39,9 +39,28 @@ else
   fail_exit "[FAIL] JuiceFS CSI Driver pods not Running."
 fi
 
+LLAMA_PVC=$(kubectl get pvc -n llamacpp-rocm llamacpp-model-pvc -o jsonpath='{.status.phase}' 2>/dev/null || echo "None")
+if [ "$LLAMA_PVC" = "Bound" ]; then
+  echo "[PASS] JuiceFS RWX PVC 'llamacpp-model-pvc' is Bound."
+else
+  fail_exit "[FAIL] JuiceFS PVC 'llamacpp-model-pvc' status is not Bound ($LLAMA_PVC)."
+fi
+
 # --- 2. PostgreSQL CloudNativePG High-Availability & Cluster Integrity ---
 echo ""
 echo "--- 2. CloudNativePG PostgreSQL Enterprise Database Clusters ---"
+
+# 2.0 JuiceFS Metadata Database Cluster
+JFS_PG=$(kubectl get cluster -n kube-system cloudflare-juicefs-postgres -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
+JFS_INSTANCES=$(kubectl get cluster -n kube-system cloudflare-juicefs-postgres -o jsonpath='{.status.instances}' 2>/dev/null || echo "0")
+JFS_READY=$(kubectl get cluster -n kube-system cloudflare-juicefs-postgres -o jsonpath='{.status.readyInstances}' 2>/dev/null || echo "0")
+
+echo "JuiceFS Metadata PostgreSQL Cluster Status: $JFS_PG ($JFS_READY/$JFS_INSTANCES instances ready)"
+if [ "$JFS_READY" -ge 1 ]; then
+  echo "[PASS] JuiceFS Metadata PostgreSQL: Primary instance active."
+else
+  fail_exit "[FAIL] JuiceFS Metadata PostgreSQL cluster not ready ($JFS_READY/$JFS_INSTANCES instances ready)."
+fi
 
 # 2.1 LiteLLM Database Cluster
 LITELLM_PG=$(kubectl get cluster -n litellm litellm-postgres -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")

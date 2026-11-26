@@ -3,10 +3,7 @@
 #  [13] Falco Runtime Security
 #  Modern eBPF Kernel Threat Detection & Falcosidekick UI Ingress
 #
-#  Simple Installation Command:
-#    kubectl apply -f ~/13-Falco-Security/1-Falco-Namespace.yaml
-#    helm upgrade --install falco falcosecurity/falco -n falco --create-namespace -f ~/13-Falco-Security/My-Falco-Config.yaml
-#    kubectl apply -f ~/13-Falco-Security/2-Falco-Ingress.yaml
+#  Usage: ./13-Falco-Security.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -18,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   kubectl apply -f "$HOME/13-Falco-Security/1-Falco-Namespace.yaml" || true
@@ -40,15 +37,30 @@ do_test() {
   echo "=== [13 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl get externalsecret -n falco --no-headers 2>/dev/null | awk '{print $1}' | while read -r name; do
+    [ -n "$name" ] && kubectl annotate externalsecret "$name" -n falco force-sync="$(date +%s)" --overwrite >/dev/null 2>&1 || true
+  done
+  kubectl rollout restart deploy -n falco 2>/dev/null || true
+  kubectl rollout restart ds -n falco 2>/dev/null || true
+  echo "=== [13 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  [ -d "$HOME/13-Falco-Security" ] && kubectl delete -f "$HOME/13-Falco-Security" --ignore-not-found 2>/dev/null || true
+  helm uninstall falco -n falco 2>/dev/null || true
+  kubectl delete ns falco --ignore-not-found 2>/dev/null || true
+  echo "=== [13 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

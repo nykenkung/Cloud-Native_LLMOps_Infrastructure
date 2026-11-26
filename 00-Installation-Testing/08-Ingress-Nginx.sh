@@ -3,12 +3,7 @@
 #  [8] Ingress-Nginx Controller
 #  Edge Ingress Controller & Local sslip.io HostNetwork Direct Routing
 #
-#  Simple Installation Command:
-#    kubectl apply -f ~/8-Ingress-Nginx/1-Ingress-Nginx-Namespace.yaml
-#    helm upgrade --install ingress-nginx ingress-nginx/ingress-nginx \
-#      -n ingress-nginx --create-namespace \
-#      --set controller.service.type=ClusterIP \
-#      --set controller.hostNetwork=true
+#  Usage: ./08-Ingress-Nginx.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -20,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   local DIR="$HOME/08-Ingress-Nginx"
@@ -53,15 +48,26 @@ do_test() {
   echo "=== [8 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl rollout restart deploy -n ingress-nginx 2>/dev/null || true
+  kubectl rollout restart ds -n ingress-nginx 2>/dev/null || true
+  echo "=== [8 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  helm uninstall ingress-nginx -n ingress-nginx 2>/dev/null || true
+  kubectl delete ns ingress-nginx --ignore-not-found 2>/dev/null || true
+  echo "=== [8 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

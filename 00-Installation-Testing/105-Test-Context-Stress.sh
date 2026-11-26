@@ -9,7 +9,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 echo "=================================================================="
 echo " [105] Stepped Context Window (1K~32K) & ROCm VRAM Benchmark"
@@ -49,12 +49,13 @@ if [ "$LLAMA_READY" = "false" ]; then
     "import torch; print(f'GPU Device: {torch.cuda.get_device_name(0)}'); print(f'Total Memory: {torch.cuda.get_device_properties(0).total_memory / (1024**3):.2f} GB')" 2>/dev/null || true
   echo ""
   echo "Context Window Configuration:"
-  echo "  - llama.cpp total context (-c): 65,536 tokens"
-  echo "  - Parallel slots (--parallel): 2 (32,768 tokens per slot)"
-  echo "  - LiteLLM max_input_tokens: 32,768 tokens"
+  echo "  - llama.cpp total context (-c): 32,768 tokens"
+  echo "  - Parallel slots (--parallel): 1 (32,768 tokens per slot)"
+  echo "  - Max generation tokens (-n): 4,096 tokens"
+  echo "  - GPU layers offloaded (-ngl): 10"
   echo "  - Estimated 32K KV-Cache Allocation: ~4GB - 8GB unified memory"
   echo ""
-  echo "Once a model is placed in /models via ./0-Menu.sh 100,"
+  echo "Once a model is placed in /models via ./Menu.sh 100,"
   echo "re-run this script to execute live 1K -> 4K -> 8K -> 16K -> 32K context stress tests."
   exit 0
 fi
@@ -74,7 +75,7 @@ else
 fi
 [ -z "$ACTIVE_MODEL" ] && ACTIVE_MODEL="qwen2.5-0.5b-instruct"
 
-python3 - "$ACTIVE_MODEL" "$LITELLM_IP" <<EOF
+PYTHONUNBUFFERED=1 python3 - "$ACTIVE_MODEL" "$LITELLM_IP" <<EOF
 import sys, os, urllib.request, json, time
 
 model = sys.argv[1]

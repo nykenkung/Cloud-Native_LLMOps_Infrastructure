@@ -9,7 +9,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 echo "=================================================================="
 echo " [101] AI Stack End-to-End Pipeline Verification"
@@ -70,7 +70,7 @@ if [ -n "$LLAMA_IP" ]; then
     if echo "$LLAMA_TEST" | grep -qi "content\|text"; then
       echo "[OK] llama.cpp Test Generation ($TARGET_M): OK"
     else
-      echo "llama.cpp Test Generation: $LLAMA_TEST"
+      fail_exit "[FAIL] llama.cpp Test Generation ($TARGET_M) failed: $LLAMA_TEST"
     fi
   else
     echo "[INFO/WAIT] llama.cpp /health: $LLAMA_HEALTH (waiting for model file in /models)"
@@ -126,14 +126,22 @@ else
   fail_exit "[FAIL] Open-WebUI service IP not found"
 fi
 
-# 5. Cloudflare Zero Trust Tunnel Test
+# 5. Cloudflare Zero Trust Tunnel & Public Endpoint Test
 echo ""
-echo "--- 5. Testing Cloudflare Zero Trust Tunnel Pods ---"
+echo "--- 5. Testing Cloudflare Zero Trust Tunnel & Public Endpoints ---"
 CF_PODS=$(kubectl get pods -n cloudflare-kv --field-selector=status.phase=Running --no-headers 2>/dev/null | grep -i "tunnel" | wc -l)
 if [ "$CF_PODS" -ge 1 ]; then
   echo "[OK] Cloudflare Tunnel is Running ($CF_PODS pods active)"
 else
   fail_exit "[FAIL] Cloudflare Tunnel pods not running"
+fi
+
+CF_API_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 "https://api.kung.nyc/health/liveliness" || echo "000")
+CF_UI_CODE=$(curl -s -o /dev/null -w "%{http_code}" --max-time 8 "https://open-webui.kung.nyc/health" || echo "000")
+if [ "$CF_API_CODE" = "200" ] && [ "$CF_UI_CODE" = "200" ]; then
+  echo "[OK] Public Zero Trust Endpoints: api.kung.nyc (HTTP $CF_API_CODE), open-webui.kung.nyc (HTTP $CF_UI_CODE)"
+else
+  fail_exit "[FAIL] Public Zero Trust Endpoints unreachable: api.kung.nyc=HTTP $CF_API_CODE, open-webui.kung.nyc=HTTP $CF_UI_CODE"
 fi
 
 echo ""

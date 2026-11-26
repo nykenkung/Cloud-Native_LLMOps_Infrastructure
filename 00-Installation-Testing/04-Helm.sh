@@ -3,9 +3,7 @@
 #  [4] Helm 3 Package Manager
 #  Helm CLI & Official Community Chart Repositories
 #
-#  Simple Installation Command:
-#    curl -fsSL https://raw.githubusercontent.com/helm/helm/main/scripts/get-helm-3 | bash
-#    bash ~/4-Helm/init-helm-repos.sh
+#  Usage: ./04-Helm.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -17,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   if ! command -v helm >/dev/null 2>&1; then
@@ -52,15 +50,35 @@ do_test() {
   echo "=== [4 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  local DIR="$HOME/04-Helm"
+  [ ! -d "$DIR" ] && DIR="$HOME/4-Helm"
+
+  if [ -f "$DIR/init-helm-repos.sh" ]; then
+    echo "Re-initializing Helm repositories..."
+    bash "$DIR/init-helm-repos.sh"
+  fi
+  if command -v helm >/dev/null 2>&1; then
+    echo "Updating Helm repositories..."
+    helm repo update || true
+  fi
+  echo "=== [4 Restart/Refresh Completed Successfully] ==="
+}
+
+do_uninstall() {
+  echo "Removing Helm 3 binary and cache..."
+  sudo rm -f /usr/local/bin/helm
+  rm -rf "$HOME/.config/helm" "$HOME/.cache/helm"
+  echo "=== [4 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

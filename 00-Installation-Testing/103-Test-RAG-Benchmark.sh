@@ -9,7 +9,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 echo "=================================================================="
 echo " [103] Qdrant Vector Search & Closed-Loop RAG QA Benchmark"
@@ -167,7 +167,7 @@ if [ "$LLAMA_READY" = "true" ] && [ -n "$LITELLM_IP" ]; then
 else
   echo "[NOTICE] llama.cpp is currently awaiting a model in /models."
   echo "         Qdrant vector ingestion and top-1 cosine retrieval passed with Score: $SCORE."
-  echo "         Once a model is loaded via ./0-Menu.sh 100, this test will execute the full LLM answer validation."
+  echo "         Once a model is loaded via ./Menu.sh 100, this test will execute the full LLM answer validation."
 fi
 
 # Cleanup

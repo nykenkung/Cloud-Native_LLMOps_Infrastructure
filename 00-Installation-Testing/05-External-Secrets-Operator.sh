@@ -3,17 +3,7 @@
 #  [5] External Secrets Operator (ESO)
 #  Kubernetes External Secrets for Zero-Trust Credential Sync (GCP WIF)
 #
-#  Installation Commands:
-#    1. kubectl apply -f ~/5-External-Secrets-Operator/1-External-Secrets-Namespace.yaml
-#    2. kubectl create secret generic gcp-wif-config \
-#         --from-file=config=$HOME/5-External-Secrets-Operator/wif-credentials.json \
-#         -n external-secrets --dry-run=client -o yaml | kubectl apply -f -
-#    3. helm upgrade --install external-secrets external-secrets/external-secrets \
-#         -n external-secrets --create-namespace --set installCRDs=true
-#    4. kubectl apply -f ~/5-External-Secrets-Operator/Google-Cloud-Platform-CSS.yaml
-#
-#  Verification:
-#    kubectl get clustersecretstore
+#  Usage: ./05-External-Secrets-Operator.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -25,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   local DIR="$HOME/05-External-Secrets-Operator"
@@ -47,7 +37,12 @@ do_install() {
   fi
 
   echo ">>> [3/4] Ensuring External Secrets Operator is installed..."
-  if ! helm status external-secrets -n external-secrets >/dev/null 2>&1; then
+  if [ -f "$DIR/My-ESO-Config.yaml" ]; then
+    helm upgrade --install external-secrets external-secrets/external-secrets \
+      -n external-secrets --create-namespace \
+      --version 2.15.0 \
+      -f "$DIR/My-ESO-Config.yaml" || true
+  elif ! helm status external-secrets -n external-secrets >/dev/null 2>&1; then
     helm upgrade --install external-secrets external-secrets/external-secrets \
       -n external-secrets --create-namespace \
       --set installCRDs=true || true
@@ -80,10 +75,10 @@ do_test() {
     if [ "$CSS_STATUS" = "True" ]; then
       echo "[OK] ClusterSecretStore 'gcp-secret-store' is Valid and Ready (True)"
     else
-      echo "[WARN] ClusterSecretStore 'gcp-secret-store' status is: $CSS_STATUS"
+      fail_exit "[FAIL] ClusterSecretStore 'gcp-secret-store' status is: $CSS_STATUS"
     fi
   else
-    echo "[WARN] ClusterSecretStore 'gcp-secret-store' not found yet."
+    fail_exit "[FAIL] ClusterSecretStore 'gcp-secret-store' not found."
   fi
 
   echo ">>> Checking Synced ExternalSecrets..."
@@ -92,15 +87,35 @@ do_test() {
   echo "=== [5 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  echo ">>> Forcing ExternalSecrets re-sync across cluster..."
+  kubectl get externalsecret -A --no-headers 2>/dev/null | awk '{print $1, $2}' | while read -r ns name; do
+    [ -n "$ns" ] && [ -n "$name" ] && \
+      kubectl annotate externalsecret "$name" -n "$ns" force-sync="$(date +%s)" --overwrite >/dev/null 2>&1 || true
+  done
+  echo ">>> Rolling out external-secrets deployments..."
+  kubectl rollout restart deploy -n external-secrets 2>/dev/null || true
+  echo "=== [5 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  local DIR="$HOME/05-External-Secrets-Operator"
+  [ ! -d "$DIR" ] && DIR="$HOME/5-External-Secrets-Operator"
+
+  [ -f "$DIR/Google-Cloud-Platform-CSS.yaml" ] && kubectl delete -f "$DIR/Google-Cloud-Platform-CSS.yaml" --ignore-not-found 2>/dev/null || true
+  helm uninstall external-secrets -n external-secrets 2>/dev/null || true
+  kubectl delete ns external-secrets --ignore-not-found 2>/dev/null || true
+  echo "=== [5 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

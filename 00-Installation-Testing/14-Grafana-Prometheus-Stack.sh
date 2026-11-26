@@ -3,13 +3,7 @@
 #  [14] Grafana & Prometheus LGTM Stack
 #  Observability Stack, ServiceMonitors, Dashboards & Ingress
 #
-#  Simple Installation Command:
-#    kubectl apply -f ~/14-Grafana-Prometheus-Stack/1-Grafana-Namespace.yaml
-#    helm upgrade --install lgtm-prometheus prometheus-community/kube-prometheus-stack \
-#      -n grafana --create-namespace --set grafana.enabled=true \
-#      -f ~/14-Grafana-Prometheus-Stack/My-Grafana-Config.yaml
-#    kubectl apply -f ~/14-Grafana-Prometheus-Stack/2-Grafana-Ingress.yaml
-#    kubectl apply -f ~/14-Grafana-Prometheus-Stack/3-Grafana-LLaMAcpp-ROCm.yaml
+#  Usage: ./14-Grafana-Prometheus-Stack.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -21,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   kubectl apply -f "$HOME/14-Grafana-Prometheus-Stack/1-Grafana-Namespace.yaml" || true
@@ -45,15 +39,31 @@ do_test() {
   echo "=== [14 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl get externalsecret -n grafana --no-headers 2>/dev/null | awk '{print $1}' | while read -r name; do
+    [ -n "$name" ] && kubectl annotate externalsecret "$name" -n grafana force-sync="$(date +%s)" --overwrite >/dev/null 2>&1 || true
+  done
+  kubectl rollout restart deploy -n grafana 2>/dev/null || true
+  kubectl rollout restart sts -n grafana 2>/dev/null || true
+  kubectl rollout restart ds -n grafana 2>/dev/null || true
+  echo "=== [14 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  [ -d "$HOME/14-Grafana-Prometheus-Stack" ] && kubectl delete -f "$HOME/14-Grafana-Prometheus-Stack" --ignore-not-found 2>/dev/null || true
+  helm uninstall lgtm-prometheus -n grafana 2>/dev/null || true
+  kubectl delete ns grafana --ignore-not-found 2>/dev/null || true
+  echo "=== [14 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

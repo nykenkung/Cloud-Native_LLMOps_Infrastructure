@@ -9,7 +9,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 echo "=================================================================="
 echo " [102] Security Penetration, NetworkPolicy & Falco Audit"
@@ -86,7 +86,7 @@ kubectl run "$TEST_POD_NAME" --image=curlimages/curl --restart=Never --command -
 # Wait for test pod
 kubectl wait --for=condition=Ready pod/"$TEST_POD_NAME" --timeout=30s >/dev/null 2>&1 || true
 
-# Attempt 1: Default namespace trying to connect to llamacpp (Should be blocked by llamacpp-rocm-netpol)
+# Attempt 1: Default namespace trying to connect to llamacpp (Should be blocked by llamacpp-rocm-np)
 echo "Attempting unauthorized lateral connection: default pod -> llamacpp-rocm:8080"
 BLOCK_LLAMA=$(kubectl exec "$TEST_POD_NAME" -- curl -s -m 3 "http://llamacpp-rocm-svc.llamacpp-rocm.svc:8080/health" 2>&1 || echo "blocked_timeout")
 if echo "$BLOCK_LLAMA" | grep -qi "timeout\|timed out\|refused\|blocked"; then
@@ -137,6 +137,17 @@ if ! echo "$TRAVERSAL_RES" | grep -q "root:x:0:0"; then
   echo "[PASS] Ingress Path Traversal Defense: Arbitrary host /etc/passwd access prevented (No secret leakage)."
 else
   fail_exit "[FAIL] Ingress Path Traversal Defense failed: /etc/passwd was leaked!"
+fi
+
+# --- 4. Falco eBPF Runtime Security Sensor Audit ---
+echo ""
+echo "--- 4. Falco eBPF Runtime Threat Detection Audit ---"
+FALCO_READY=$(kubectl get daemonset -n falco falco -o jsonpath='{.status.numberReady}' 2>/dev/null || echo "0")
+SIDEKICK_READY=$(kubectl get pods -n falco -l app.kubernetes.io/name=falcosidekick --field-selector=status.phase=Running --no-headers 2>/dev/null | wc -l)
+if [ "${FALCO_READY:-0}" -ge 1 ] && [ "${SIDEKICK_READY:-0}" -ge 1 ]; then
+  echo "[PASS] Falco Modern eBPF Sensor Active ($FALCO_READY DaemonSet pod, $SIDEKICK_READY Falcosidekick pod(s) Running)."
+else
+  fail_exit "[FAIL] Falco runtime security sensor not ready (DaemonSet=$FALCO_READY, Sidekick=$SIDEKICK_READY)."
 fi
 
 echo ""

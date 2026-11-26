@@ -3,8 +3,7 @@
 #  [17] LiteLLM API Gateway
 #  OpenAI-Compatible Multi-Model Router, CNPG Database & Prometheus Metrics
 #
-#  Simple Installation Command:
-#    kubectl apply -f ~/17-LiteLLM-Gateway
+#  Usage: ./17-LiteLLM-Gateway.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -16,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   kubectl apply -f "$HOME/17-LiteLLM-Gateway/1-LiteLLM-Namespace.yaml"
@@ -53,15 +52,29 @@ do_test() {
   echo "=== [17 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl get externalsecret -n litellm --no-headers 2>/dev/null | awk '{print $1}' | while read -r name; do
+    [ -n "$name" ] && kubectl annotate externalsecret "$name" -n litellm force-sync="$(date +%s)" --overwrite >/dev/null 2>&1 || true
+  done
+  kubectl rollout restart deploy -n litellm 2>/dev/null || true
+  kubectl rollout restart sts -n litellm 2>/dev/null || true
+  echo "=== [17 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  [ -d "$HOME/17-LiteLLM-Gateway" ] && kubectl delete -f "$HOME/17-LiteLLM-Gateway" --ignore-not-found 2>/dev/null || true
+  kubectl delete ns litellm --ignore-not-found 2>/dev/null || true
+  echo "=== [17 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

@@ -3,10 +3,7 @@
 #  [6] Tailscale Operator
 #  Tailscale Mesh VPN Operator & ProxyGroup Cross-Network Routing
 #
-#  Simple Installation Command:
-#    kubectl apply -f ~/6-Tailscale-Operator/1-Tailscale-Namespace.yaml
-#    helm upgrade --install tailscale-operator tailscale/tailscale-operator -n tailscale --create-namespace ...
-#    kubectl apply -f ~/6-Tailscale-Operator/2-Tailscale-ProxyGroup.yaml
+#  Usage: ./06-Tailscale-Operator.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -18,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   local DIR="$HOME/06-Tailscale-Operator"
@@ -43,15 +40,33 @@ do_test() {
   echo "=== [6 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl get externalsecret -n tailscale --no-headers 2>/dev/null | awk '{print $1}' | while read -r name; do
+    [ -n "$name" ] && kubectl annotate externalsecret "$name" -n tailscale force-sync="$(date +%s)" --overwrite >/dev/null 2>&1 || true
+  done
+  kubectl rollout restart deploy -n tailscale 2>/dev/null || true
+  kubectl rollout restart sts -n tailscale 2>/dev/null || true
+  echo "=== [6 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  local DIR="$HOME/06-Tailscale-Operator"
+  [ ! -d "$DIR" ] && DIR="$HOME/6-Tailscale-Operator"
+
+  [ -d "$DIR" ] && kubectl delete -f "$DIR" --ignore-not-found 2>/dev/null || true
+  helm uninstall tailscale-operator -n tailscale 2>/dev/null || true
+  kubectl delete ns tailscale --ignore-not-found 2>/dev/null || true
+  echo "=== [6 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

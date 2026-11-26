@@ -3,10 +3,7 @@
 #  [12] ArgoCD GitOps
 #  Declarative Continuous Delivery Platform & Ingress
 #
-#  Simple Installation Command:
-#    kubectl apply -f ~/12-ArgoCD-GitOps/1-ArgoCD-Namespace.yaml
-#    kubectl apply --server-side --force-conflicts -n argocd -f https://raw.githubusercontent.com/argoproj/argo-cd/stable/manifests/install.yaml
-#    kubectl apply -f ~/12-ArgoCD-GitOps/2-ArgoCD-Ingress.yaml
+#  Usage: ./12-ArgoCD-GitOps.sh {-install|-test|-restart|-uninstall}
 # =====================================================================
 set -e
 
@@ -18,7 +15,7 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-fail_exit() { echo -e "\033[0;31m$1\033[0m"; exit 1; }
+fail_exit() { echo -e "$1"; exit 1; }
 
 do_install() {
   kubectl create namespace argocd --dry-run=client -o yaml | kubectl apply -f -
@@ -44,15 +41,31 @@ do_test() {
   echo "=== [12 Verification Completed Successfully] ==="
 }
 
+do_restart() {
+  do_install
+  kubectl get externalsecret -n argocd --no-headers 2>/dev/null | awk '{print $1}' | while read -r name; do
+    [ -n "$name" ] && kubectl annotate externalsecret "$name" -n argocd force-sync="$(date +%s)" --overwrite >/dev/null 2>&1 || true
+  done
+  kubectl rollout restart deploy -n argocd 2>/dev/null || true
+  kubectl rollout restart sts -n argocd 2>/dev/null || true
+  echo "=== [12 Restart/Rollover Completed Successfully] ==="
+}
+
+do_uninstall() {
+  [ -f "$HOME/12-ArgoCD-GitOps/2-ArgoCD-Ingress.yaml" ] && kubectl delete -f "$HOME/12-ArgoCD-GitOps/2-ArgoCD-Ingress.yaml" --ignore-not-found 2>/dev/null || true
+  [ -f "$HOME/12-ArgoCD-GitOps/My-ArgoCD-ExternalSecret.yaml" ] && kubectl delete -f "$HOME/12-ArgoCD-GitOps/My-ArgoCD-ExternalSecret.yaml" --ignore-not-found 2>/dev/null || true
+  [ -f "$HOME/12-ArgoCD-GitOps/3-ArgoCD-Install.yaml" ] && kubectl delete -n argocd -f "$HOME/12-ArgoCD-GitOps/3-ArgoCD-Install.yaml" --ignore-not-found 2>/dev/null || true
+  kubectl delete ns argocd --ignore-not-found 2>/dev/null || true
+  echo "=== [12 Uninstallation Completed Successfully] ==="
+}
+
 case "$1" in
-  -install|--install|install)
-    do_install
-    ;;
-  -test|--test|test)
-    do_test
-    ;;
+  -install)   do_install ;;
+  -test)      do_test ;;
+  -restart)   do_restart ;;
+  -uninstall) do_uninstall ;;
   *)
-    echo "Usage: $0 {-install|-test}"
+    echo "Usage: $0 {-install|-test|-restart|-uninstall}"
     exit 1
     ;;
 esac

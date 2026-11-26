@@ -1,0 +1,3 @@
+# Local exported GCP Secret Manager JSON & WIF credentials
+00-Installation-Testing/My-CISC4900-Config.json
+05-External-Secrets-Operator/wif-credentials.json
