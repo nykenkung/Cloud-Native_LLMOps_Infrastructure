@@ -164,9 +164,41 @@ November 24, 2026 [GitOps Finalization & Comprehensive Verification Suite]
 ---
 
 ## 🏗️ System Architecture & Simplified Data Flow
+### 1. `EXTERNAL NETWORK & CLOUD SERVICES`
+External clients and cloud control planes interface with the on-premise K3s cluster without exposing any inbound router ports:
+* **Public Traffic (`Public Internet` -> `Cloudflare Edge`):** `HTTPS Clients` resolve `*.kung.nyc (DNS)` at `Cloudflare Edge`, which forwards traffic over an **Outbound Tunnel** initiated from inside the cluster. A scheduled **`DNS Sync (CronJob)`** keeps Kubernetes Ingress hostnames synchronized with Cloudflare DNS records.
+* **Local & Remote Private Access:** `LAN 192.168.1.0/24` clients connect directly via `*.sslip.io`, while `Remote Admins` connect over an encrypted `Tailscale VPN`.
+* **External Cloud Backends:** `Cloudflare R2 (S3 Object Store)` provides durable object storage over the **S3 API**; `GCP WIF & Secret Mgr (my-cisc4900-config)` serves secrets via keyless **OIDC/WIF** authentication; and `GitHub Repo & Pages` hosts both declarative **GitOps** manifests and public **OIDC JWKS** discovery metadata.
 
-The architecture is designed to be conceptually straightforward: **Clients request access through Zero-Trust Edge Ingress, traffic routes through an Application & Gateway tier, and inference is computed locally on accelerated AMD GPU hardware, backed by persistent databases and governed by GitOps and SecretOps.**
+### 2. `K3s CLUSTER: ZERO-TRUST EDGE INGRESS`
+Three specialized edge gateways terminate external connections and **`Route by Hostname (HTTPS/HTTP)`** to internal Kubernetes services:
+* **`Cloudflare Tunnel (cloudflared x2 pods)`:** Maintains dual-replica outbound tunnels to `Cloudflare Edge`, routing `open-webui.kung.nyc`, `api.kung.nyc`, and management portals (`qdrant` / `argocd` / `falco` / `grafana`).
+* **`Ingress-Nginx (hostNetwork :80/443)`:** Handles high-throughput local LAN routing (`*.sslip.io`) directly on host ports `:80/443`.
+* **`Tailscale Operator (WireGuard Mesh)`:** Bridges authorized `Remote Admins` directly into the cluster network over WireGuard.
 
+### 3. `APPLICATION & AI API GATEWAY` `[Zero-Trust NetworkPolicy Enforced]`
+Application traffic is strictly segmented using Kubernetes `NetworkPolicy` (`[NP: ...]`) microsegmentation:
+* **`Open-WebUI Portal` (`open-webui-svc.open-webui:8080`):** Enforces **`[NP: Ingress Only]`**, accepting user sessions via `open-webui.kung.nyc`. It communicates with **`LiteLLM Gateway`** via **`OpenAI API (/v1/*)`**, queries **`Qdrant Vector DB`** via **`REST/gRPC API Key (:6333)`** for RAG retrieval, and persists chat history to PostgreSQL on **`:5432`**.
+* **`LiteLLM Gateway` (`litellm.litellm:4000`):** Enforces **`[NP: WebUI/Ingress Only]`**, serving both internal requests from `Open-WebUI Portal` and external **`Public API`** calls via `api.kung.nyc`. It authenticates downstream inference requests to **`llama.cpp ROCm Server`** using an internal **`Bearer Token`** and writes audit/routing logs to PostgreSQL on **`:5432`**.
+
+### 4. `INFERENCE, VECTOR & AUTOSCALING`
+Compute-intensive AI generation and semantic retrieval execute locally on dedicated hardware:
+* **`llama.cpp ROCm Server` (`llamacpp-rocm-svc:8080`):** Enforces **`[NP: LiteLLM Only]`** (`Lateral Access BLOCKED`), rejecting any unauthorized pod-to-pod traffic. It accesses physical GPU acceleration on the **`AMD Radeon 8060S (62GB VRAM/APU)`** via **`/dev/dxg`** and **`librocdxg.so`** passthrough, and loads GGUF weights from a shared **`RWX PVC`**.
+* **`Qdrant Vector DB` (`qdrant.qdrant:6333`):** Performs HNSW semantic vector search for `Open-WebUI Portal` (with dashboard access via `qdrant.kung.nyc`), backed by a dedicated **`PVC (10Gi)`**.
+
+### 5. `HIGH-AVAILABILITY STORAGE & DATABASES`
+Stateful workloads and large model artifacts are decoupled from ephemeral pods:
+* **`CloudNativePG PostgreSQL 16 (HA)`:** Enforces **`[NP: App-Only :5432 | Direct Access BLOCKED]`**, isolating three dedicated HA database clusters:
+  * `open-webui-postgres-rw:5432` (Open-WebUI state & users)
+  * `litellm-postgres-rw:5432` (LiteLLM keys & usage logs)
+  * `juicefs-postgres-rw:5432 (Metadata)` (JuiceFS filesystem metadata engine)
+* **`JuiceFS CSI Storage (cloudflare-juicefs)`:** Mounts **`/HuggingFace-Models`** as a shared POSIX `RWX PVC` for `llama.cpp ROCm Server`, storing metadata in `juicefs-postgres-rw:5432` and persisting model blobs to **`Cloudflare R2`** via the **S3 API**.
+
+### 6. `GITOPS, SECRETOPS, SECURITY & OBSERVABILITY`
+A unified control plane governs deployment, credential injection, runtime defense, and autoscaling across all cluster tiers:
+* **`Argo CD (v3.6.2)` (`argocd-server:443` / `argocd.kung.nyc`):** Continuously reconciles cluster state from `GitHub Repo & Pages` via **`GitOps Sync (Server-Side Apply)`**.
+* **`External Secrets (ESO)` (`ClusterSecretStore: gcp-secret-store`):** Authenticates to `GCP WIF & Secret Mgr` using K3s projected OIDC tokens and executes **`Hourly Secret Sync (30 Keys -> K8s Secrets)`** across all namespaces with zero static credentials.
+* **`Falco eBPF / Prometheus / Grafana`:** Provides **`eBPF / Metrics / Scaling (ServiceMonitors & KEDA)`** across the stack—capturing kernel-level threats in **`Falcosidekick UI (:2802)`**, scraping inference queue and cluster metrics in **`Prometheus (:9090) -> KEDA`** for event-driven scaling, and visualizing ROCm GPU/LLM telemetry in **`Grafana (:80, grafana.kung.nyc)`**.
 ```
 +================================================================================================+
 |                             EXTERNAL NETWORK & CLOUD SERVICES                                  |
