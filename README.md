@@ -880,10 +880,10 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
    ~/00-Installation-Testing/92-Reveal-ESO-Secrets.sh > ~/00-Installation-Testing/My-CISC4900-Config.json
    ```
    Then copy JSON output or upload the local JSON file to Google Cloud Secret Manager:
-   1. Open [Google Cloud Console Secret Manager](https://console.cloud.google.com/security/secret-manager/secrets).
-   2. Click **Create secret** -> set **Name** to `my-cisc4900-config` (or open the existing `my-cisc4900-config` secret and click **New version**).
-   3. Paste the JSON output (or upload `~/00-Installation-Testing/My-CISC4900-Config.json`) into **Secret value**, then click **Create secret** / **Add new version**. *(To stay within the GCP Free Tier limit of <= 6 active versions, disable or destroy older versions when rotating.)*
-   4. Trigger an immediate cluster re-sync and verify all `ExternalSecret` resources are synced:
+   * Open [Google Cloud Console Secret Manager](https://console.cloud.google.com/security/secret-manager/secrets)
+   * Click **Create secret** -> set **Name** to `my-cisc4900-config` (or open the existing `my-cisc4900-config` secret and click **New version**).
+   * Paste the JSON output (or upload `~/00-Installation-Testing/My-CISC4900-Config.json`) into **Secret value**, then click **Create secret** / **Add new version**. *(To stay within the GCP Free Tier limit of <= 6 active versions, disable or destroy older versions when rotating.)*
+   * Trigger an immediate cluster re-sync and verify all `ExternalSecret` resources are synced:
       ```bash
       ~/00-Installation-Testing/05-External-Secrets-Operator.sh -restart
       kubectl get externalsecrets -A
