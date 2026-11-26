@@ -127,7 +127,7 @@ if not model_name:
     model_name = "qwen2.5-0.5b-instruct"
 
 print(f"Target Model: {model_name}")
-print(f"{'Test ID':<26} | {'Threat Category':<24} | {'Status':<14} | {'Notes'}")
+print(f"{'Test ID':<26} | {'Threat Category':<26} | {'Status':<14} | {'Notes'}")
 print("-" * 80)
 
 passed_count = 0
@@ -179,7 +179,7 @@ for tc in test_cases:
         status = "ERROR"
         note = f"Request failed: {str(e)[:35]}"
         
-    print(f"{tc['id']:<26} | {tc['category']:<24} | {status:<14} | {note}")
+    print(f"{tc['id']:<26} | {tc['category']:<26} | {status:<14} | {note}")
 
 print("-" * 80)
 print(f"Summary: {passed_count}/{len(test_cases)} Guardrail Defense Tests Passed.")
