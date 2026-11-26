@@ -20,9 +20,9 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
   cat <<'EOF'
 Usage: 92-Reveal-ESO-Secrets.sh [gcp-secret-name]
 
-Reconstructs the consolidated JSON payload (matching !Secret_Backup/My-CISC4900-Config.json)
-from live Kubernetes Secrets synced by External Secrets Operator (ESO), for uploading to
-Google Cloud Console Secret Manager (Secret name: my-cisc4900-config).
+Reconstruct consolidated JSON payload from Kubernetes Secrets synced by
+External Secrets Operator (ESO), for uploading to Google Cloud Console
+Secret Manager (Secret name: my-cisc4900-config).
 
 Outputs pure JSON to stdout and status diagnostics to stderr.
 Example:
@@ -56,7 +56,7 @@ import sys
 
 gcp_secret_name = sys.argv[1]
 
-# Canonical field order & Kubernetes Secret sources matching !Secret_Backup/My-CISC4900-Config.json
+# Canonical field order & Kubernetes Secret sources
 CANONICAL_SOURCES = [
     ("llamacpp_api_key", [("llamacpp-rocm", "llamacpp-api-key", "api-key")]),
     ("litellm_username", [
