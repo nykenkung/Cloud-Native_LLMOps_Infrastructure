@@ -1,10 +1,9 @@
 #!/usr/bin/env bash
 
-# Robust KUBECONFIG discovery
 if [ -z "$KUBECONFIG" ]; then
-  if [ -f "$HOME/.kube/config" ] && [ -r "$HOME/.kube/config" ]; then
+  if [ -r "$HOME/.kube/config" ]; then
     export KUBECONFIG="$HOME/.kube/config"
-  elif [ -f "/etc/rancher/k3s/k3s.yaml" ] && [ -r "/etc/rancher/k3s/k3s.yaml" ]; then
+  elif [ -r "/etc/rancher/k3s/k3s.yaml" ]; then
     export KUBECONFIG="/etc/rancher/k3s/k3s.yaml"
   fi
 fi
