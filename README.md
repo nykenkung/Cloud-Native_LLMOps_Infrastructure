@@ -167,74 +167,88 @@ November 24, 2026 [GitOps Finalization & Comprehensive Verification Suite]
 
 The architecture is designed to be conceptually straightforward: **Clients request access through Zero-Trust Edge Ingress, traffic routes through an Application & Gateway tier, and inference is computed locally on accelerated AMD GPU hardware, backed by persistent databases and governed by GitOps and SecretOps.**
 
-```mermaid
-flowchart TD
-    %% Styling Classes
-    classDef clientStyle fill:#ECEFF1,stroke:#607D8B,stroke-width:2px,color:#263238;
-    classDef edgeStyle fill:#FFF3E0,stroke:#FB8C00,stroke-width:2px,color:#E65100;
-    classDef appStyle fill:#E1F5FE,stroke:#039BE5,stroke-width:2px,color:#01579B;
-    classDef aiStyle fill:#FFEBEE,stroke:#E53935,stroke-width:2px,color:#B71C1C;
-    classDef dataStyle fill:#E8F5E9,stroke:#43A047,stroke-width:2px,color:#1B5E20;
-    classDef secStyle fill:#F3E5F5,stroke:#8E24AA,stroke-width:2px,color:#4A148C;
-
-    subgraph UserLayer["1. Users & Network Access"]
-        PublicWeb["Public Users<br/>(Internet HTTPS)"]:::clientStyle
-        LocalLAN["Local Clients<br/>(192.168.1.0/24)"]:::clientStyle
-        RemoteVPN["Remote Admins<br/>(Tailscale Mesh)"]:::clientStyle
-    end
-
-    subgraph IngressLayer["2. Zero-Trust Edge Gateways"]
-        CFTunnel["Cloudflare Tunnel<br/>(*.kung.nyc)"]:::edgeStyle
-        NginxIngress["Nginx Ingress<br/>(*.sslip.io)"]:::edgeStyle
-        TailscaleProxy["Tailscale Operator<br/>(ProxyGroup)"]:::edgeStyle
-    end
-
-    subgraph AppLayer["3. Application & Gateway Tier"]
-        OpenWebUI["Open-WebUI Portal<br/>(Chat Interface & RAG UI)"]:::appStyle
-        LiteLLM["LiteLLM Gateway<br/>(OpenAI Multi-Model Router)"]:::appStyle
-    end
-
-    subgraph InferenceLayer["4. Hardware Accelerated Inference"]
-        LlamaROCm["llama.cpp ROCm Server<br/>(GPU Accelerated Inference)"]:::aiStyle
-        AMD_GPU["AMD Radeon 8060S GPU<br/>(62GB Shared VRAM / 128GB RAM)"]:::aiStyle
-        Qdrant["Qdrant Vector Database<br/>(HNSW Semantic Search)"]:::aiStyle
-    end
-
-    subgraph StorageLayer["5. High-Availability Storage & DBs"]
-        PostgresDB["CloudNativePG PostgreSQL<br/>(HA Clusters for WebUI & LiteLLM)"]:::dataStyle
-        JuiceFSStorage["JuiceFS CSI Shared Storage<br/>(Cloudflare R2 Object Storage)"]:::dataStyle
-    end
-
-    subgraph GovernanceLayer["6. GitOps, Security & Observability"]
-        ArgoCD["Argo CD GitOps Engine<br/>(Automated K8s Sync)"]:::secStyle
-        GCP_WIF["Google Cloud WIF & ESO<br/>(Keyless Secret Management)"]:::secStyle
-        FalcoMonitoring["Falco eBPF & Prometheus/Grafana<br/>(Runtime Security & Metrics)"]:::secStyle
-    end
-
-    %% Network Routing
-    PublicWeb --> CFTunnel
-    LocalLAN --> NginxIngress
-    RemoteVPN --> TailscaleProxy
-
-    CFTunnel --> OpenWebUI & LiteLLM
-    NginxIngress --> OpenWebUI & LiteLLM
-    TailscaleProxy --> OpenWebUI & LiteLLM
-
-    %% Core Application Flow
-    OpenWebUI -->|API Calls| LiteLLM
-    OpenWebUI -->|Vector Search| Qdrant
-    LiteLLM -->|Prompt Processing| LlamaROCm
-    LlamaROCm -->|Hardware Compute| AMD_GPU
-
-    %% Data & State Persistence
-    LiteLLM --> PostgresDB
-    OpenWebUI --> PostgresDB
-    LlamaROCm --> JuiceFSStorage
-
-    %% Management, Secret & Observability Flow
-    ArgoCD -.->|Deploys & Syncs| AppLayer & InferenceLayer & StorageLayer
-    GCP_WIF -.->|Injects Secrets| AppLayer & InferenceLayer & StorageLayer
-    FalcoMonitoring -.->|Monitors Syscalls & Metrics| AppLayer & InferenceLayer
+```
++================================================================================================+
+|                             EXTERNAL NETWORK & CLOUD SERVICES                                  |
+|                                                                                                |
+|  [Public Internet]       [Cloudflare Edge]          [Cloudflare R2]     [GCP WIF & Secret Mgr] |
+|   HTTPS Clients   ----->  *.kung.nyc (DNS)          S3 Object Store      (my-cisc4900-config)  |
+|                              ^       |                     ^                      ^            |
+|  [LAN 192.168.1.0/24]        |       | Outbound            | S3 API               | OIDC/WIF   |
+|   *.sslip.io ------+         |       | Tunnel              |                      | (Keyless)  |
+|                    |         |       |                     |                      |            |
+|  [Remote Admins]   |    DNS Sync     |                     |            [GitHub Repo & Pages]  |
+|   Tailscale VPN -+ |   (CronJob)     |                     |             GitOps + OIDC JWKS    |
++==================|=|=========|=======|=====================|======================|============+
+                   | |         |       v                     |                      |
++==================|=|=========|=======|=====================|======================|============+
+|                  | |        K3s CLUSTER: ZERO-TRUST EDGE INGRESS                               |
+|                  | |         |       |                     |                      |            |
+|   +--------------v-+---+  +--v-------+--------------+  +---+------------------+   |            |
+|   | Tailscale Operator |  |   Cloudflare Tunnel     |  |    Ingress-Nginx     |   |            |
+|   | (WireGuard Mesh)   |  | (cloudflared x2 pods)   |  | (hostNetwork :80/443)|   |            |
+|   +---------+----------+  +------------+------------+  +----------+-----------+   |            |
++=============|==========================|==========================|===============|============+
+              +--------------------------+--------------------------+               |
+                 | Route by Hostname (HTTPS/HTTP)                                   |
+                 +--------------------------------------------------+               |
+                 |                                                  |               |
+                 | open-webui.kung.nyc    api.kung.nyc              | qdrant / argocd / falco / grafana
+                 v                        v                         v               |
++================|========================|=========================|===============|============+
+|         APPLICATION & AI API GATEWAY [Zero-Trust NetworkPolicy Enforced]          |            |
+|                                                                   |               |            |
+|  +- [NP: Ingress Only] -------------+     OpenAI API (/v1/*)      |               |            |
+|  |         Open-WebUI Portal        |  +-[NP: WebUI/Ingress Only]-+               |            |
+|  |  open-webui-svc.open-webui:8080  |--|-->  LiteLLM Gateway  |<--+ (Public API)  |            |
+|  +--------+----------------+--------+  |   litellm.litellm:4000   |               |            |
+|           |                |           +----+------------+----+   |               |            |
++===========|================|================|============|========|===============|============+
+            |                | REST/gRPC      |            |        |               |
+            |                | API Key (:6333)|            | Bearer |               |
+            |                v                |            | Token  |               |
++===========|================|================|============|========|===============|============+
+|           |        INFERENCE, VECTOR & AUTOSCALING       |        |               |            |
+|           |                |                |            v        |               |            |
+|           |  +-------------+----------+     |  +-[NP: LiteLLM Only]-----------+   |            |
+|           |  |    Qdrant Vector DB    |<----|  |    llama.cpp ROCm Server     |   |            |
+|           |  |   qdrant.qdrant:6333   |  (qdrant.kung.nyc)                    |   |            |
+|           |  +-------------+----------+     |  | llamacpp-rocm-svc:8080       |   |            |
+|           |                |                |  | (Lateral Access BLOCKED)     |   |            |
+|           |                |                |  +------+---------------+-------+   |            |
+|           |                |                |         | /dev/dxg      |           |            |
+|           |                |                |         v librocdxg.so  |           |            |
+|           |                |                |  +------+----------+    |           |            |
+|           |                |                |  | AMD Radeon 8060S|    |           |            |
+|           |                |                |  | (62GB VRAM/APU) |    |           |            |
+|           |                |                |  +-----------------+    |           |            |
++===========|================|================|=========================|===========|============+
+            | :5432          | PVC (10Gi)     | :5432                   | RWX PVC   |
+            v                v                v                         v           |
++===========|================|================|=========================|===========|============+
+|             HIGH-AVAILABILITY STORAGE & DATABASES                     |           |            |
+|                                                                       |           |            |
+|  +- [NP: App-Only :5432 | Direct Access BLOCKED] --+   +--------------+--------+  |            |
+|  |       CloudNativePG PostgreSQL 16 (HA)          |   |  JuiceFS CSI Storage  |--+ (to R2)    |
+|  |  - open-webui-postgres-rw:5432                  |   | (cloudflare-juicefs)  |               |
+|  |  - litellm-postgres-rw:5432                     |   | Mounts /HuggingFace   |               |
+|  |  - juicefs-postgres-rw:5432 (Metadata) <--------+---|        -Models        |               |
+|  +-------------------------------------------------+   +-----------------------+               |
++================================================================================================+
+               ^                          ^                           ^
+               : GitOps Sync              : Hourly Secret Sync        : eBPF / Metrics / Scaling
+               : (Server-Side Apply)      : (30 Keys -> K8s Secrets)  : (ServiceMonitors & KEDA)
++==============:==========================:===========================:==========================+
+|                    GITOPS, SECRETOPS, SECURITY & OBSERVABILITY                                 |
+|                                                                                                |
+|  +------------------------+  +------------------------+  +----------------------------------+  |
+|  |   Argo CD (v3.6.2)     |  | External Secrets (ESO) |  | Falco eBPF / Prometheus / Grafana|  |
+|  |  argocd-server:443     |  |  ClusterSecretStore:   |  |  - Falcosidekick UI (:2802)      |  |
+|  |  (argocd.kung.nyc)     |  |   gcp-secret-store     |  |  - Prometheus (:9090) -> KEDA    |  |
+|  +------------------------+  +------------------------+  |  - Grafana (:80, grafana.kung.nyc)| |
+|                                                          +----------------------------------+  |
++================================================================================================+
+  Legend: [NP: ...] = Kubernetes NetworkPolicy Zero-Trust Microsegmentation Boundary
 ```
 
 ---
