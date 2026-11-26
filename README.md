@@ -331,7 +331,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │   ├── 105-Test-Context-Stress.sh        # [Test 105] Evaluates stepped context windows (1K~32K) and ROCm VRAM usage
 │   ├── 106-Test-Needle-In-Haystack.sh    # [Test 106] Conducts 32K context Needle-In-A-Haystack deep retrieval precision
 │   ├── 107-Test-LLM-Guardrails-OWASP.sh  # [Test 107] Audits OWASP Top 10 for LLMs (prompt injection, jailbreak, leaks)
-│   ├── 108-Test-Cluster-Security-Audit.sh# [Test 108] Audits Kubernetes RBAC least-privilege, Pod Security & Secrets
+│   ├── 108-Test-Cluster-Security-Audit.sh # [Test 108] Audits Kubernetes RBAC least-privilege, Pod Security & Secrets
 │   ├── 109-Test-Storage-Persistence-Failover.sh # [Test 109] Tests CloudNativePG failover, ACID compliance & CSI persistence
 │   └── 110-Test-LLM-CLI.sh               # [Test 110] Interactive multi-turn terminal chatbot with dynamic model routing
 │
@@ -361,7 +361,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │
 ├── <b>07-Cloudflare-Tunnel/</b>                 # Zero-trust perimeter ingress
 │   ├── 1-Cloudflare-KV-Namespace.yaml    # Namespace definition for cloudflare-kv
-│   ├── 2-Cloudflare-KV-ServiceAccount.yaml# ServiceAccount used by the Cloudflare DNS synchronization CronJob
+│   ├── 2-Cloudflare-KV-ServiceAccount.yaml # ServiceAccount used by the Cloudflare DNS synchronization CronJob
 │   ├── 3-Cloudflare-KV-RBAC.yaml         # Role defining read permissions for Pods and Secrets
 │   ├── 4-Cloudflare-KV-RoleBinding.yaml  # Binds Cloudflare KV ServiceAccount to local read role
 │   ├── 5-Cloudflare-ES-RBAC.yaml         # Role defining ESO synchronization permissions in Cloudflare namespace
@@ -376,7 +376,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │
 ├── <b>09-JuiceFS-CSI-Driver/</b>                # Distributed POSIX shared file system
 │   ├── 1-Cloudflare-JuiceFS-StorageClass.yaml # StorageClass defining dynamic JuiceFS volume provisioning
-│   ├── 2-Cloudflare-JuiceFS-Postgres.yaml# CloudNativePG PostgreSQL metadata cluster for JuiceFS
+│   ├── 2-Cloudflare-JuiceFS-Postgres.yaml # CloudNativePG PostgreSQL metadata cluster for JuiceFS
 │   └── My-Cloudflare-JuiceFS-ExternalSecret.yaml # Syncs JuiceFS format token and Cloudflare R2 S3 access keys
 │
 ├── <b>10-CloudNativePG-DB/</b>                  # PostgreSQL high-availability operator
