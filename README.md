@@ -200,7 +200,7 @@ This project was developed incrementally over a 45-week timeline, solving comple
                                                       | Route by Hostname (HTTPS/HTTP)
              +----------------------------------------+-------------------------------------+ Management
              v open-webui.kung.nyc                    v api.kung.nyc                        v  Portals*
-<b>+============</b>|<b>========================================</b>|<b>=====================================|===========+
+<b>+============</b>|<b>========================================</b>|<b>=================================================+
 |            [3] Application & AI API Gateway [Zero-Trust NetworkPolicy Enforced]           |  *qdrant  |
 |                                                                                           |           |
 |</b>  +-------- [NP: Ingress Only] ---------+   OpenAI API   +-- [NP: WebUI/Ingress Only] --+  <b>|  *argocd  |
@@ -208,7 +208,7 @@ This project was developed incrementally over a 45-week timeline, solving comple
 |</b>  |   open-webui-svc.open-webui:8080    +--------------->+     litellm.litellm:4000     |  <b>|  *falco   |
 |</b>  +--------+-------------+--------------+                +--------+-------+-------------+  <b>|           |
 |</b>           |             |                                        |       |                <b>|  *grafana |
-+===========</b>|<b>=============</b>|<b>========================================</b>|<b>=======</b>|<b>================</b>|<b>===========+</b>
++===========</b>|<b>=============</b>|<b>========================================</b>|<b>=======</b>|<b>============================+</b>
             |             |                                        |       |
             v             v REST/gRPC API Key (Port :6333)         v       v Bearer Token
 <b>+===========</b>|<b>=============</b>|<b>========================================</b>|<b>=======</b>|<b>============================+
@@ -1008,8 +1008,6 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
 | **110** | **Interactive CLI Chat** | Dynamic model routing | Route misconfigurations & model drops | Allows terminal-based model exploration and health checks |
 
 ---
-
-## Test Execution & Diagnostic Procedures (Actual Verified Outputs: Test [`101`]–[`110`])
 
 ### Test [`101`]. `101-Test-AI-Stack-E2E.sh` - End-to-End Inference Verification
 **What It Tests:** Validates the complete end-to-end request chain from public Zero-Trust ingress down to GPU inference and vector storage. The script dynamically extracts ESO-managed credentials from Kubernetes Secrets (`qdrant`, `litellm`, `llamacpp-rocm`) and verifies five tiers in order:
