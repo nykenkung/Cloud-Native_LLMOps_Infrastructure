@@ -301,38 +301,38 @@ A unified control plane governs deployment, credential injection, runtime defens
 │
 ├── <b>00-Installation-Testing/</b>              # Deployment orchestration, Ops utilities and verification benchmarks
 │   ├── Copy-SSH.bat                      # Project SSH file transfer script from Windows to Ubuntu server
-│   ├── Delete-SSH.bat                    # Remove all synced project directories on WSL2 Ubuntu server
-│   ├── Menu.sh                           # Master interactive & multi-task CLI console (e.g. [91 101 110])
-│   ├── 01-Hardware-OS-Configuration.sh   # [-install|-test|-restart|-uninstall] Configures /etc/wsl.conf, ~/.bashrc, inotify limits and apt utilities
+│   ├── Delete-SSH.bat                    # Remove all synced project directories on Ubuntu server
+│   ├── Menu.sh                           # Install, maintainance & multi-task CLI console (e.g., Menu.sh 91 101 110)
+│   ├── 01-Hardware-OS-Configuration.sh   # [-install|-test|-restart|-uninstall] Configure /etc/wsl.conf, ~/.bashrc, inotify limits and apt utilities
 │   ├── 02-AMD-ROCm-DXG.sh                # [-install|-test|-restart|-uninstall] Verifies /dev/dxg, configures librocdxg.so and tests ROCm diagnostic pod
-│   ├── 03-Kubernetes.sh                  # [-install|-test|-restart|-uninstall] Installs K3s, configures Kubeconfig, public OIDC issuer parameters
-│   ├── 04-Helm.sh                        # [-install|-test|-restart|-uninstall] Installs Helm 3 package manager and initializes 9 community chart repos
-│   ├── 05-External-Secrets-Operator.sh   # [-install|-test|-restart|-uninstall] Sets up ESO, creates WIF config secret, verifies ClusterSecretStore
-│   ├── 06-Tailscale-Operator.sh          # [-install|-test|-restart|-uninstall] Deploys Tailscale Operator, connects Tailnet, creates ProxyGroup
-│   ├── 07-Cloudflare-Tunnel.sh           # [-install|-test|-restart|-uninstall] Deploys dual-replica cloudflared tunnel, CronJob DNS synchronizer
-│   ├── 08-Ingress-Nginx.sh               # [-install|-test|-restart|-uninstall] Deploys Nginx Ingress Controller with hostNetwork for sslip.io access
-│   ├── 09-JuiceFS-CSI-Driver.sh          # [-install|-test|-restart|-uninstall] Installs JuiceFS CSI Driver and creates Cloudflare R2 StorageClass
-│   ├── 10-CloudNativePG-DB.sh            # [-install|-test|-restart|-uninstall] Deploys CloudNativePG Operator v1.25.0 and verifies controller readiness
-│   ├── 11-Qdrant-Vector-DB.sh            # [-install|-test|-restart|-uninstall] Deploys Qdrant vector database, applies Ingress and verifies port 6333
-│   ├── 12-ArgoCD-GitOps.sh               # [-install|-test|-restart|-uninstall] Deploys Argo CD reconciles Bcrypt admin password patch
-│   ├── 13-Falco-Security.sh              # [-install|-test|-restart|-uninstall] Deploys Falco modern eBPF driver and sets up Falcosidekick Web UI
-│   ├── 14-Grafana-Prometheus-Stack.sh    # [-install|-test|-restart|-uninstall] Deploys Prometheus & Grafana stack, imports custom ROCm dashboards
-│   ├── 15-KEDA-Autoscaler.sh             # [-install|-test|-restart|-uninstall] Deploys KEDA event-driven autoscaler and configures HTTP queue scaling
-│   ├── 16-LLaMAcpp-ROCm.sh               # [-install|-test|-restart|-uninstall] Deploys llama.cpp ROCm GPU server, dynamically mounts GGUF models
-│   ├── 17-LiteLLM-Gateway.sh             # [-install|-test|-restart|-uninstall] Deploys LiteLLM proxy, CloudNativePG PostgreSQL cluster, Ingress routing
-│   ├── 18-Open-WebUI.sh                  # [-install|-test|-restart|-uninstall] Deploys Open-WebUI chat portal, CloudNativePG PostgreSQL cluster, Ingress
-│   ├── 91-Check-Pod-Status.sh            # [Util 91] Checks ClusterSecretStore, Deployments, StatefulSets, Pods across all namespaces
-│   ├── 92-Reveal-ESO-Secrets.sh          # [Util 92] Exports all 30 ESO-managed K8s secrets as consolidated GCP JSON (my-cisc4900-config)
+│   ├── 03-Kubernetes.sh                  # [-install|-test|-restart|-uninstall] Install K3s, configures Kubeconfig, public OIDC issuer parameters
+│   ├── 04-Helm.sh                        # [-install|-test|-restart|-uninstall] Install Helm 3 package manager and initializes 9 community chart repos
+│   ├── 05-External-Secrets-Operator.sh   # [-install|-test|-restart|-uninstall] Set up ESO, creates WIF config secret, verifies ClusterSecretStore
+│   ├── 06-Tailscale-Operator.sh          # [-install|-test|-restart|-uninstall] Deploy Tailscale Operator, connects Tailnet, creates ProxyGroup
+│   ├── 07-Cloudflare-Tunnel.sh           # [-install|-test|-restart|-uninstall] Deploy dual-replica cloudflared tunnel, CronJob DNS synchronizer
+│   ├── 08-Ingress-Nginx.sh               # [-install|-test|-restart|-uninstall] Deploy Nginx Ingress Controller with hostNetwork for sslip.io access
+│   ├── 09-JuiceFS-CSI-Driver.sh          # [-install|-test|-restart|-uninstall] Install JuiceFS CSI Driver and creates Cloudflare R2 StorageClass
+│   ├── 10-CloudNativePG-DB.sh            # [-install|-test|-restart|-uninstall] Deploy CloudNativePG Operator v1.25.0 and verifies controller readiness
+│   ├── 11-Qdrant-Vector-DB.sh            # [-install|-test|-restart|-uninstall] Deploy Qdrant vector database, applies Ingress and verifies port 6333
+│   ├── 12-ArgoCD-GitOps.sh               # [-install|-test|-restart|-uninstall] Deploy Argo CD reconciles Bcrypt admin password patch
+│   ├── 13-Falco-Security.sh              # [-install|-test|-restart|-uninstall] Deploy Falco modern eBPF driver and sets up Falcosidekick Web UI
+│   ├── 14-Grafana-Prometheus-Stack.sh    # [-install|-test|-restart|-uninstall] Deploy Prometheus & Grafana stack, imports custom ROCm dashboards
+│   ├── 15-KEDA-Autoscaler.sh             # [-install|-test|-restart|-uninstall] Deploy KEDA event-driven autoscaler and configures HTTP queue scaling
+│   ├── 16-LLaMAcpp-ROCm.sh               # [-install|-test|-restart|-uninstall] Deploy llama.cpp ROCm GPU server, dynamically mounts GGUF models
+│   ├── 17-LiteLLM-Gateway.sh             # [-install|-test|-restart|-uninstall] Deploy LiteLLM proxy, CloudNativePG PostgreSQL cluster, Ingress routing
+│   ├── 18-Open-WebUI.sh                  # [-install|-test|-restart|-uninstall] Deploy Open-WebUI chat portal, CloudNativePG PostgreSQL cluster, Ingress
+│   ├── 91-Check-Pod-Status.sh            # [Util 91] Check ClusterSecretStore, Deployments, StatefulSets, Pods across all namespaces
+│   ├── 92-Reveal-ESO-Secrets.sh          # [Util 92] Export all 30 ESO-managed K8s secrets as consolidated GCP JSON (my-cisc4900-config)
 │   ├── 100-Download-LLM.sh               # [Util 100] High-speed download of HuggingFace LLM models to /HuggingFace-Models
-│   ├── 101-Test-AI-Stack-E2E.sh          # [Test 101] Verifies full inference chain (Qdrant -> llama -> LiteLLM -> WebUI)
-│   ├── 102-Test-Security-Penetration.sh  # [Test 102] Validates NetworkPolicy zero-trust micro-isolation & Falco eBPF
-│   ├── 103-Test-RAG-Benchmark.sh         # [Test 103] Tests vector search indexing recall and closed-loop RAG answering
+│   ├── 101-Test-AI-Stack-E2E.sh          # [Test 101] Verify full inference chain (Qdrant -> llama -> LiteLLM -> WebUI)
+│   ├── 102-Test-Security-Penetration.sh  # [Test 102] Validate NetworkPolicy zero-trust micro-isolation & Falco eBPF
+│   ├── 103-Test-RAG-Benchmark.sh         # [Test 103] Test vector search indexing recall and closed-loop RAG answering
 │   ├── 104-Test-Concurrency-Throughput.sh# [Test 104] Stress tests concurrency (1~4 streams), TPS throughput & KEDA scaling
-│   ├── 105-Test-Context-Stress.sh        # [Test 105] Evaluates stepped context windows (1K~32K), ROCm VRAM usage
-│   ├── 106-Test-Needle-In-Haystack.sh    # [Test 106] Conducts 32K context Needle-In-A-Haystack deep retrieval precision
-│   ├── 107-Test-LLM-Guardrails-OWASP.sh  # [Test 107] Audits OWASP Top 10 for LLMs (prompt injection, jailbreak, leaks)
-│   ├── 108-Test-Cluster-Security-Audit.sh # [Test 108] Audits Kubernetes RBAC least-privilege, Pod Security & Secrets
-│   ├── 109-Test-Storage-Persistence-Failover.sh # [Test 109] Tests CloudNativePG failover, ACID compliance & CSI persistence
+│   ├── 105-Test-Context-Stress.sh        # [Test 105] Evaluate stepped context windows (1K~32K), ROCm VRAM usage
+│   ├── 106-Test-Needle-In-Haystack.sh    # [Test 106] Conduct 32K context Needle-In-A-Haystack deep retrieval precision
+│   ├── 107-Test-LLM-Guardrails-OWASP.sh  # [Test 107] Audit OWASP Top 10 for LLMs (Prompt injection, jailbreak, leaks)
+│   ├── 108-Test-Cluster-Security-Audit.sh # [Test 108] Audit Kubernetes RBAC least-privilege, Pod Security & Secrets
+│   ├── 109-Test-Storage-Persistence-Failover.sh # [Test 109] Test CloudNativePG failover, ACID compliance & CSI persistence
 │   └── 110-Test-LLM-CLI.sh               # [Test 110] Interactive multi-turn terminal chatbot with dynamic model routing
 │
 ├── <b>01-Hardware-OS-Configuration/</b>         # Host environment settings
@@ -357,19 +357,19 @@ A unified control plane governs deployment, credential injection, runtime defens
 ├── <b>06-Tailscale-Operator/</b>                # Encrypted mesh VPN integration
 │   ├── 1-Tailscale-Namespace.yaml        # Namespace definition for tailscale controller
 │   ├── 2-Tailscale-ProxyGroup.yaml       # Custom resource establishing mesh routes into Kubernetes services
-│   └── My-Tailscale-ExternalSecret.yaml  # Syncs Tailscale OAuth Client ID and Secret from Google Secret Manager
+│   └── My-Tailscale-ExternalSecret.yaml  # Sync Tailscale OAuth Client ID and Secret from Google Secret Manager
 │
 ├── <b>07-Cloudflare-Tunnel/</b>                 # Zero-trust perimeter ingress
 │   ├── 1-Cloudflare-KV-Namespace.yaml    # Namespace definition for cloudflare-kv
 │   ├── 2-Cloudflare-KV-ServiceAccount.yaml # ServiceAccount used by the Cloudflare DNS synchronization CronJob
 │   ├── 3-Cloudflare-KV-RBAC.yaml         # Role defining read permissions for Pods and Secrets
-│   ├── 4-Cloudflare-KV-RoleBinding.yaml  # Binds Cloudflare KV ServiceAccount to local read role
+│   ├── 4-Cloudflare-KV-RoleBinding.yaml  # Bind Cloudflare KV ServiceAccount to local read role
 │   ├── 5-Cloudflare-ES-RBAC.yaml         # Role defining ESO synchronization permissions in Cloudflare namespace
 │   ├── 6-Cloudflare-ES-RoleBinding.yaml  # Binds ESO ServiceAccount to Cloudflare secret management
 │   ├── 7-Cloudflare-KV-CronJob.yaml      # Automated CronJob syncing Kubernetes Ingress domains to Cloudflare DNS
 │   ├── 8-Cloudflared-Tunnel-Deployment.yaml # High-Availability dual-replica cloudflared tunnel deployment
-│   ├── My-Cloudflare-KV-ExternalSecret.yaml # Syncs Cloudflare Account ID and API Token from Google Secret Manager
-│   └── My-Cloudflare-Tunnel-ExternalSecret.yaml # Syncs CLOUDFLARE_TUNNEL_ID (cf_tunnel_id) from Google Secret Manager
+│   ├── My-Cloudflare-KV-ExternalSecret.yaml # Sync Cloudflare Account ID and API Token from Google Secret Manager
+│   └── My-Cloudflare-Tunnel-ExternalSecret.yaml # Sync CLOUDFLARE_TUNNEL_ID (cf_tunnel_id) from Google Secret Manager
 │
 ├── <b>08-Ingress-Nginx/</b>                     # High-performance local ingress controller
 │   └── 1-Ingress-Nginx-Namespace.yaml    # Namespace definition for ingress-nginx
@@ -377,7 +377,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 ├── <b>09-JuiceFS-CSI-Driver/</b>                # Distributed POSIX shared file system
 │   ├── 1-Cloudflare-JuiceFS-StorageClass.yaml # StorageClass defining dynamic JuiceFS volume provisioning
 │   ├── 2-Cloudflare-JuiceFS-Postgres.yaml # CloudNativePG PostgreSQL metadata cluster for JuiceFS
-│   └── My-Cloudflare-JuiceFS-ExternalSecret.yaml # Syncs JuiceFS format token and Cloudflare R2 S3 access keys
+│   └── My-Cloudflare-JuiceFS-ExternalSecret.yaml # Sync JuiceFS format token and Cloudflare R2 S3 access keys
 │
 ├── <b>10-CloudNativePG-DB/</b>                  # PostgreSQL high-availability operator
 │   ├── 1-CloudNativePG-Namespace.yaml    # Namespace definition for cnpg-system
@@ -386,27 +386,27 @@ A unified control plane governs deployment, credential injection, runtime defens
 ├── <b>11-Qdrant-Vector-DB/</b>                  # Semantic search vector database
 │   ├── 1-Qdrant-Namespace.yaml           # Namespace definition for qdrant
 │   ├── 2-Qdrant-Ingress.yaml             # Ingress exposing Qdrant Web Dashboard and REST API
-│   └── My-Qdrant-ExternalSecret.yaml     # Syncs Qdrant read/write and read-only API keys from Google Secret Manager
+│   └── My-Qdrant-ExternalSecret.yaml     # Sync Qdrant read/write and read-only API keys from Google Secret Manager
 │
 ├── <b>12-ArgoCD-GitOps/</b>                     # Declarative continuous delivery platform
 │   ├── 1-ArgoCD-Namespace.yaml           # Namespace definition for argocd
 │   ├── 2-ArgoCD-Ingress.yaml             # Ingress with SSL-passthrough exposing Argo CD Web UI
 │   ├── 3-ArgoCD-Install.yaml             # Official Argo CD complete installation manifests
 │   ├── ArgoCD-App-External-Secrets.yaml  # Argo CD Application manifest managing External Secrets Operator (with WIF Helm values)
-│   └── My-ArgoCD-ExternalSecret.yaml     # Patches argocd-secret with Bcrypt hashed admin password from GCP
+│   └── My-ArgoCD-ExternalSecret.yaml     # Patch Argo CD secret with Bcrypt hashed admin password from GCP
 │
 ├── <b>13-Falco-Security/</b>                    # eBPF runtime threat detection
 │   ├── 1-Falco-Namespace.yaml            # Namespace definition for falco
 │   ├── 2-Falco-Ingress.yaml              # Ingress exposing Falcosidekick Web UI dashboard
 │   ├── My-Falco-Config.yaml              # Helm values configuring modern eBPF driver and external secret name
-│   └── My-Falco-ExternalSecret.yaml      # Syncs Falcosidekick UI basic auth credentials from Google Secret Manager
+│   └── My-Falco-ExternalSecret.yaml      # Sync Falcosidekick UI basic auth credentials from Google Secret Manager
 │
 ├── <b>14-Grafana-Prometheus-Stack/</b>          # LGTM full-stack monitoring
 │   ├── 1-Grafana-Namespace.yaml          # Namespace definition for grafana
 │   ├── 2-Grafana-Ingress.yaml            # Ingress exposing Grafana web portal
 │   ├── 3-Grafana-LLaMAcpp-ROCm.yaml      # ConfigMap containing custom Grafana dashboard for ROCm & LLM throughput
 │   ├── My-Grafana-Config.yaml            # Helm values configuring existingSecret for Grafana admin authentication
-│   └── My-Grafana-ExternalSecret.yaml    # Syncs Grafana admin username and password from Google Secret Manager
+│   └── My-Grafana-ExternalSecret.yaml    # Sync Grafana admin username and password from Google Secret Manager
 │
 ├── <b>15-KEDA-Autoscaler/</b>                   # Event-driven pod autoscaling
 │   └── 1-LLaMAcpp-KEDA-ScaledObject.yaml # ScaledObject scaling llama.cpp based on HTTP inference queue depth
@@ -418,7 +418,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │   ├── 4-LLaMAcpp-Service.yaml           # ClusterIP Service exposing port 8080
 │   ├── 5-LLaMAcpp-ServiceMonitor.yaml    # Prometheus ServiceMonitor scraping inference performance metrics
 │   ├── 6-LLaMAcpp-NetworkPolicy.yaml     # Zero-trust micro-isolation policy restricting access to LiteLLM
-│   └── My-LLaMAcpp-ExternalSecret.yaml   # Syncs internal Bearer Token from Google Secret Manager
+│   └── My-LLaMAcpp-ExternalSecret.yaml   # Sync internal Bearer Token from Google Secret Manager
 │
 ├── <b>17-LiteLLM-Gateway/</b>                   # Multi-model AI router and gateway
 │   ├── 1-LiteLLM-Namespace.yaml          # Namespace definition for litellm
@@ -429,7 +429,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │   ├── 6-LiteLLM-NetworkPolicy.yaml      # NetworkPolicy restricting ingress to Open-WebUI and Ingress Controller
 │   ├── 7-LiteLLM-Ingress.yaml            # Ingress exposing public API endpoint at api.kung.nyc
 │   ├── My-LiteLLM-Config.yaml            # Model catalog routing configuration (wildcard * to llama.cpp router)
-│   └── My-LiteLLM-ExternalSecret.yaml    # Syncs LiteLLM Master API Key and PostgreSQL database credentials
+│   └── My-LiteLLM-ExternalSecret.yaml    # Sync LiteLLM Master API Key and PostgreSQL database credentials
 │
 ├── <b>18-Open-WebUI/</b>                        # Enterprise conversational AI portal
 │   ├── 1-OpenWebUI-Namespace.yaml        # Namespace definition for open-webui
@@ -439,7 +439,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │   ├── 5-OpenWebUI-NetworkPolicy.yaml    # NetworkPolicy enforcing strict namespace perimeter isolation
 │   ├── 6-Open-WebUI-Ingress.yaml         # Ingress exposing web portal at open-webui.kung.nyc
 │   ├── My-OpenWebUI-Config.yaml          # Environment configuration (branding, feature flags, signup controls)
-│   └── My-OpenWebUI-ExternalSecret.yaml  # Syncs WebUI JWT secret, database connection string and Qdrant keys
+│   └── My-OpenWebUI-ExternalSecret.yaml  # Sync WebUI JWT secret, database connection string and Qdrant keys
 │
 ├── <b>K8s-OIDC-Provider/</b>                    # Public RFC 8414 OIDC identity metadata (GitHub Pages)
 │   ├── .well-known/
@@ -447,7 +447,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │   └── jwks.json                         # Public JSON Web Key Set containing K3s ServiceAccount public keys
 │
 ├── .gitignore                            # Excludes local credentials (00-Installation-Testing/My-CISC4900-Config.json & 05-External-Secrets-Operator/wif-credentials.json)
-├── .nojekyll                             # Skips the Jekyll build step when deploying pre-built static files
+├── .nojekyll                             # Skip the Jekyll build step when deploying pre-built static files
 └── README.md                             # Main introductory document for this project
 </pre>
 
