@@ -778,10 +778,10 @@ To set up passwordless SSH authentication between your Windows client and WSL2 U
    </pre>
 
    * **Components Management ([`0`] to [`18`] & [`A`] to [`S`] with/without [`+`]/[`-`]):**
-     * Option [`1`] to [`18`] install individual infrastructure components ([`0`] targets all modules).
-     * Letters [`B`] to [`S`] map to run `-test` each component ([`A`] targets all modules), append `+` for `-restart` (re-apply/rollout), or append `-` for `-uninstall`.
-   * **Cluster Operations ([`91`] to [`92`]):** [`91`] inspecting cluster health, [`92`] exporting consolidated ESO secrets as GCP JSON.
-   * **Validation Benchmarks ([`100`] to [`110`]):** [`100`] downloading HuggingFace LLM models to `/HuggingFace-Models`, [`101`] to [`110`] running 10 automated benchmark and interactive test suites.
+     * Option [**`1`**] to [**`18`**] install individual infrastructure components ([**`0`**] targets all modules).
+     * Letters [**`B`**] to [**`S`**] map to run `-test` each component ([**`A`**] targets all modules), append **`+`** for `-restart` (re-apply/rollout), or append **`-`** for `-uninstall`.
+   * **Cluster Operations ([`91`] to [`92`]):** [**`91`**] inspecting cluster health, [**`92`**] exporting consolidated ESO secrets as GCP JSON.
+   * **Validation Benchmarks ([`100`] to [`110`]):** [**`100`**] downloading HuggingFace LLM models to `/HuggingFace-Models`, [**`101`**] to [**`110`**] running 10 automated benchmark and interactive test suites.
    * **Multi-Task CLI Mode:** `Menu.sh` supports space-separated sequential pipelines both interactively and via CLI arguments (e.g., `~/00-Installation-Testing/Menu.sh 91 101 110`). Queued pipelines stop immediately on the first failure. Each module script (`01-Hardware-OS-Configuration.sh` to `18-Open-WebUI.sh`) also independently accepts `-install`, `-test`, `-restart`, `-uninstall`.
 
 ---
