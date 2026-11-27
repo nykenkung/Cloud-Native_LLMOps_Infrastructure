@@ -49,7 +49,30 @@ import sys
 gcp_secret_name = sys.argv[1]
 
 CANONICAL_SOURCES = [
+    ("tailscale_client_id", [("tailscale", "operator-oauth", "client_id")]),
+    ("tailscale_client_secret", [("tailscale", "operator-oauth", "client_secret")]),
+
+    ("cf_account_id", [("external-secrets", "my-cloudflare-config", "MY_ACCOUNT_ID")]),
+    ("cf_kv_namespace_id", [("external-secrets", "my-cloudflare-config", "MY_KV_NAMESPACE_ID")]),
+    ("cf_api_token", [("external-secrets", "my-cloudflare-config", "MY_API_TOKEN")]),
+    ("cf_tunnel_id", [("cloudflare-kv", "cloudflare-kv-secret", "CLOUDFLARE_TUNNEL_ID")]),
+
+    ("juicefs_username", [("kube-system", "my-cloudflare-juicefs-config", "username")]),
+    ("juicefs_password", [("kube-system", "my-cloudflare-juicefs-config", "password")]),
+    ("juicefs_name", [("kube-system", "my-cloudflare-juicefs-config", "name")]),
+    ("juicefs_metaurl", [("kube-system", "my-cloudflare-juicefs-config", "metaurl")]),
+    ("juicefs_storage", [("kube-system", "my-cloudflare-juicefs-config", "storage")]),
+    ("juicefs_bucket", [("kube-system", "my-cloudflare-juicefs-config", "bucket")]),
+    ("juicefs_access_key", [("kube-system", "my-cloudflare-juicefs-config", "access-key")]),
+    ("juicefs_secret_key", [("kube-system", "my-cloudflare-juicefs-config", "secret-key")]),
+
+    ("qdrant_key", [("qdrant", "my-qdrant-config", "MY-QDRANT-KEY")]),
+    ("qdrant_read_only_key", [("qdrant", "my-qdrant-config", "MY-QDRANT-READ-ONLY-KEY")]),
+
+    ("argocd_admin_password", [("argocd", "argocd-secret", "admin.password")]),
+
     ("llamacpp_api_key", [("llamacpp-rocm", "llamacpp-api-key", "api-key")]),
+
     ("litellm_username", [
         ("litellm", "my-litellm-postgres-config", "username"),
         ("grafana", "grafana-admin-credentials", "admin-user"),
@@ -60,6 +83,7 @@ CANONICAL_SOURCES = [
     ]),
     ("litellm_database_url", [("litellm", "my-litellm-postgres-config", "database-url")]),
     ("litellm_master_key", [("litellm", "my-litellm-postgres-config", "master-key")]),
+
     ("openwebui_openai_api_keys", [("open-webui", "my-open-webui-secret", "OPENAI_API_KEYS")]),
     ("openwebui_secret_key", [("open-webui", "my-open-webui-secret", "WEBUI_SECRET_KEY")]),
     ("openwebui_db_username", [("open-webui", "my-open-webui-postgres-config", "username")]),
@@ -68,23 +92,6 @@ CANONICAL_SOURCES = [
     ("openwebui_vector_db", [("open-webui", "my-open-webui-qdrant-config", "VECTOR_DB")]),
     ("openwebui_qdrant_uri", [("open-webui", "my-open-webui-qdrant-config", "QDRANT_URI")]),
     ("openwebui_qdrant_api_key", [("open-webui", "my-open-webui-qdrant-config", "QDRANT_API_KEY")]),
-    ("qdrant_key", [("qdrant", "my-qdrant-config", "MY-QDRANT-KEY")]),
-    ("qdrant_read_only_key", [("qdrant", "my-qdrant-config", "MY-QDRANT-READ-ONLY-KEY")]),
-    ("tailscale_client_id", [("tailscale", "operator-oauth", "client_id")]),
-    ("tailscale_client_secret", [("tailscale", "operator-oauth", "client_secret")]),
-    ("cf_account_id", [("external-secrets", "my-cloudflare-config", "MY_ACCOUNT_ID")]),
-    ("cf_kv_namespace_id", [("external-secrets", "my-cloudflare-config", "MY_KV_NAMESPACE_ID")]),
-    ("cf_api_token", [("external-secrets", "my-cloudflare-config", "MY_API_TOKEN")]),
-    ("cf_tunnel_id", [("cloudflare-kv", "cloudflare-kv-secret", "CLOUDFLARE_TUNNEL_ID")]),
-    ("juicefs_username", [("kube-system", "my-cloudflare-juicefs-config", "username")]),
-    ("juicefs_password", [("kube-system", "my-cloudflare-juicefs-config", "password")]),
-    ("juicefs_name", [("kube-system", "my-cloudflare-juicefs-config", "name")]),
-    ("juicefs_metaurl", [("kube-system", "my-cloudflare-juicefs-config", "metaurl")]),
-    ("juicefs_storage", [("kube-system", "my-cloudflare-juicefs-config", "storage")]),
-    ("juicefs_bucket", [("kube-system", "my-cloudflare-juicefs-config", "bucket")]),
-    ("juicefs_access_key", [("kube-system", "my-cloudflare-juicefs-config", "access-key")]),
-    ("juicefs_secret_key", [("kube-system", "my-cloudflare-juicefs-config", "secret-key")]),
-    ("argocd_admin_password", [("argocd", "argocd-secret", "admin.password")]),
 ]
 
 secret_cache = {}
@@ -109,7 +116,9 @@ def get_secret_data(ns, name):
     return secret_cache[key]
 
 
-print(f">>> [92] Exporting ESO Secrets for '{gcp_secret_name}'...", file=sys.stderr, flush=True)
+print(f"""=====================================================================
+ [92] Exporting ESO Secrets for '{gcp_secret_name}'
+=====================================================================""", file=sys.stderr, flush=True)
 
 result = {}
 missing = []
@@ -165,23 +174,17 @@ if missing:
     for item in missing:
         print(f"  - {item}", file=sys.stderr)
 else:
-    print(f"[OK] Exported {len(result)} secret keys.", file=sys.stderr)
-
-print(
-    f"""
-=====================================================================
+    print(f"""=====================================================================
+ [OK] Successfully exported {len(result)} secret keys
  Next Steps: Upload to Google Cloud Secret Manager
 =====================================================================
  1. Open: https://console.cloud.google.com/security/secret-manager/secrets
- 2. Click "Create secret":
-    - Set Name to: {gcp_secret_name}
+ 2. Click "Create secret", set Name to: {gcp_secret_name}
     (If '{gcp_secret_name}' already exists, open it and click "New version".)
  3. Copy the JSON output above and paste it into "Secret value"
-    (or upload your exported .json file).
+    (or save as .json and upload your file on Google Cloud Secret Manager.)
  4. Click "Create secret" / "Add new version".
     * Tip: Disable or destroy older versions to stay within the
       GCP Free Tier limit (<= 6 active secret versions).
-=====================================================================""",
-    file=sys.stderr,
-)
+=====================================================================""", file=sys.stderr)
 PYEOF
