@@ -183,7 +183,7 @@ Application traffic is strictly segmented using Kubernetes `NetworkPolicy` (`[NP
 
 ### [4] Inference, Vector & Autoscaling
 Compute-intensive AI generation and semantic retrieval execute locally on dedicated hardware:
-* **`llama.cpp ROCm Server` (`llamacpp-rocm-svc:8080`):** Enforces **[`NP: LiteLLM Only`]** (`Lateral Access BLOCKED`), rejecting any unauthorized pod-to-pod traffic. It accesses physical GPU acceleration on the **`AMD Radeon 8060S (62GB VRAM/APU)`** via **`/dev/dxg`** and **`librocdxg.so`** passthrough, and loads GGUF weights from a shared **`RWX PVC`**.
+* **`llama.cpp ROCm Server` (`llamacpp-rocm-svc:8080`):** Enforces **[`NP: LiteLLM Only`]** (`Lateral Access BLOCKED`), rejecting any unauthorized pod-to-pod traffic. It accesses physical GPU acceleration on the **`AMD Radeon 8060S (128GB RAM/APU)`** via **`/dev/dxg`** and **`librocdxg.so`** passthrough, and loads GGUF weights from a shared **`RWX PVC`**.
 * **`Qdrant Vector DB` (`qdrant.qdrant:6333`):** Performs HNSW semantic vector search for `Open-WebUI Portal` (with dashboard access via `qdrant.kung.nyc`), backed by a dedicated **`PVC (10Gi)`**.
 
 ### [5] High-Availability Storage & Databases
