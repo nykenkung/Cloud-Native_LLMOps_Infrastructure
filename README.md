@@ -900,9 +900,49 @@ To establish zero-trust remote access:
 ---
 
 ### Phase 5: GitOps Secret Management with GCP WIF & Argo CD
-Step-by-step procedure to transition credentials to Google Cloud Secret Manager with zero static keys:
 
-1. **Deploy External Secrets Operator via Argo CD Web UI:**
+**End-to-End Keyless SecretOps Workflow (Purpose, Target Files & Execution Flow):**
+* **Step 1 (Public OIDC Trust):** Export K3s public signing keys (`K8s-OIDC-Provider/.well-known/openid-configuration`, `jwks.json`, `.nojekyll`) to GitHub Pages so GCP can cryptographically verify K3s tokens ->
+* **Step 2 (Install ESO Controller):** Deploy `external-secrets` via Argo CD Web UI to establish the `ExternalSecret` & `ClusterSecretStore` CRDs in Kubernetes ->
+* **Step 3 (GCP IAM & WIF Federation):** Create GCP Service Account (`cisc4900-es-accessor`) and Workload Identity Pool trusting the GitHub Pages OIDC Issuer, generating `05-External-Secrets-Operator/wif-credentials.json` ->
+* **Step 4 (Store WIF Config in K8s):** Load `wif-credentials.json` into Kubernetes Secret `gcp-wif-config` inside namespace `external-secrets` ->
+* **Step 5 (Inject Projected OIDC Token & Verify):** Configure Argo CD Helm parameters (`extraVolumes`, `extraVolumeMounts`, `extraEnv`), sync ESO, and inspect the pod to confirm `gcp-wif-config` and `k8s-oidc-token` are mounted ->
+* **Step 6 (Connect Secret Store):** Set your GCP `projectID` in `05-External-Secrets-Operator/Google-Cloud-Platform-CSS.yaml`, apply `ClusterSecretStore`, and verify `STATUS: Valid | READY: True` ->
+* **Step 7 (Consolidate & Sync Secrets):** Run `92-Reveal-ESO-Secrets.sh` to export all 30 cluster secrets into JSON, upload to GCP Secret Manager (`my-cisc4900-config`), and verify all 12 `ExternalSecrets` show `SecretSynced | True`.
+
+---
+
+1. **Export K3s OIDC Metadata & Host on GitHub Pages:**
+   Export the K3s OIDC discovery document and JWKS public keys from your cluster into the repository's `K8s-OIDC-Provider/` directory:
+   ```bash
+   mkdir -p K8s-OIDC-Provider/.well-known
+   kubectl get --raw /.well-known/openid-configuration > K8s-OIDC-Provider/.well-known/openid-configuration
+   kubectl get --raw /openid/v1/jwks > K8s-OIDC-Provider/jwks.json
+   touch .nojekyll
+   ```
+   *(Ensure `.nojekyll` exists in the repository root so GitHub Pages serves hidden directories like `.well-known/`.)*
+
+   Commit and push these files to your GitHub repository:
+   ```bash
+   git add .nojekyll K8s-OIDC-Provider/
+   git commit -m "Publish K3s OIDC discovery metadata for GCP WIF"
+   git push origin main
+   ```
+
+   **Enable GitHub Pages in Your Repository:**
+   * Open your **GitHub Repository** -> **Settings** -> **Pages** (left sidebar).
+   * Under **Build and deployment**:
+     * **Source:** Select **`Deploy from a branch`**.
+     * **Branch:** Select **`main`** (or your default branch) and folder **`/ (root)`**, then click **Save**.
+   * Wait ~1–2 minutes for the GitHub Pages deployment workflow to complete.
+
+   **Verify OIDC Discovery Endpoint:**
+   ```bash
+   curl -i https://nykenkung.github.io/Cloud-Native_LLMOps_Infrastructure/K8s-OIDC-Provider/.well-known/openid-configuration
+   ```
+   Confirm the response returns **`HTTP/2 200`** (or `HTTP/1.1 200 OK`) along with a JSON document containing `"issuer"` and `"jwks_uri"`.
+
+2. **Deploy External Secrets Operator via Argo CD Web UI:**
    * Open `https://argocd.kung.nyc` -> **New App**
    * **Application Name:** `external-secrets`
    * **Sync Policy:** `Automatic` (Check: `PRUNE RESOURCES`, `SELF HEAL`, `Auto-Create Namespace`)
@@ -910,40 +950,33 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
    * **Chart:** `external-secrets`
    * **Destination:** `https://kubernetes.default.svc`, Namespace: `external-secrets`
 
-2. **Google Cloud Service Account Configuration:**
-   * Open [Google Cloud Console Secret Manager](https://console.cloud.google.com/security/secret-manager)
-   * Enable Secret Manager API.
-   * Create Service Account: `cisc4900-es-accessor`
-   * Grant Role: `Secret Manager Secret Accessor`
+3. **Configure GCP Service Account & Create GCP Workload Identity Pool:**
+   * **Create Google Cloud Service Account & Enable Secret Manager:**
+     * Open [Google Cloud Console Secret Manager](https://console.cloud.google.com/security/secret-manager) and enable the **Secret Manager API**.
+     * Create Service Account: `cisc4900-es-accessor`
+     * Grant Role: `Secret Manager Secret Accessor`
 
-3. **Export K3s OIDC Metadata & Host on GitHub Pages:**
-   ```bash
-   kubectl get --raw /.well-known/openid-configuration > openid-configuration
-   kubectl get --raw /openid/v1/jwks > jwks.json
-   ```
-   * Push to GitHub repository under folder `K8s-OIDC-Provider` with root `.nojekyll`.
-   * Public URL: `https://nykenkung.github.io/Cloud-Native_LLMOps_Infrastructure/K8s-OIDC-Provider/.well-known/openid-configuration`
+   * **Next, Create GCP Workload Identity Pool & OIDC Provider:**
+     * Open [Google Cloud Console Workload Identity Pools](https://console.cloud.google.com/iam-admin/workload-identity-pools)
+     * **Pool Name:** `CISC4900-K8s-Workload`
+     * **Provider:** `OpenID Connect (OIDC)`
+     * **Provider Name:** `Github-OIDC-Provider`
+     * **Issuer (URL):** `https://nykenkung.github.io/Cloud-Native_LLMOps_Infrastructure/K8s-OIDC-Provider`
+     * **Attribute Mapping:** `google.subject = assertion.sub`
+     * **Grant Access -> Select Service Account:** `cisc4900-es-accessor`
+     * **Service Account Impersonation Subject:** `system:serviceaccount:external-secrets:external-secrets`
+     * **Token Path:** `/var/run/secrets/k8s-oidc/token`
+     * Download the generated credential configuration file as `05-External-Secrets-Operator/wif-credentials.json` *(excluded from Git via `.gitignore`)*.
 
-4. **Create GCP Workload Identity Pool:**
-   * Open [Google Cloud Console Workload Identity Pools](https://console.cloud.google.com/iam-admin/workload-identity-pools)
-   * **Pool Name:** `CISC4900-K8s-Workload`
-   * **Provider:** `OpenID Connect (OIDC)`
-   * **Provider Name:** `Github-OIDC-Provider`
-   * **Issuer (URL):** `https://nykenkung.github.io/Cloud-Native_LLMOps_Infrastructure/K8s-OIDC-Provider`
-   * **Attribute Mapping:** `google.subject = assertion.sub`
-   * **Service Account Impersonation Subject:** `system:serviceaccount:external-secrets:external-secrets`
-   * **Token Path:** `/var/run/secrets/k8s-oidc/token`
-   * Save output as `05-External-Secrets-Operator/wif-credentials.json` *(excluded from Git via `.gitignore`)*
-
-5. **Apply WIF Configuration Secret in Kubernetes:**
+4. **Apply WIF Configuration Secret in Kubernetes:**
    ```bash
    kubectl create secret generic gcp-wif-config \
      --from-file=config=$HOME/05-External-Secrets-Operator/wif-credentials.json \
      -n external-secrets
    ```
 
-6. **Update Argo CD Application Helm Parameters for External Secrets:**
-   Copy `audience` string value from `05-External-Secrets-Operator/wif-credentials.json` generated by GCP Workload Identity Pool in Phase 5.4. Then, in Argo CD > Applications > `external-secrets` > **Parameters** > **Edit**, paste below:
+5. **Update Argo CD Application Helm Parameters for External Secrets:**
+   Copy `audience` string value from JSON file `05-External-Secrets-Operator/wif-credentials.json` downloaded from GCP Workload Identity Pool in `Phase 5.3`. Then, go back to Argo CD Web UI (`https://argocd.kung.nyc`) > `Applications` > `external-secrets` > **Parameters** > **Edit**, paste below:
    ```yaml
    installCRDs: true
    extraVolumes:
@@ -970,28 +1003,35 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
    ```
    Trigger synchronization in the Argo CD UI: **Applications** > **SYNC** > check **Auto-Create Namespace** > **SYNCHRONIZE**.
 
-7. **Verify Projected Tokens & Deploy `ClusterSecretStore`:**
-   Inspect the External Secrets pod to confirm the WIF configuration and projected OIDC token are mounted properly:
+   **Verify Projected Tokens & WIF Mounts on the ESO Pod:**
+   Once Argo CD finishes syncing and the new `external-secrets` pod is `Running`, inspect the pod specification:
    ```bash
    kubectl describe pod -n external-secrets -l app.kubernetes.io/name=external-secrets
    ```
-   Confirm the output contains:
+   Confirm the output contains `Environment`, `Mounts`, `Volumes`:
    * **Environment:** `GOOGLE_APPLICATION_CREDENTIALS: /var/run/secrets/gcp-wif/config`
    * **Mounts:** `/var/run/secrets/gcp-wif` and `/var/run/secrets/k8s-oidc`
    * **Volumes:** `gcp-wif-config` and `k8s-oidc-token`
-   
-   To deploy the `ClusterSecretStore`, you must edit `05-External-Secrets-Operator/Google-Cloud-Platform-CSS.yaml` and replace `projectID` with your own GCP Project ID. You can obtain your Project ID from:
-   * Open [Google Cloud Console Dashboard](https://console.cloud.google.com/home/dashboard) **or**
-   * Copy `service_account_impersonation_url` string value between your GCP Service Account `cisc4900-es-accessor@` and `.iam.gserviceaccount.com` from `05-External-Secrets-Operator/wif-credentials.json` generated by GCP Workload Identity Pool in `Phase 5.4`.
 
-   Apply the `ClusterSecretStore` manifest and verify connectivity to Google Cloud Secret Manager:
+6. **Deploy & Verify `ClusterSecretStore`:**
+   First, edit `05-External-Secrets-Operator/Google-Cloud-Platform-CSS.yaml` and replace `projectID` with your own GCP Project ID. You can obtain your Project ID from:
+   * Look at JSON file `05-External-Secrets-Operator/wif-credentials.json` downloaded from GCP Workload Identity Pool in `Phase 5.3`, copy `service_account_impersonation_url` string value between your GCP Service Account `cisc4900-es-accessor@` and `.iam.gserviceaccount.com` to get your `projectID`.
+   **or**
+   * Open [Google Cloud Console Dashboard](https://console.cloud.google.com/home/dashboard) and showed in `Project info`.
+
+   Then, apply the `ClusterSecretStore` manifest and verify connectivity to Google Cloud Secret Manager:
    ```bash
    kubectl apply -f ~/05-External-Secrets-Operator/Google-Cloud-Platform-CSS.yaml
    kubectl get clustersecretstore gcp-secret-store
-   # Output must show: STATUS: Valid | READY: True
+
+   ```
+   Confirm the output of `ClusterSecretStore` called `gcp-secret-store` shows **`STATUS: Valid`** | **`READY: True`**:
+   ```
+   NAME               STATUS   CAPABILITIES   READY
+   gcp-secret-store   Valid    ReadWrite      True
    ```
 
-8. **Export Cluster Secrets to JSON output and Create/Update `my-cisc4900-config` in Google Cloud Console Secret Manager:**
+7. **Export Cluster Secrets to JSON output and Create/Update `my-cisc4900-config` in Google Cloud Console Secret Manager:**
    Run `~/00-Installation-Testing/92-Reveal-ESO-Secrets.sh` to collect all 30 ESO-managed Kubernetes secrets across namespaces (including `cf_tunnel_id` in `cloudflare-kv/cloudflare-kv-secret`) and output in JSON format:
    ```bash
    # Print pure JSON to stdout (status summary & warnings go to stderr that ignored to export JSON file)
@@ -1062,6 +1102,22 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
       ```bash
       ~/00-Installation-Testing/05-External-Secrets-Operator.sh -restart
       kubectl get externalsecrets -A
+      ```
+      Confirm the output of all `ClusterSecretStore` called `gcp-secret-store` show **`STATUS: SecretSynced`** | **`READY: True`**:
+      ```text
+      NAMESPACE          NAME                            STORETYPE            STORE              REFRESH INTERVAL   STATUS         READY
+      argocd             argocd-secret-patch             ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      external-secrets   my-cloudflare-config            ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      falco              falco-falcosidekick-ui-secret   ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      grafana            grafana-admin-credentials       ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      kube-system        my-cloudflare-juicefs-config    ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      litellm            my-litellm-postgres-config      ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      llamacpp-rocm      llamacpp-api-key                ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      open-webui         my-open-webui-postgres-config   ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      open-webui         my-open-webui-qdrant-config     ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      open-webui         my-open-webui-secret            ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      qdrant             my-qdrant-config                ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
+      tailscale          operator-oauth                  ClusterSecretStore   gcp-secret-store   1h                 SecretSynced   True
       ```
       *(Note: If migrating `cloudflare-kv-secret` from an older manual secret on an existing cluster, delete the legacy secret after updating GCP Secret Manager so ESO takes ownership: `kubectl delete secret cloudflare-kv-secret -n cloudflare-kv --ignore-not-found && ~/00-Installation-Testing/07-Cloudflare-Tunnel.sh -restart`.)*
 
