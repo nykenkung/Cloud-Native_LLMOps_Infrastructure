@@ -79,7 +79,7 @@ This project was developed incrementally over a 45-week timeline, solving comple
 
 ```
 January 16, 2026 [Project Kickoff]
- ├─ Initialized CISC 4900 Capstone repository and defined system architecture.
+ ├─ Initialized CISC 4900 project repository and defined system architecture.
  ├─ Configured baseline Windows 11 host with AMD Strix Halo APU (128GB unified memory).
  │
 January 23, 2026 [WSL2 Linux Kernel & OS Tuning]
@@ -101,7 +101,7 @@ February 20, 2026 [Helm Package Ecosystem Standardization]
  ├─ Created automated initialization scripts for 9 official community repositories.
  │
 February 28, 2026 [High-Availability Database Layer]
- ├─ Deployed CloudNativePG Operator v1.25.0 to manage declarative PostgreSQL 16 instances.
+ ├─ Deployed CloudNativePG Operator to manage declarative PostgreSQL 16 instances.
  ├─ Engineered automated primary-standby streaming replication with self-healing failover.
  │
 March 14, 2026 [Distributed POSIX Storage with Cloudflare R2]
@@ -156,7 +156,7 @@ November 21, 2026 [Cross-Cloud Keyless SecretOps Transformation]
  ├─ Consolidated all 30 credentials into single GCP Secret my-cisc4900-config (Free-Tier compliant).
  │
 November 24, 2026 [GitOps Finalization & Comprehensive Verification Suite]
- ├─ Transitioned all application deployments to Argo CD v3.6.2 with Server-Side Apply.
+ ├─ Transitioned all application deployments to Argo CD with Server-Side Apply.
  ├─ Built and verified 10-tier automated testing benchmark suite (Test 101 through Test 110).
  └─ Achieved 100% test pass rate across E2E inference, security penetration, and failover resilience.
 ```
@@ -164,29 +164,29 @@ November 24, 2026 [GitOps Finalization & Comprehensive Verification Suite]
 ---
 
 ## 🏗️ System Architecture & Simplified Data Flow
-### [1] External Network & Cloud Services
-External clients and cloud control planes interface with the on-premise K3s cluster without exposing any inbound router ports:
-* **Public Traffic (`Public Internet` -> `Cloudflare Edge`):** `HTTPS Clients` resolve `*.kung.nyc (DNS)` at `Cloudflare Edge`, which forwards traffic over an **Outbound Tunnel** initiated from inside the cluster. A scheduled **`DNS Sync (CronJob)`** keeps Kubernetes Ingress hostnames synchronized with Cloudflare DNS records.
-* **Local & Remote Private Access:** `LAN 192.168.1.0/24` clients connect directly via `*.sslip.io`, while `Remote Admins` connect over an encrypted `Tailscale VPN`.
-* **External Cloud Backends:** `Cloudflare R2 (S3 Object Store)` provides durable object storage over the **S3 API**; `GCP WIF & Secret Mgr (my-cisc4900-config)` serves secrets via keyless **OIDC/WIF** authentication; and `GitHub Repo & Pages` hosts both declarative **GitOps** manifests and public **OIDC JWKS** discovery metadata.
+### 1. External Network & Cloud Services
+* **External clients and cloud control planes interface with the on-premise K3s cluster without exposing any inbound router ports:
+  * Public Traffic (`Public Internet` -> `Cloudflare Edge`):** `HTTPS Clients` resolve `*.kung.nyc (DNS)` at `Cloudflare Edge`, which forwards traffic over an **Outbound Tunnel** initiated from inside the cluster. A scheduled **`DNS Sync (CronJob)`** keeps Kubernetes Ingress hostnames synchronized with Cloudflare DNS records.
+  *Local & Remote Private Access:** `LAN 192.168.1.0/24` clients connect directly via `*.sslip.io`, while `Remote Admins` connect over an encrypted `Tailscale VPN`.
+  *External Cloud Backends:** `Cloudflare R2 (S3 Object Store)` provides durable object storage over the **S3 API**; `GCP WIF & Secret Mgr (my-cisc4900-config)` serves secrets via keyless **OIDC/WIF** authentication; and `GitHub Repo & Pages` hosts both declarative **GitOps** manifests and public **OIDC JWKS** discovery metadata.
 
-### [2] K3s Cluster: Zero-Trust Edge Ingress
-Three specialized edge gateways terminate external connections and **`Route by Hostname (HTTPS/HTTP)`** to internal Kubernetes services:
-* **`Cloudflare Tunnel (cloudflared x2 pods)`:** Maintains dual-replica outbound tunnels to `Cloudflare Edge`, routing `open-webui.kung.nyc`, `api.kung.nyc`, and management portals (`qdrant` / `argocd` / `falco` / `grafana`).
-* **`Ingress-Nginx (hostNetwork :80/443)`:** Handles high-throughput local LAN routing (`*.sslip.io`) directly on host ports `:80/443`.
-* **`Tailscale Operator (WireGuard Mesh)`:** Bridges authorized `Remote Admins` directly into the cluster network over WireGuard.
+### 2. K3s Cluster: Zero-Trust Edge Ingress
+* **Three specialized edge gateways terminate external connections and **`Route by Hostname (HTTPS/HTTP)`** to internal Kubernetes services:
+  *`Cloudflare Tunnel (cloudflared x2 pods)`:** Maintains dual-replica outbound tunnels to `Cloudflare Edge`, routing `open-webui.kung.nyc`, `api.kung.nyc`, and management portals (`qdrant` / `argocd` / `falco` / `grafana`).
+  *`Ingress-Nginx (hostNetwork :80/443)`:** Handles high-throughput local LAN routing (`*.sslip.io`) directly on host ports `:80/443`.
+  *`Tailscale Operator (WireGuard Mesh)`:** Bridges authorized `Remote Admins` directly into the cluster network over WireGuard.
 
-### [3] Application & AI API Gateway [`Zero-Trust NetworkPolicy Enforced`]
-Application traffic is strictly segmented using Kubernetes `NetworkPolicy` (`[NP: ...]`) microsegmentation:
-* **`Open-WebUI Portal` (`open-webui-svc.open-webui:8080`):** Enforces **`[NP: Ingress Only]`**, accepting user sessions via `open-webui.kung.nyc`. It communicates with **`LiteLLM Gateway`** via **`OpenAI API (/v1/*)`**, queries **`Qdrant Vector DB`** via **`REST/gRPC API Key (:6333)`** for RAG retrieval, and persists chat history to PostgreSQL on **`:5432`**.
-* **`LiteLLM Gateway` (`litellm.litellm:4000`):** Enforces **`[NP: WebUI/Ingress Only]`**, serving both internal requests from `Open-WebUI Portal` and external **`Public API`** calls via `api.kung.nyc`. It authenticates downstream inference requests to **`llama.cpp ROCm Server`** using an internal **`Bearer Token`** and writes audit/routing logs to PostgreSQL on **`:5432`**.
+### 3. Application & AI API Gateway [`Zero-Trust NetworkPolicy Enforced`]
+* **Application traffic is strictly segmented using Kubernetes `NetworkPolicy` (`[NP: ...]`) microsegmentation:
+  *`Open-WebUI Portal` (`open-webui-svc.open-webui:8080`):** Enforces **`[NP: Ingress Only]`**, accepting user sessions via `open-webui.kung.nyc`. It communicates with **`LiteLLM Gateway`** via **`OpenAI API (/v1/*)`**, queries **`Qdrant Vector DB`** via **`REST/gRPC API Key (:6333)`** for RAG retrieval, and persists chat history to PostgreSQL on **`:5432`**.
+  *`LiteLLM Gateway` (`litellm.litellm:4000`):** Enforces **`[NP: WebUI/Ingress Only]`**, serving both internal requests from `Open-WebUI Portal` and external **`Public API`** calls via `api.kung.nyc`. It authenticates downstream inference requests to **`llama.cpp ROCm Server`** using an internal **`Bearer Token`** and writes audit/routing logs to PostgreSQL on **`:5432`**.
 
-### [4] Inference, Vector & Autoscaling
-Compute-intensive AI generation and semantic retrieval execute locally on dedicated hardware:
-* **`llama.cpp ROCm Server` (`llamacpp-rocm-svc:8080`):** Enforces **[`NP: LiteLLM Only`]** (`Lateral Access BLOCKED`), rejecting any unauthorized pod-to-pod traffic. It accesses physical GPU acceleration on the **`AMD Radeon 8060S (62GB VRAM/APU)`** via **`/dev/dxg`** and **`librocdxg.so`** passthrough, and loads GGUF weights from a shared **`RWX PVC`**.
-* **`Qdrant Vector DB` (`qdrant.qdrant:6333`):** Performs HNSW semantic vector search for `Open-WebUI Portal` (with dashboard access via `qdrant.kung.nyc`), backed by a dedicated **`PVC (10Gi)`**.
+### 4. Inference, Vector & Autoscaling
+* **Compute-intensive AI generation and semantic retrieval execute locally on dedicated hardware:
+  *`llama.cpp ROCm Server` (`llamacpp-rocm-svc:8080`):** Enforces **[`NP: LiteLLM Only`]** (`Lateral Access BLOCKED`), rejecting any unauthorized pod-to-pod traffic. It accesses physical GPU acceleration on the **`AMD Radeon 8060S (62GB VRAM/APU)`** via **`/dev/dxg`** and **`librocdxg.so`** passthrough, and loads GGUF weights from a shared **`RWX PVC`**.
+  *`Qdrant Vector DB` (`qdrant.qdrant:6333`):** Performs HNSW semantic vector search for `Open-WebUI Portal` (with dashboard access via `qdrant.kung.nyc`), backed by a dedicated **`PVC (10Gi)`**.
 
-### [5] High-Availability Storage & Databases
+### 5. High-Availability Storage & Databases
 Stateful workloads and large model artifacts are decoupled from ephemeral pods:
 * **`CloudNativePG PostgreSQL 16 (HA)`:** Enforces **`[NP: App-Only :5432 | Direct Access BLOCKED]`**, isolating three dedicated HA database clusters:
   * `open-webui-postgres-rw:5432` (Open-WebUI state & users)
@@ -194,27 +194,27 @@ Stateful workloads and large model artifacts are decoupled from ephemeral pods:
   * `juicefs-postgres-rw:5432 (Metadata)` (JuiceFS filesystem metadata engine)
 * **`JuiceFS CSI Storage (cloudflare-juicefs)`:** Mounts **`/HuggingFace-Models`** as a shared POSIX `RWX PVC` for `llama.cpp ROCm Server`, storing metadata in `juicefs-postgres-rw:5432` and persisting model blobs to **`Cloudflare R2`** via the **S3 API**.
 
-### [6] GitOps, SecretOps, Security & Observability
-A unified control plane governs deployment, credential injection, runtime defense, and autoscaling across all cluster tiers:
-* **`Argo CD (v3.6.2)` (`argocd-server:443` / `argocd.kung.nyc`):** Continuously reconciles cluster state from `GitHub Repo & Pages` via **`GitOps Sync (Server-Side Apply)`**.
-* **`External Secrets (ESO)` (`ClusterSecretStore: gcp-secret-store`):** Authenticates to `GCP WIF & Secret Mgr` using K3s projected OIDC tokens and executes **`Hourly Secret Sync (30 Keys -> K8s Secrets)`** across all namespaces with zero static credentials.
-* **`Falco eBPF / Prometheus / Grafana`:** Provides **`eBPF / Metrics / Scaling (ServiceMonitors & KEDA)`** across the stack—capturing kernel-level threats in **`Falcosidekick UI (:2802)`**, scraping inference queue and cluster metrics in **`Prometheus (:9090) -> KEDA`** for event-driven scaling, and visualizing ROCm GPU/LLM telemetry in **`Grafana (:80, grafana.kung.nyc)`**.
+### 6. GitOps, SecretOps, Security & Observability
+* **A unified control plane governs deployment, credential injection, runtime defense, and autoscaling across all cluster tiers:
+  *`Argo CD` (`argocd-server:443` / `argocd.kung.nyc`):** Continuously reconciles cluster state from `GitHub Repo & Pages` via **`GitOps Sync (Server-Side Apply)`**.
+  *`External Secrets (ESO)` (`ClusterSecretStore: gcp-secret-store`):** Authenticates to `GCP WIF & Secret Mgr` using K3s projected OIDC tokens and executes **`Hourly Secret Sync (30 Keys -> K8s Secrets)`** across all namespaces with zero static credentials.
+  *`Falco eBPF / Prometheus / Grafana`:** Provides **`eBPF / Metrics / Scaling (ServiceMonitors & KEDA)`** across the stack—capturing kernel-level threats in **`Falcosidekick UI (:2802)`**, scraping inference queue and cluster metrics in **`Prometheus (:9090) -> KEDA`** for event-driven scaling, and visualizing ROCm GPU/LLM telemetry in **`Grafana (:80, grafana.kung.nyc)`**.
 ```
 +=======================================================================================================+
 |                                  [1] External Network & Cloud Services                                |
 |                                                                                                       |
 |  +---------------------+  +--------------------+  +----------------------+  +----------------------+  |
-|  |   Public Internet   |  |   Cloudflare Edge  |  |  LAN 192.168.1.0/24  |  |    Remote Admins     |  |
-|  |    HTTPS Clients    |->|  *.kung.nyc (DNS)  |  |      *.sslip.io      |  |    Tailscale VPN     |  |
+|  |   Public Internet   +->|   Cloudflare Edge  |  |  LAN 192.168.1.0/24  |  |    Remote Admins     |  |
+|  |    HTTPS Clients    |  |  *.kung.nyc (DNS)  |  |      *.sslip.io      |  |    Tailscale VPN     |  |
 |  +---------------------+  +-------+------+-----+  +----------+-----------+  +----------+-----------+  |
 |                                   ^      |                   |                         |              |
-|  +---------------------------+    |      | Outbound          | Direct LAN              | WireGuard    |
-|  | External Cloud Backends   |    |      | Tunnel            | HTTP/HTTPS              | Mesh VPN     |
-|  | - Cloudflare R2 (S3)      | DNS Sync  |                   |                         |              |
-|  | - GCP WIF & Secret Mgr    | (CronJob) |                   |                         |              |
-|  |   (my-cisc4900-config)    |    |      |                   |                         |              |
-|  | - GitHub Repo & Pages     |    |      |                   |                         |              |
-|  |   (GitOps + OIDC JWKS)    |    |      |                   |                         |              |
+|  +---------------------------+    |      |                   |                         |              |
+|  |  External Cloud Backends  |    |      |                   |                         |              |
+|  |  - Cloudflare R2 (S3)     |    |      |                   |                         |              |
+|  |  - GCP WIF & Secret Mgr   | DNS Sync  | Outbound          | Direct LAN              | WireGuard    |
+|  |    (my-cisc4900-config)   | (CronJob) |  Tunnel           | HTTP/HTTPS              | Mesh VPN     |
+|  |  - GitHub Repo & Pages    |    |      |                   |                         |              |
+|  |    (GitOps + OIDC JWKS)   |    |      |                   |                         |              |
 |  +---------------------------+    |      |                   |                         |              |
 |                                   |      |                   |                         |              |
 +===================================|======|===================|=========================|==============+
@@ -223,23 +223,23 @@ A unified control plane governs deployment, credential injection, runtime defens
 +===================================|======|===================|=========================|==============+
 |                                 [2] K3s Cluster: Zero-Trust Edge Ingress                              |
 |                                                                                                       |
-|  +-------------------------------------+  +--------------------------+  +--------------------------+  |
-|  |          Cloudflare Tunnel          |  |      Ingress-Nginx       |  |    Tailscale Operator    |  |
-|  |        (cloudflared x2 pods)        |  |  (hostNetwork :80/443)   |  |     (WireGuard Mesh)     |  |
-|  +------------------+------------------+  +------------+-------------+  +------------+-------------+  |
-|                     |                                  |                             |                |
-+=====================|==================================|=============================|================+
-                      |                                  |                             |
-                      +----------------------------------+-----------------------------+
-                                                         |
-                                                         | Route by Hostname (HTTPS/HTTP)
-             +-------------------------------------------+----------------------------------+
-             |                                           |                                  | Management
-             v open-webui.kung.nyc                       v api.kung.nyc                     v  Portals*
-+============|===========================================|==================================|===========+
+|  +---------------------------------+  +------------------------------+  +--------------------------+  |
+|  |          Cloudflare Tunnel      |  |        Ingress-Nginx         |  |    Tailscale Operator    |  |
+|  |        (cloudflared x2 pods)    |  |    (hostNetwork :80/443)     |  |     (WireGuard Mesh)     |  |
+|  +------------------+--------------+  +-------------+----------------+  +------------+-------------+  |
+|                     |                               |                                |                |
++=====================|===============================|================================|================+
+                      |                               |                                |
+                      +-------------------------------+--------------------------------+
+                                                      |
+                                                      | Route by Hostname (HTTPS/HTTP)
+             +----------------------------------------+-------------------------------------+
+             |                                        |                                     | Management
+             v open-webui.kung.nyc                    v api.kung.nyc                        v  Portals*
++============|========================================|=====================================|===========+
 |            [3] Application & AI API Gateway [Zero-Trust NetworkPolicy Enforced]           |  *qdrant  |
 |                                                                                           |           |
-|  +--------- [NP: Ingress Only] --------+   OpenAI API   +-- [NP: WebUI/Ingress Only] --+  |  *argocd  |
+|  +-------- [NP: Ingress Only] ---------+   OpenAI API   +-- [NP: WebUI/Ingress Only] --+  |  *argocd  |
 |  |          Open-WebUI Portal          |    (/v1/*)     |       LiteLLM Gateway        |  |           |
 |  |   open-webui-svc.open-webui:8080    +--------------->+     litellm.litellm:4000     |  |  *falco   |
 |  +--------+-------------+--------------+                +--------+-------+-------------+  |           |
@@ -266,7 +266,7 @@ A unified control plane governs deployment, credential injection, runtime defens
             |                                                      |                          |
             v :5432                                                v :5432                    v RWX PVC
 +===========|======================================================|==========================|=========+
-|                                  [5] High-Availability Storage & Databases                            |
+|                                [5] High-Availability Storage & Databases                              |
 |                                                                                                       |
 |  +-------- [NP: App-Only :5432 | Direct Access BLOCKED] --------+       +--------------------------+  |
 |  |               CloudNativePG PostgreSQL 16 (HA)               |       |    JuiceFS CSI Storage   |  |
@@ -275,10 +275,10 @@ A unified control plane governs deployment, credential injection, runtime defens
 |  |                 - juicefs-postgres-rw:5432 (Metadata) <------+<------+      (Syncs to R2 S3)    |  |
 |  +--------------------------------------------------------------+       +--------------------------+  |
 |                                                                                                       |
-+===========:=============================:================================:============================+
-            ^     GitOps Sync             ^    Hourly Secret Sync          ^ eBPF / Metrics
-            : (Server-Side Apply)         : (30 Keys -> K8s Secrets)       : & KEDA Scaling
-+===========:=============================:================================:============================+
++===========:===========================:==================================:============================+
+            ^     GitOps Sync           ^    Hourly Secret Sync            ^  eBPF / Metrics
+            : (Server-Side Apply)       : (30 Keys -> K8s Secrets)         : & KEDA Scaling
++===========:===========================:==================================:============================+
 |                                [6] GitOps, SecretOps, Security & Observability                        |
 |                                                                                                       |
 |  +-------------------------+  +--------------------------+  +--------------------------------------+  |
@@ -300,35 +300,35 @@ A unified control plane governs deployment, credential injection, runtime defens
 <b>Cloud-Native_LLMOps_Infrastructure</b>
 │
 ├── <b>00-Installation-Testing/</b>              # Deployment orchestration, ops utilities, and verification benchmarks
-│   ├── Copy-SSH.bat                      # Silent individual file transfer script from Windows to WSL2 server
-│   ├── Delete-SSH.bat                    # Removes synced project directories (00~18 & K8s-OIDC-Provider) on WSL_SSH
-│   ├── Menu.sh                           # Master interactive & multi-task CLI console (0~18, A~S / A+~S+ / A-~S-, 91~92, 100~110)
+│   ├── Copy-SSH.bat                      # Project file transfer script from Windows to WSL2 Ubuntu server
+│   ├── Delete-SSH.bat                    # Remove all synced project directories on WSL2 Ubuntu server
+│   ├── Menu.sh                           # Master interactive & multi-task CLI console (e.g. [91 101 110])
 │   ├── 01-Hardware-OS-Configuration.sh   # [-install|-test|-restart|-uninstall] Configures /etc/wsl.conf, ~/.bashrc, inotify limits and apt utilities
 │   ├── 02-AMD-ROCm-DXG.sh                # [-install|-test|-restart|-uninstall] Verifies /dev/dxg, configures librocdxg.so, and tests ROCm diagnostic pod
-│   ├── 03-Kubernetes.sh                  # [-install|-test|-restart|-uninstall] Installs K3s, configures Kubeconfig and public OIDC issuer parameters
+│   ├── 03-Kubernetes.sh                  # [-install|-test|-restart|-uninstall] Installs K3s, configures Kubeconfig, public OIDC issuer parameters
 │   ├── 04-Helm.sh                        # [-install|-test|-restart|-uninstall] Installs Helm 3 package manager and initializes 9 community chart repos
-│   ├── 05-External-Secrets-Operator.sh   # [-install|-test|-restart|-uninstall] Sets up ESO, creates WIF config secret, and verifies ClusterSecretStore
-│   ├── 06-Tailscale-Operator.sh          # [-install|-test|-restart|-uninstall] Deploys Tailscale Operator, connects Tailnet, and creates ProxyGroup
-│   ├── 07-Cloudflare-Tunnel.sh           # [-install|-test|-restart|-uninstall] Deploys dual-replica cloudflared tunnel and CronJob DNS synchronizer
+│   ├── 05-External-Secrets-Operator.sh   # [-install|-test|-restart|-uninstall] Sets up ESO, creates WIF config secret, verifies ClusterSecretStore
+│   ├── 06-Tailscale-Operator.sh          # [-install|-test|-restart|-uninstall] Deploys Tailscale Operator, connects Tailnet, creates ProxyGroup
+│   ├── 07-Cloudflare-Tunnel.sh           # [-install|-test|-restart|-uninstall] Deploys dual-replica cloudflared tunnel, CronJob DNS synchronizer
 │   ├── 08-Ingress-Nginx.sh               # [-install|-test|-restart|-uninstall] Deploys Nginx Ingress Controller with hostNetwork for sslip.io access
 │   ├── 09-JuiceFS-CSI-Driver.sh          # [-install|-test|-restart|-uninstall] Installs JuiceFS CSI Driver and creates Cloudflare R2 StorageClass
 │   ├── 10-CloudNativePG-DB.sh            # [-install|-test|-restart|-uninstall] Deploys CloudNativePG Operator v1.25.0 and verifies controller readiness
 │   ├── 11-Qdrant-Vector-DB.sh            # [-install|-test|-restart|-uninstall] Deploys Qdrant vector database, applies Ingress and verifies port 6333
-│   ├── 12-ArgoCD-GitOps.sh               # [-install|-test|-restart|-uninstall] Deploys Argo CD v3.6.2 and reconciles Bcrypt admin password patch
+│   ├── 12-ArgoCD-GitOps.sh               # [-install|-test|-restart|-uninstall] Deploys Argo CD reconciles Bcrypt admin password patch
 │   ├── 13-Falco-Security.sh              # [-install|-test|-restart|-uninstall] Deploys Falco modern eBPF driver and sets up Falcosidekick Web UI
-│   ├── 14-Grafana-Prometheus-Stack.sh    # [-install|-test|-restart|-uninstall] Deploys Prometheus & Grafana stack and imports custom ROCm dashboards
+│   ├── 14-Grafana-Prometheus-Stack.sh    # [-install|-test|-restart|-uninstall] Deploys Prometheus & Grafana stack, imports custom ROCm dashboards
 │   ├── 15-KEDA-Autoscaler.sh             # [-install|-test|-restart|-uninstall] Deploys KEDA event-driven autoscaler and configures HTTP queue scaling
-│   ├── 16-LLaMAcpp-ROCm.sh               # [-install|-test|-restart|-uninstall] Deploys llama.cpp ROCm GPU server and dynamically mounts GGUF models
-│   ├── 17-LiteLLM-Gateway.sh             # [-install|-test|-restart|-uninstall] Deploys LiteLLM proxy, CloudNativePG PostgreSQL cluster, and Ingress routing
-│   ├── 18-Open-WebUI.sh                  # [-install|-test|-restart|-uninstall] Deploys Open-WebUI chat portal, CloudNativePG PostgreSQL cluster, and Ingress
-│   ├── 91-Check-Pod-Status.sh            # [Util 91] Checks ClusterSecretStore, Deployments, StatefulSets, and Pods across all namespaces
+│   ├── 16-LLaMAcpp-ROCm.sh               # [-install|-test|-restart|-uninstall] Deploys llama.cpp ROCm GPU server, dynamically mounts GGUF models
+│   ├── 17-LiteLLM-Gateway.sh             # [-install|-test|-restart|-uninstall] Deploys LiteLLM proxy, CloudNativePG PostgreSQL cluster, Ingress routing
+│   ├── 18-Open-WebUI.sh                  # [-install|-test|-restart|-uninstall] Deploys Open-WebUI chat portal, CloudNativePG PostgreSQL cluster, Ingress
+│   ├── 91-Check-Pod-Status.sh            # [Util 91] Checks ClusterSecretStore, Deployments, StatefulSets, Pods across all namespaces
 │   ├── 92-Reveal-ESO-Secrets.sh          # [Util 92] Exports all 30 ESO-managed K8s secrets as consolidated GCP JSON (my-cisc4900-config)
 │   ├── 100-Download-LLM.sh               # [Util 100] High-speed download of HuggingFace LLM models to /HuggingFace-Models
 │   ├── 101-Test-AI-Stack-E2E.sh          # [Test 101] Verifies full inference chain (Qdrant -> llama -> LiteLLM -> WebUI)
 │   ├── 102-Test-Security-Penetration.sh  # [Test 102] Validates NetworkPolicy zero-trust micro-isolation & Falco eBPF
 │   ├── 103-Test-RAG-Benchmark.sh         # [Test 103] Tests vector search indexing recall and closed-loop RAG answering
 │   ├── 104-Test-Concurrency-Throughput.sh# [Test 104] Stress tests concurrency (1~4 streams), TPS throughput & KEDA scaling
-│   ├── 105-Test-Context-Stress.sh        # [Test 105] Evaluates stepped context windows (1K~32K) and ROCm VRAM usage
+│   ├── 105-Test-Context-Stress.sh        # [Test 105] Evaluates stepped context windows (1K~32K), ROCm VRAM usage
 │   ├── 106-Test-Needle-In-Haystack.sh    # [Test 106] Conducts 32K context Needle-In-A-Haystack deep retrieval precision
 │   ├── 107-Test-LLM-Guardrails-OWASP.sh  # [Test 107] Audits OWASP Top 10 for LLMs (prompt injection, jailbreak, leaks)
 │   ├── 108-Test-Cluster-Security-Audit.sh # [Test 108] Audits Kubernetes RBAC least-privilege, Pod Security & Secrets
@@ -336,7 +336,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │   └── 110-Test-LLM-CLI.sh               # [Test 110] Interactive multi-turn terminal chatbot with dynamic model routing
 │
 ├── <b>01-Hardware-OS-Configuration/</b>         # Host environment settings
-│   ├── .bashrc                           # User shell profile declaring KUBECONFIG and Linux environment variables
+│   ├── .bashrc                           # User shell profile declaring KUBECONFIG, Linux environment variables
 │   └── wsl.conf                          # WSL2 boot configuration (systemd enabled, automount options)
 │
 ├── <b>02-AMD-ROCm-DXG/</b>                      # AMD GPU acceleration and verification
@@ -351,8 +351,8 @@ A unified control plane governs deployment, credential injection, runtime defens
 │
 ├── <b>05-External-Secrets-Operator/</b>         # Cross-cloud keyless secret synchronization
 │   ├── 1-External-Secrets-Namespace.yaml # Namespace definition for external-secrets components
-│   ├── wif-credentials.json              # (Generated locally via GCP WIF, see Phase 5.4; excluded via .gitignore)
-│   └── Google-Cloud-Platform-CSS.yaml    # (Replace projectID with your GCP Project ID, see Phase 5.7) ClusterSecretStore declaring connection to Google Cloud Secret Manager
+│   ├── wif-credentials.json              # (Generated locally by Google Cloud WIF, see Phase 5.4) WIF credential configuration file of Google Cloud Secret Manager
+│   └── Google-Cloud-Platform-CSS.yaml    # (Replace projectID with your Google Cloud Project ID, see Phase 5.7) ClusterSecretStore declaring connection to Google Cloud Secret Manager
 │
 ├── <b>06-Tailscale-Operator/</b>                # Encrypted mesh VPN integration
 │   ├── 1-Tailscale-Namespace.yaml        # Namespace definition for tailscale controller
@@ -381,7 +381,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │
 ├── <b>10-CloudNativePG-DB/</b>                  # PostgreSQL high-availability operator
 │   ├── 1-CloudNativePG-Namespace.yaml    # Namespace definition for cnpg-system
-│   └── 2-CloudNativePG-Operator.yaml     # CloudNativePG Operator v1.25.0 deployment manifests
+│   └── 2-CloudNativePG-Operator.yaml     # CloudNativePG Operator deployment manifests
 │
 ├── <b>11-Qdrant-Vector-DB/</b>                  # Semantic search vector database
 │   ├── 1-Qdrant-Namespace.yaml           # Namespace definition for qdrant
@@ -391,7 +391,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 ├── <b>12-ArgoCD-GitOps/</b>                     # Declarative continuous delivery platform
 │   ├── 1-ArgoCD-Namespace.yaml           # Namespace definition for argocd
 │   ├── 2-ArgoCD-Ingress.yaml             # Ingress with SSL-passthrough exposing Argo CD Web UI
-│   ├── 3-ArgoCD-Install.yaml             # Official Argo CD v3.6.2 complete installation manifests
+│   ├── 3-ArgoCD-Install.yaml             # Official Argo CD complete installation manifests
 │   ├── ArgoCD-App-External-Secrets.yaml  # Argo CD Application manifest managing External Secrets Operator (with WIF Helm values)
 │   └── My-ArgoCD-ExternalSecret.yaml     # Patches argocd-secret with Bcrypt hashed admin password from GCP
 │
