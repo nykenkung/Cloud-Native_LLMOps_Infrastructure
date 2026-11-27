@@ -188,7 +188,7 @@ Compute-intensive AI generation and semantic retrieval execute locally on dedica
 
 ### [5] High-Availability Storage & Databases
 Stateful workloads and large model artifacts are decoupled from ephemeral pods:
-* **`CloudNativePG PostgreSQL 16 (HA)`:** Enforces **`[NP: App-Only :5432 | Direct Access BLOCKED]`**, isolating three dedicated HA database clusters:
+* **`CloudNativePG PostgreSQL 16 (High-Availability)`:** Enforces **`[NP: App-Only :5432 | Direct Access BLOCKED]`**, isolating three dedicated high-availability database clusters:
   * `open-webui-postgres-rw:5432` (Open-WebUI state & users)
   * `litellm-postgres-rw:5432` (LiteLLM keys & usage logs)
   * `juicefs-postgres-rw:5432 (Metadata)` (JuiceFS filesystem metadata engine)
@@ -196,7 +196,7 @@ Stateful workloads and large model artifacts are decoupled from ephemeral pods:
 
 ### [6] GitOps, SecretOps, Security & Observability
 A unified control plane governs deployment, credential injection, runtime defense, and autoscaling across all cluster tiers:
-* **`Argo CD (v3.6.2)` (`argocd-server:443` / `argocd.kung.nyc`):** Continuously reconciles cluster state from `GitHub Repo & Pages` via **`GitOps Sync (Server-Side Apply)`**.
+* **`Argo CD` (`argocd-server:443` / `argocd.kung.nyc`):** Continuously reconciles cluster state from `GitHub Repo & Pages` via **`GitOps Sync (Server-Side Apply)`**.
 * **`External Secrets (ESO)` (`ClusterSecretStore: gcp-secret-store`):** Authenticates to `GCP WIF & Secret Mgr` using K3s projected OIDC tokens and executes **`Hourly Secret Sync (30 Keys -> K8s Secrets)`** across all namespaces with zero static credentials.
 * **`Falco eBPF / Prometheus / Grafana`:** Provides **`eBPF / Metrics / Scaling (ServiceMonitors & KEDA)`** across the stack—capturing kernel-level threats in **`Falcosidekick UI (:2802)`**, scraping inference queue and cluster metrics in **`Prometheus (:9090) -> KEDA`** for event-driven scaling, and visualizing ROCm GPU/LLM telemetry in **`Grafana (:80, grafana.kung.nyc)`**.
 ```
@@ -269,7 +269,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 |                                [5] High-Availability Storage & Databases                              |
 |                                                                                                       |
 |  +-------- [NP: App-Only :5432 | Direct Access BLOCKED] --------+       +--------------------------+  |
-|  |               CloudNativePG PostgreSQL 16 (HA)               |       |    JuiceFS CSI Storage   |  |
+|  |         CloudNativePG PostgreSQL 16 (High-Availability)      |       |    JuiceFS CSI Storage   |  |
 |  |                 - open-webui-postgres-rw:5432                |       |    (cloudflare-juicefs)  |  |
 |  |                 - litellm-postgres-rw:5432                   |       |    /HuggingFace-Models   |  |
 |  |                 - juicefs-postgres-rw:5432 (Metadata) <------+<------+      (Syncs to R2 S3)    |  |
@@ -282,7 +282,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 |                                [6] GitOps, SecretOps, Security & Observability                        |
 |                                                                                                       |
 |  +-------------------------+  +--------------------------+  +--------------------------------------+  |
-|  |     Argo CD (v3.6.2)    |  |  External Secrets (ESO)  |  |  Falco eBPF / Prometheus / Grafana   |  |
+|  |         Argo CD         |  |  External Secrets (ESO)  |  |  Falco eBPF / Prometheus / Grafana   |  |
 |  |    argocd-server:443    |  |    ClusterSecretStore:   |  |  - Falcosidekick UI (:2802)          |  |
 |  |    (argocd.kung.nyc)    |  |     gcp-secret-store     |  |  - Prometheus (:9090) -> KEDA        |  |
 |  |   (GitHub Repo Sync)    |  | (GCP WIF / GitHub OIDC)  |  |  - Grafana (:80 | grafana.kung.nyc)  |  |
@@ -300,7 +300,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 <b>Cloud-Native_LLMOps_Infrastructure</b>
 │
 ├── <b>00-Installation-Testing/</b>              # Deployment orchestration, ops utilities, and verification benchmarks
-│   ├── Copy-SSH.bat                      # Project file transfer script from Windows to WSL2 Ubuntu server
+│   ├── Copy-SSH.bat                      # Project SSH file transfer script from Windows to Ubuntu server
 │   ├── Delete-SSH.bat                    # Remove all synced project directories on WSL2 Ubuntu server
 │   ├── Menu.sh                           # Master interactive & multi-task CLI console (e.g. [91 101 110])
 │   ├── 01-Hardware-OS-Configuration.sh   # [-install|-test|-restart|-uninstall] Configures /etc/wsl.conf, ~/.bashrc, inotify limits and apt utilities
