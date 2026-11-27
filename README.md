@@ -41,9 +41,9 @@
 
 ## 🌟 Executive Summary
 
-**CISC4900 Cloud-Native Scalable AI Infrastructure** is an enterprise-grade private cloud platform designed for production-level Large Language Model (LLM) serving, semantic search, and Retrieval-Augmented Generation (RAG). 
+**CISC4900 Cloud-Native Scalable AI Infrastructure** is an enterprise-grade private cloud platform designed for production-level Large Language Model (LLM) serving, semantic search and Retrieval-Augmented Generation (RAG). 
 
-Operating on physical AMD hardware (**AMD Ryzen AI Max+ 395 APU with Radeon 8060S Strix Halo gfx1151 GPU, 128GB Unified Host RAM, and ~62GB shared VRAM allocation**), the platform completely removes dependency on third-party commercial AI APIs (e.g., OpenAI, Anthropic), saving organizations hundreds of thousands of dollars annually while ensuring complete data sovereignty and zero telemetry leaks.
+Operating on physical AMD hardware (**AMD Ryzen AI Max+ 395 APU with Radeon 8060S Strix Halo gfx1151 GPU, 128GB Unified Host RAM and ~62GB shared VRAM allocation**), the platform completely removes dependency on third-party commercial AI APIs (e.g., OpenAI, Anthropic), saving organizations hundreds of thousands of dollars annually while ensuring complete data sovereignty and zero telemetry leaks.
 
 ### Key Architectural Pillars
 
@@ -57,7 +57,7 @@ Operating on physical AMD hardware (**AMD Ryzen AI Max+ 395 APU with Radeon 8060
 
 * **Declarative GitOps Continuous Delivery**
   
-  Managed end-to-end by Argo CD (`v3.6.2`). The entire infrastructure, from namespaces, storage classes, and database operators up to inference runtimes and web portals, is defined declaratively and reconciled automatically with Server-Side Apply in ordered sync waves.
+  Managed end-to-end by Argo CD (`v3.6.2`). The entire infrastructure, from namespaces, storage classes and database operators up to inference runtimes and web portals, is defined declaratively and reconciled automatically with Server-Side Apply in ordered sync waves.
 
 * **Hardware-Accelerated Sovereign AI Inference**
   
@@ -65,17 +65,17 @@ Operating on physical AMD hardware (**AMD Ryzen AI Max+ 395 APU with Radeon 8060
 
 * **Unified Multi-Model Gateway & Semantic RAG**
   
-  LiteLLM Gateway provides an enterprise-standard OpenAI-compatible proxy interface backed by CloudNativePG PostgreSQL for connection pooling, request logging, and rate limiting. Open-WebUI pairs natively with Qdrant Vector Database to execute sub-millisecond semantic document retrieval and hybrid RAG.
+  LiteLLM Gateway provides an enterprise-standard OpenAI-compatible proxy interface backed by CloudNativePG PostgreSQL for connection pooling, request logging and rate limiting. Open-WebUI pairs natively with Qdrant Vector Database to execute sub-millisecond semantic document retrieval and hybrid RAG.
 
 * **Kernel-Level Runtime Defense & Full-Stack Observability**
   
-  Falco inspects system calls directly in the Linux kernel via modern eBPF probes, firing instant alerts on privilege escalations or suspicious shell commands. Prometheus and Grafana provide continuous visibility into ROCm GPU memory consumption, slot queue depth, token throughput (TPS), and latency (TTFT).
+  Falco inspects system calls directly in the Linux kernel via modern eBPF probes, firing instant alerts on privilege escalations or suspicious shell commands. Prometheus and Grafana provide continuous visibility into ROCm GPU memory consumption, slot queue depth, token throughput (TPS) and latency (TTFT).
 
 ---
 
 ## 📅 Engineering & Development Log (January 16 - November 24, 2026)
 
-This project was developed incrementally over a 45-week timeline, solving complex systems engineering, hardware acceleration, zero-trust security, and cloud-native orchestration challenges:
+This project was developed incrementally over a 45-week timeline, solving complex systems engineering, hardware acceleration, zero-trust security and cloud-native orchestration challenges:
 
 ```
 January 16, 2026 [Project Kickoff]
@@ -142,7 +142,7 @@ August 8, 2026 [Runtime Threat Defense with Modern eBPF]
  │
 October 17, 2026 [Full-Stack Observability Stack (LGTM)]
  ├─ Deployed Prometheus and Grafana monitoring stack via Prometheus Community Helm Chart.
- ├─ Designed a custom Grafana dashboard tracking ROCm GPU VRAM, queue depth, TPS, and TTFT.
+ ├─ Designed a custom Grafana dashboard tracking ROCm GPU VRAM, queue depth, TPS and TTFT.
  │
 November 14, 2026 [Event-Driven Dynamic Autoscaling (KEDA)]
  ├─ Deployed KEDA autoscaler to dynamically monitor HTTP inference queue depth.
@@ -158,7 +158,7 @@ November 21, 2026 [Cross-Cloud Keyless SecretOps Transformation]
 November 24, 2026 [GitOps Finalization & Comprehensive Verification Suite]
  ├─ Transitioned all application deployments to Argo CD with Server-Side Apply.
  ├─ Built and verified 10-tier automated testing benchmark suite (Test 101 through Test 110).
- └─ Achieved 100% test pass rate across E2E inference, security penetration, and failover resilience.
+ └─ Achieved 100% test pass rate across E2E inference, security penetration and failover resilience.
 ```
 
 ---
@@ -172,18 +172,18 @@ External clients and cloud control planes interface with the on-premise K3s clus
 
 ### [2] K3s Cluster: Zero-Trust Edge Ingress
 Three specialized edge gateways terminate external connections and **`Route by Hostname (HTTPS/HTTP)`** to internal Kubernetes services:
-* **`Cloudflare Tunnel (cloudflared x2 pods)`:** Maintains dual-replica outbound tunnels to `Cloudflare Edge`, routing `open-webui.kung.nyc`, `api.kung.nyc`, and management portals (`qdrant` / `argocd` / `falco` / `grafana`).
+* **`Cloudflare Tunnel (cloudflared x2 pods)`:** Maintains dual-replica outbound tunnels to `Cloudflare Edge`, routing `open-webui.kung.nyc`, `api.kung.nyc` and management portals (`qdrant` / `argocd` / `falco` / `grafana`).
 * **`Ingress-Nginx (hostNetwork :80/443)`:** Handles high-throughput local LAN routing (`*.sslip.io`) directly on host ports `:80/443`.
 * **`Tailscale Operator (WireGuard Mesh)`:** Bridges authorized `Remote Admins` directly into the cluster network over WireGuard.
 
 ### [3] Application & AI API Gateway [`Zero-Trust NetworkPolicy Enforced`]
 Application traffic is strictly segmented using Kubernetes `NetworkPolicy` (`[NP: ...]`) microsegmentation:
-* **`Open-WebUI Portal` (`open-webui-svc.open-webui:8080`):** Enforces **`[NP: Ingress Only]`**, accepting user sessions via `open-webui.kung.nyc`. It communicates with **`LiteLLM Gateway`** via **`OpenAI API (/v1/*)`**, queries **`Qdrant Vector DB`** via **`REST/gRPC API Key (:6333)`** for RAG retrieval, and persists chat history to PostgreSQL on **`:5432`**.
+* **`Open-WebUI Portal` (`open-webui-svc.open-webui:8080`):** Enforces **`[NP: Ingress Only]`**, accepting user sessions via `open-webui.kung.nyc`. It communicates with **`LiteLLM Gateway`** via **`OpenAI API (/v1/*)`**, queries **`Qdrant Vector DB`** via **`REST/gRPC API Key (:6333)`** for RAG retrieval and persists chat history to PostgreSQL on **`:5432`**.
 * **`LiteLLM Gateway` (`litellm.litellm:4000`):** Enforces **`[NP: WebUI/Ingress Only]`**, serving both internal requests from `Open-WebUI Portal` and external **`Public API`** calls via `api.kung.nyc`. It authenticates downstream inference requests to **`llama.cpp ROCm Server`** using an internal **`Bearer Token`** and writes audit/routing logs to PostgreSQL on **`:5432`**.
 
 ### [4] Inference, Vector & Autoscaling
 Compute-intensive AI generation and semantic retrieval execute locally on dedicated hardware:
-* **`llama.cpp ROCm Server` (`llamacpp-rocm-svc:8080`):** Enforces **[`NP: LiteLLM Only`]** (`Lateral Access BLOCKED`), rejecting any unauthorized pod-to-pod traffic. It accesses physical GPU acceleration on the **`AMD Radeon 8060S (128GB RAM/APU)`** via **`/dev/dxg`** and **`librocdxg.so`** passthrough, and loads GGUF weights from a shared **`RWX PVC`**.
+* **`llama.cpp ROCm Server` (`llamacpp-rocm-svc:8080`):** Enforces **[`NP: LiteLLM Only`]** (`Lateral Access BLOCKED`), rejecting any unauthorized pod-to-pod traffic. It accesses physical GPU acceleration on the **`AMD Radeon 8060S (128GB RAM/APU)`** via **`/dev/dxg`** and **`librocdxg.so`** passthrough and loads GGUF weights from a shared **`RWX PVC`**.
 * **`Qdrant Vector DB` (`qdrant.qdrant:6333`):** Performs HNSW semantic vector search for `Open-WebUI Portal` (with dashboard access via `qdrant.kung.nyc`), backed by a dedicated **`PVC (10Gi)`**.
 
 ### [5] High-Availability Storage & Databases
@@ -195,10 +195,10 @@ Stateful workloads and large model artifacts are decoupled from ephemeral pods:
 * **`JuiceFS CSI Storage (cloudflare-juicefs)`:** Mounts **`/HuggingFace-Models`** as a shared POSIX `RWX PVC` for `llama.cpp ROCm Server`, storing metadata in `juicefs-postgres-rw:5432` and persisting model blobs to **`Cloudflare R2`** via the **S3 API**.
 
 ### [6] GitOps, SecretOps, Security & Observability
-A unified control plane governs deployment, credential injection, runtime defense, and autoscaling across all cluster tiers:
+A unified control plane governs deployment, credential injection, runtime defense and autoscaling across all cluster tiers:
 * **`Argo CD` (`argocd-server:443` / `argocd.kung.nyc`):** Continuously reconciles cluster state from `GitHub Repo & Pages` via **`GitOps Sync (Server-Side Apply)`**.
 * **`External Secrets (ESO)` (`ClusterSecretStore: gcp-secret-store`):** Authenticates to `GCP WIF & Secret Mgr` using K3s projected OIDC tokens and executes **`Hourly Secret Sync (30 Keys -> K8s Secrets)`** across all namespaces with zero static credentials.
-* **`Falco eBPF / Prometheus / Grafana`:** Provides **`eBPF / Metrics / Scaling (ServiceMonitors & KEDA)`** across the stack—capturing kernel-level threats in **`Falcosidekick UI (:2802)`**, scraping inference queue and cluster metrics in **`Prometheus (:9090) -> KEDA`** for event-driven scaling, and visualizing ROCm GPU/LLM telemetry in **`Grafana (:80, grafana.kung.nyc)`**.
+* **`Falco eBPF / Prometheus / Grafana`:** Provides **`eBPF / Metrics / Scaling (ServiceMonitors & KEDA)`** across the stack, capturing kernel-level threats in **`Falcosidekick UI (:2802)`**, scraping inference queue and cluster metrics in **`Prometheus (:9090) -> KEDA`** for event-driven scaling and visualizing ROCm GPU/LLM telemetry in **`Grafana (:80, grafana.kung.nyc)`**.
 ```
 +=======================================================================================================+
 |                                  [1] External Network & Cloud Services                                |
@@ -299,12 +299,12 @@ A unified control plane governs deployment, credential injection, runtime defens
 <pre>
 <b>Cloud-Native_LLMOps_Infrastructure</b>
 │
-├── <b>00-Installation-Testing/</b>              # Deployment orchestration, ops utilities, and verification benchmarks
+├── <b>00-Installation-Testing/</b>              # Deployment orchestration, Ops utilities and verification benchmarks
 │   ├── Copy-SSH.bat                      # Project SSH file transfer script from Windows to Ubuntu server
 │   ├── Delete-SSH.bat                    # Remove all synced project directories on WSL2 Ubuntu server
 │   ├── Menu.sh                           # Master interactive & multi-task CLI console (e.g. [91 101 110])
 │   ├── 01-Hardware-OS-Configuration.sh   # [-install|-test|-restart|-uninstall] Configures /etc/wsl.conf, ~/.bashrc, inotify limits and apt utilities
-│   ├── 02-AMD-ROCm-DXG.sh                # [-install|-test|-restart|-uninstall] Verifies /dev/dxg, configures librocdxg.so, and tests ROCm diagnostic pod
+│   ├── 02-AMD-ROCm-DXG.sh                # [-install|-test|-restart|-uninstall] Verifies /dev/dxg, configures librocdxg.so and tests ROCm diagnostic pod
 │   ├── 03-Kubernetes.sh                  # [-install|-test|-restart|-uninstall] Installs K3s, configures Kubeconfig, public OIDC issuer parameters
 │   ├── 04-Helm.sh                        # [-install|-test|-restart|-uninstall] Installs Helm 3 package manager and initializes 9 community chart repos
 │   ├── 05-External-Secrets-Operator.sh   # [-install|-test|-restart|-uninstall] Sets up ESO, creates WIF config secret, verifies ClusterSecretStore
@@ -486,7 +486,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ### 2. Kubernetes Core Cluster & Package Management
 * **Architecture & Storage Role:**
-  * Installs K3s (`v1.37.2+k3s1`) using containerd, Flannel CNI, and Metrics Server.
+  * Installs K3s (`v1.37.2+k3s1`) using containerd, Flannel CNI and Metrics Server.
   * Traefik is explicitly disabled via `--disable traefik`.
   * Public OIDC identity is enabled by configuring `/etc/rancher/k3s/config.yaml` with `--service-account-issuer=https://nykenkung.github.io/Cloud-Native_LLMOps_Infrastructure/K8s-OIDC-Provider`.
 * **Core Strengths:**
@@ -577,10 +577,10 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ### 5. High-Availability Storage & Enterprise Databases
 * **Architecture & Storage Role:**
-  * **CloudNativePG**: Manages declarative PostgreSQL 16 instances with streaming replication, continuous health checking, and automatic failover.
+  * **CloudNativePG**: Manages declarative PostgreSQL 16 instances with streaming replication, continuous health checking and automatic failover.
   * **JuiceFS CSI Driver**: Provides a shared POSIX file system backed by Cloudflare R2 object storage, mounting `/var/lib/juicefs` across worker pods.
 * **Core Strengths:**
-  * Guarantees ACID transaction safety for session logs, chat history, and API keys with sub-second failover.
+  * Guarantees ACID transaction safety for session logs, chat history and API keys with sub-second failover.
 * **Original Deployment Commands:**
   ```bash
   # Step 9: Install JuiceFS CSI Driver and StorageClass
@@ -621,7 +621,7 @@ A unified control plane governs deployment, credential injection, runtime defens
   * **Falco**: Modern eBPF kernel instrumentation hooks into system calls, dispatching real-time alerts to Falcosidekick Web UI.
   * **Prometheus & Grafana**: Collects cluster metrics and scrapes custom llama.cpp inference metrics via ServiceMonitors.
 * **Core Strengths:**
-  * Zero overhead kernel monitoring with pre-built Grafana dashboards tracking GPU utilization, queue depth, and TTFT latency.
+  * Zero overhead kernel monitoring with pre-built Grafana dashboards tracking GPU utilization, queue depth and TTFT latency.
 * **Original Deployment Commands:**
   ```bash
   # Step 13: Deploy Falco with Modern eBPF Driver
@@ -737,14 +737,14 @@ To set up passwordless SSH authentication between your Windows client and the WS
    (Windows) ssh WSL_SSH
    (Ubuntu) ~/00-Installation-Testing/Menu.sh
    ```
-   * **Multi-Task CLI Mode:** `Menu.sh` accepts strictly `0 to 18` (`Install`), `A to S` (`Test`), `A+ to S+` (`Restart`), `A- to S-` (`Uninstall`), `91` (`91-Check-Pod-Status.sh`), `92` (`92-Reveal-ESO-Secrets.sh`), and `100-110` (`Benchmarks`), supporting space-separated sequential pipelines (e.g., `~/00-Installation-Testing/Menu.sh 91 101 110`). Each module script (`01` to `18`) independently accepts `-install`, `-test`, `-restart`, and `-uninstall`.
+   * **Multi-Task CLI Mode:** `Menu.sh` accepts strictly `0 to 18` (`Install`), `A to S` (`Test`), `A+ to S+` (`Restart`), `A- to S-` (`Uninstall`), `91` (`91-Check-Pod-Status.sh`), `92` (`92-Reveal-ESO-Secrets.sh`), `100-110` (`Benchmarks`), supporting space-separated sequential pipelines (e.g., `~/00-Installation-Testing/Menu.sh 91 101 110`). Each module script (`01` to `18`) independently accepts `-install`, `-test`, `-restart`, `-uninstall`.
 
 ---
 
 ### Phase 3: Bootstrapping Local Air-Gapped AI Stack
 Before enabling cloud integrations, you can initialize the core AI inference stack in completely offline local mode:
 1. **Initialize Local Secrets for Databases & Microservices:**
-   Generate baseline credentials for PostgreSQL, Qdrant, and LiteLLM:
+   Generate baseline credentials for PostgreSQL, Qdrant, LiteLLM:
    ```bash
    kubectl create namespace litellm --dry-run=client -o yaml | kubectl apply -f -
    kubectl create namespace open-webui --dry-run=client -o yaml | kubectl apply -f -
@@ -1325,4 +1325,4 @@ You [turn 2]: /exit
 This project is submitted in partial fulfillment of the requirements for the **CISC 4900 Project** at **Brooklyn College of the City University of New York (CUNY)**.
 
 * **Codebase & Architecture:** Released under the [MIT License](https://opensource.org/licenses/MIT).
-* **Model Weights:** Google Gemma 4, Qwen 3.6, and Meta Muse Glimmer weights are governed by their respective community terms of use and open-weights distribution agreements.
+* **Model Weights:** Google Gemma 4, Qwen 3.6, Meta Muse Glimmer weights are governed by their respective community terms of use and open-weights distribution agreements.
