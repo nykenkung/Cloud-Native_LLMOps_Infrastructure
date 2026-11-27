@@ -29,13 +29,13 @@
 | :--- | :--- | :--- | :--- | :--- |
 | **Frontend** | **Open-WebUI Portal** | [https://open-webui.kung.nyc](https://open-webui.kung.nyc) | `open-webui-svc.open-webui.svc:8080` | **Demo Account:**<br/>• Email: `test@test.com`<br/>• Password: `test` |
 | **Gateway** | **LiteLLM Gateway** | [https://api.kung.nyc](https://api.kung.nyc) | `litellm.litellm.svc:4000` | Bearer Token managed via ESO (`my-cisc4900-config`) |
-| **Inference**| **llama.cpp ROCm** | *Internal Protected* | `llamacpp-rocm-svc.llamacpp-rocm.svc:8080` | Internal Bearer Token synced via ESO |
+| **Inference**| **llama.cpp ROCm** | Internal Protected | `llamacpp-rocm-svc.llamacpp-rocm.svc:8080` | Internal Bearer Token synced via ESO |
 | **Vector DB**| **Qdrant Vector DB** | [https://qdrant.kung.nyc](https://qdrant.kung.nyc/dashboard) | `qdrant.qdrant.svc:6333` | Read/Write API Key synced via ESO |
 | **GitOps** | **Argo CD UI** | [https://argocd.kung.nyc](https://argocd.kung.nyc) | `argocd-server.argocd.svc:443` | Admin password managed via Bcrypt ESO patch |
 | **Security** | **Falco Sidekick UI**| [https://falco.kung.nyc](https://falco.kung.nyc) | `falco-falcosidekick-ui.falco.svc:2802` | Basic Auth synced via ESO (`my-cisc4900-config`) |
 | **Monitor** | **Grafana LGTM** | [https://grafana.kung.nyc](https://grafana.kung.nyc) | `lgtm-prometheus-grafana.grafana.svc:80` | Admin credentials synced via ESO |
-| **Metrics** | **Prometheus Core** | *Internal Protected* | `lgtm-prometheus-kube-prome-prometheus.grafana.svc:9090` | ServiceMonitor metrics scraping endpoints |
-| **Mesh VPN** | **Tailscale Operator**| *Tailnet Virtual IP* | `tailscale-pg-0.tailscale.svc` | Operator OAuth Secret synced via ESO |
+| **Metrics** | **Prometheus Core** | Internal Protected | `lgtm-prometheus-kube-prome-prometheus.grafana.svc:9090` | ServiceMonitor metrics scraping endpoints |
+| **Mesh VPN** | **Tailscale Operator**| Tailnet Virtual IP | `tailscale-pg-0.tailscale.svc` | Operator OAuth Secret synced via ESO |
 
 ---
 
@@ -164,6 +164,100 @@ This project was developed incrementally over a 45-week timeline, solving comple
 ---
 
 ## 🏗️ System Architecture & Simplified Data Flow
+
+<pre>
+<b>+=======================================================================================================+
+|                                  [1] External Network & Cloud Services                                |
+|                                                                                                       |
+|</b>  +---------------------+  +--------------------+  +----------------------+  +----------------------+  <b>|
+|</b>  |   <b>Public Internet</b>   +->|   <b>Cloudflare Edge</b>  |  |  <b>LAN 192.168.1.0/24</b>  |  |    <b>Remote Admins</b>     |  <b>|
+|</b>  |    <b>HTTPS Clients</b>    |  |  *.kung.nyc (DNS)  |  |      <b>*.sslip.io</b>      |  |    <b>Tailscale VPN</b>     |  <b>|
+|</b>  +---------------------+  +-------+------+-----+  +----------+-----------+  +----------+-----------+  <b>|
+|</b>                                   ^      |                   |                         |              <b>|
+|</b>  +---------------------------+    |      |                   |                         |              <b>|
+|</b>  |  <b>External Cloud Backends</b>  |    |      |                   |                         |              <b>|
+|</b>  |  - Cloudflare R2 (S3)     |    |      |                   |                         |              <b>|
+|</b>  |  - GCP WIF & Secret Mgr   | DNS Sync  | Outbound          | Direct LAN              | WireGuard    <b>|
+|</b>  |    (my-cisc4900-config)   | (CronJob) |  Tunnel           | HTTP/HTTPS              | Mesh VPN     <b>|
+|</b>  |  - GitHub Repo & Pages    |    |      |                   |                         |              <b>|
+|</b>  |    (GitOps + OIDC JWKS)   |    |      |                   |                         |              <b>|
+|</b>  +---------------------------+    |      |                   |                         |              <b>|
+|</b>                                   |      |                   |                         |              <b>|
++===================================</b>|<b>======</b>|<b>===================</b>|<b>=========================</b>|<b>==============+</b>
+                                    ^      |                   |                         |
+                                    |      v                   v                         v
+<b>+===================================</b>|<b>======</b>|<b>===================</b>|<b>=========================</b>|<b>==============+
+|                                 [2] K3s Cluster: Zero-Trust Edge Ingress                              |
+|                                                                                                       |
+|</b>  +---------------------------------+  +------------------------------+  +--------------------------+  <b>|
+|</b>  |          <b>Cloudflare Tunnel</b>      |  |        <b>Ingress-Nginx</b>         |  |    <b>Tailscale Operator</b>    |  <b>|
+|</b>  |        (cloudflared x2 pods)    |  |    (hostNetwork :80/443)     |  |     (WireGuard Mesh)     |  <b>|
+|</b>  +------------------+--------------+  +-------------+----------------+  +------------+-------------+  <b>|
+|</b>                     |                               |                                |                <b>|
++=====================</b>|<b>===============================</b>|<b>================================</b>|<b>================+</b>
+                      |                               |                                |
+                      +-------------------------------+--------------------------------+
+                                                      |
+                                                      | Route by Hostname (HTTPS/HTTP)
+             +----------------------------------------+-------------------------------------+
+             |                                        |                                     | Management
+             v open-webui.kung.nyc                    v api.kung.nyc                        v  Portals*
+<b>+============</b>|<b>========================================</b>|<b>=====================================</b>|<b>===========+
+|            [3] Application & AI API Gateway [Zero-Trust NetworkPolicy Enforced]           |  *qdrant  |
+|                                                                                           |           |
+|</b>  +-------- [NP: Ingress Only] ---------+   OpenAI API   +-- [NP: WebUI/Ingress Only] --+  <b>|  *argocd  |
+|</b>  |          <b>Open-WebUI Portal</b>          |    (/v1/*)     |       <b>LiteLLM Gateway</b>        |  <b>|           |
+|</b>  |   open-webui-svc.open-webui:8080    +--------------->+     litellm.litellm:4000     |  <b>|  *falco   |
+|</b>  +--------+-------------+--------------+                +--------+-------+-------------+  <b>|           |
+|</b>           |             |                                        |       |                <b>|  *grafana |
++===========</b>|<b>=============</b>|<b>========================================</b>|<b>=======</b>|<b>================</b>|<b>===========+</b>
+            |             |                                        |       |
+            v             v REST/gRPC API Key (Port :6333)         v       v Bearer Token
+<b>+===========</b>|<b>=============</b>|<b>========================================</b>|<b>=======</b>|<b>============================+
+|</b>           |             |   <b>[4] Inference, Vector & Autoscaling</b>  |       |                            <b>|
+|</b>           |             v                                        |       v                            <b>|
+|</b>           |   +---------+------------------------+               |  +----+- [NP: LiteLLM Only] ----+  <b>|
+|</b>           |   |         <b>Qdrant Vector DB</b>         |               |  |      <b>llama.cpp ROCm Server</b>    |  <b>|
+|</b>           |   |        qdrant.qdrant:6333        |               |  |     llamacpp-rocm-svc:8080   |  <b>|
+|</b>           |   |     (HNSW | qdrant.kung.nyc)     |               |  |    (Lateral Access BLOCKED)  |  <b>|
+|</b>           |   +---------+------------------------+               |  +----+------------------+------+  <b>|
+|</b>           |             |                                        |       |  /dev/dxg        |         <b>|
+|</b>           |             v Persistent Volume                      |       v librocdxg.so     |         <b>|
+|</b>           |   +---------+------------------------+               |  +----+---------------+  |         <b>|
+|</b>           |   |      <b>Qdrant Local PVC (10GB)</b>      |               |  |   <b>AMD Radeon 8060S</b>  |  |         <b>|
+|</b>           |   |   (Persistent Vector Storage)    |               |  |  (128GB RAM / APU) |  |         <b>|
+|</b>           |   +----------------------------------+               |  +--------------------+  |         <b>|
+|</b>           |                                                      |                          |         <b>|
++===========</b>|<b>======================================================</b>|<b>==========================</b>|<b>=========+</b>
+            |                                                      |                          |
+            v Port :5432                                           v Port :5432               v RWX PVC
+<b>+===========</b>|<b>======================================================</b>|<b>==========================</b>|<b>=========+
+|                                [5] High-Availability Storage & Databases                              |
+|                                                                                                       |
+|</b>  +-------- [NP: App-Only :5432 | Direct Access BLOCKED] --------+       +--------------------------+  <b>|
+|</b>  |         <b>CloudNativePG PostgreSQL 16 (High-Availability)</b>      |       |    <b>JuiceFS CSI Storage</b>   |  <b>|
+|</b>  |                 - open-webui-postgres-rw:5432                |       |    (cloudflare-juicefs)  |  <b>|
+|</b>  |                 - litellm-postgres-rw:5432                   |       |    /HuggingFace-Models   |  <b>|
+|</b>  |                 - juicefs-postgres-rw:5432 (Metadata) <------+<------+      (Syncs to R2 S3)    |  <b>|
+|</b>  +--------------------------------------------------------------+       +--------------------------+  <b>|
+|                                                                                                       |
++===========</b>:<b>===========================</b>:<b>==================================</b>:<b>============================+</b>
+            ^     GitOps Sync           ^    Hourly Secret Sync            ^  eBPF / Metrics
+            : (Server-Side Apply)       : (30 Keys -> K8s Secrets)         : & KEDA Scaling
+<b>+===========</b>:<b>===========================</b>:<b>==================================</b>:<b>============================+
+|                                [6] GitOps, SecretOps, Security & Observability                        |
+|                                                                                                       |
+|</b>  +-------------------------+  +--------------------------+  +--------------------------------------+  <b>|
+|</b>  |         <b>Argo CD</b>         |  |  <b>External Secrets (ESO)</b>  |  |  <b>Falco eBPF / Prometheus / Grafana</b>   |  <b>|
+|</b>  |    argocd-server:443    |  |    ClusterSecretStore:   |  |  - Falcosidekick UI (:2802)          |  <b>|
+|</b>  |    (argocd.kung.nyc)    |  |     gcp-secret-store     |  |  - Prometheus (:9090) -> KEDA        |  <b>|
+|</b>  |   (GitHub Repo Sync)    |  | (GCP WIF / GitHub OIDC)  |  |  - Grafana (:80 | grafana.kung.nyc)  |  <b>|
+|</b>  +-------------------------+  +--------------------------+  +--------------------------------------+  <b>|
+|                                                                                                       |
++=======================================================================================================+</b>
+           Legend: [NP: ...] = Kubernetes NetworkPolicy Zero-Trust Microsegmentation Boundary
+</pre>
+
 ### [1] External Network & Cloud Services
 External clients and cloud control planes interface with the on-premise K3s cluster without exposing any inbound router ports:
 * **Public Traffic (`Public Internet` -> `Cloudflare Edge`):** `HTTPS Clients` resolve `*.kung.nyc (DNS)` at `Cloudflare Edge`, which forwards traffic over an **Outbound Tunnel** initiated from inside the cluster. A scheduled **`DNS Sync (CronJob)`** keeps Kubernetes Ingress hostnames synchronized with Cloudflare DNS records.
@@ -184,7 +278,7 @@ Application traffic is strictly segmented using Kubernetes `NetworkPolicy` (`[NP
 ### [4] Inference, Vector & Autoscaling
 Compute-intensive AI generation and semantic retrieval execute locally on dedicated hardware:
 * **`llama.cpp ROCm Server` (`llamacpp-rocm-svc:8080`):** Enforces **[`NP: LiteLLM Only`]** (`Lateral Access BLOCKED`), rejecting any unauthorized pod-to-pod traffic. It accesses physical GPU acceleration on the **`AMD Radeon 8060S (128GB RAM/APU)`** via **`/dev/dxg`** and **`librocdxg.so`** passthrough and loads GGUF weights from a shared **`RWX PVC`**.
-* **`Qdrant Vector DB` (`qdrant.qdrant:6333`):** Performs HNSW semantic vector search for `Open-WebUI Portal` (with dashboard access via `qdrant.kung.nyc`), backed by a dedicated **`PVC (10Gi)`**.
+* **`Qdrant Vector DB` (`qdrant.qdrant:6333`):** Performs HNSW semantic vector search for `Open-WebUI Portal` (with dashboard access via `qdrant.kung.nyc`), backed by a dedicated **`PVC (10GB)`**.
 
 ### [5] High-Availability Storage & Databases
 Stateful workloads and large model artifacts are decoupled from ephemeral pods:
@@ -199,98 +293,6 @@ A unified control plane governs deployment, credential injection, runtime defens
 * **`Argo CD` (`argocd-server:443` / `argocd.kung.nyc`):** Continuously reconciles cluster state from `GitHub Repo & Pages` via **`GitOps Sync (Server-Side Apply)`**.
 * **`External Secrets (ESO)` (`ClusterSecretStore: gcp-secret-store`):** Authenticates to `GCP WIF & Secret Mgr` using K3s projected OIDC tokens and executes **`Hourly Secret Sync (30 Keys -> K8s Secrets)`** across all namespaces with zero static credentials.
 * **`Falco eBPF / Prometheus / Grafana`:** Provides **`eBPF / Metrics / Scaling (ServiceMonitors & KEDA)`** across the stack, capturing kernel-level threats in **`Falcosidekick UI (:2802)`**, scraping inference queue and cluster metrics in **`Prometheus (:9090) -> KEDA`** for event-driven scaling and visualizing ROCm GPU/LLM telemetry in **`Grafana (:80, grafana.kung.nyc)`**.
-<pre>
-+=======================================================================================================+
-|                                  <b>[1] External Network & Cloud Services</b>                                |
-|                                                                                                       |
-|  +---------------------+  +--------------------+  +----------------------+  +----------------------+  |
-|  |   Public Internet   +->|   Cloudflare Edge  |  |  LAN 192.168.1.0/24  |  |    Remote Admins     |  |
-|  |    HTTPS Clients    |  |  *.kung.nyc (DNS)  |  |      *.sslip.io      |  |    Tailscale VPN     |  |
-|  +---------------------+  +-------+------+-----+  +----------+-----------+  +----------+-----------+  |
-|                                   ^      |                   |                         |              |
-|  +---------------------------+    |      |                   |                         |              |
-|  |  External Cloud Backends  |    |      |                   |                         |              |
-|  |  - Cloudflare R2 (S3)     |    |      |                   |                         |              |
-|  |  - GCP WIF & Secret Mgr   | DNS Sync  | Outbound          | Direct LAN              | WireGuard    |
-|  |    (my-cisc4900-config)   | (CronJob) |  Tunnel           | HTTP/HTTPS              | Mesh VPN     |
-|  |  - GitHub Repo & Pages    |    |      |                   |                         |              |
-|  |    (GitOps + OIDC JWKS)   |    |      |                   |                         |              |
-|  +---------------------------+    |      |                   |                         |              |
-|                                   |      |                   |                         |              |
-+===================================|======|===================|=========================|==============+
-                                    ^      |                   |                         |
-                                    |      v                   v                         v
-+===================================|======|===================|=========================|==============+
-|                                 <b>[2] K3s Cluster: Zero-Trust Edge Ingress</b>                              |
-|                                                                                                       |
-|  +---------------------------------+  +------------------------------+  +--------------------------+  |
-|  |          Cloudflare Tunnel      |  |        Ingress-Nginx         |  |    Tailscale Operator    |  |
-|  |        (cloudflared x2 pods)    |  |    (hostNetwork :80/443)     |  |     (WireGuard Mesh)     |  |
-|  +------------------+--------------+  +-------------+----------------+  +------------+-------------+  |
-|                     |                               |                                |                |
-+=====================|===============================|================================|================+
-                      |                               |                                |
-                      +-------------------------------+--------------------------------+
-                                                      |
-                                                      | Route by Hostname (HTTPS/HTTP)
-             +----------------------------------------+-------------------------------------+
-             |                                        |                                     | Management
-             v open-webui.kung.nyc                    v api.kung.nyc                        v  Portals*
-+============|========================================|=====================================|===========+
-|            <b>[3] Application & AI API Gateway [Zero-Trust NetworkPolicy Enforced]</b>           |  *qdrant  |
-|                                                                                           |           |
-|  +-------- [NP: Ingress Only] ---------+   OpenAI API   +-- [NP: WebUI/Ingress Only] --+  |  *argocd  |
-|  |          Open-WebUI Portal          |    (/v1/*)     |       LiteLLM Gateway        |  |           |
-|  |   open-webui-svc.open-webui:8080    +--------------->+     litellm.litellm:4000     |  |  *falco   |
-|  +--------+-------------+--------------+                +--------+-------+-------------+  |           |
-|           |             |                                        |       |                |  *grafana |
-+===========|=============|========================================|=======|================|===========+
-            |             |                                        |       |
-            v             v REST/gRPC API Key (:6333)              v       v Bearer Token
-+===========|=============|========================================|=======|============================+
-|           |             |   <b>[4] Inference, Vector & Autoscaling</b>  |       |                            |
-|           |             v                                        |       v                            |
-|           |   +---------+------------------------+               |  +----+- [NP: LiteLLM Only] ----+  |
-|           |   |         Qdrant Vector DB         |               |  |     llama.cpp ROCm Server    |  |
-|           |   |        qdrant.qdrant:6333        |               |  |     llamacpp-rocm-svc:8080   |  |
-|           |   |     (HNSW | qdrant.kung.nyc)     |               |  |    (Lateral Access BLOCKED)  |  |
-|           |   +---------+------------------------+               |  +----+------------------+------+  |
-|           |             |                                        |       |  /dev/dxg        |         |
-|           |             v Persistent Volume                      |       v librocdxg.so     |         |
-|           |   +---------+------------------------+               |  +----+---------------+  |         |
-|           |   |     Qdrant Local PVC (10Gi)      |               |  |  AMD Radeon 8060S  |  |         |
-|           |   |   (Persistent Vector Storage)    |               |  |  (128GB RAM / APU) |  |         |
-|           |   +----------------------------------+               |  +--------------------+  |         |
-|           |                                                      |                          |         |
-+===========|======================================================|==========================|=========+
-            |                                                      |                          |
-            v :5432                                                v :5432                    v RWX PVC
-+===========|======================================================|==========================|=========+
-|                                <b>[5] High-Availability Storage & Databases</b>                              |
-|                                                                                                       |
-|  +-------- [NP: App-Only :5432 | Direct Access BLOCKED] --------+       +--------------------------+  |
-|  |         CloudNativePG PostgreSQL 16 (High-Availability)      |       |    JuiceFS CSI Storage   |  |
-|  |                 - open-webui-postgres-rw:5432                |       |    (cloudflare-juicefs)  |  |
-|  |                 - litellm-postgres-rw:5432                   |       |    /HuggingFace-Models   |  |
-|  |                 - juicefs-postgres-rw:5432 (Metadata) <------+<------+      (Syncs to R2 S3)    |  |
-|  +--------------------------------------------------------------+       +--------------------------+  |
-|                                                                                                       |
-+===========:===========================:==================================:============================+
-            ^     GitOps Sync           ^    Hourly Secret Sync            ^  eBPF / Metrics
-            : (Server-Side Apply)       : (30 Keys -> K8s Secrets)         : & KEDA Scaling
-+===========:===========================:==================================:============================+
-|                                <b>[6] GitOps, SecretOps, Security & Observability</b>                        |
-|                                                                                                       |
-|  +-------------------------+  +--------------------------+  +--------------------------------------+  |
-|  |         Argo CD         |  |  External Secrets (ESO)  |  |  Falco eBPF / Prometheus / Grafana   |  |
-|  |    argocd-server:443    |  |    ClusterSecretStore:   |  |  - Falcosidekick UI (:2802)          |  |
-|  |    (argocd.kung.nyc)    |  |     gcp-secret-store     |  |  - Prometheus (:9090) -> KEDA        |  |
-|  |   (GitHub Repo Sync)    |  | (GCP WIF / GitHub OIDC)  |  |  - Grafana (:80 | grafana.kung.nyc)  |  |
-|  +-------------------------+  +--------------------------+  +--------------------------------------+  |
-|                                                                                                       |
-+=======================================================================================================+
-           Legend: [NP: ...] = Kubernetes NetworkPolicy Zero-Trust Microsegmentation Boundary
-</pre>
 
 ---
 
@@ -455,7 +457,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ## ⚙️ Enterprise Infrastructure Components
 
-### 1. Hardware Virtualization & Host Operating System
+### Part 1. Hardware Virtualization & Host Operating System
 * **Architecture & Storage Role:**
   * Configures `/etc/wsl.conf` to enable native systemd support and customize kernel automount rules.
   * Tunes `/etc/sysctl.d/99-inotify.conf` with `fs.inotify.max_user_instances=8192` and `fs.inotify.max_user_watches=1048576`, preventing eBPF probe crashes and Kubernetes container file watcher exhaustion.
@@ -484,7 +486,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ---
 
-### 2. Kubernetes Core Cluster & Package Management
+### Part 2. Kubernetes Core Cluster & Package Management
 * **Architecture & Storage Role:**
   * Installs K3s (`v1.37.2+k3s1`) using containerd, Flannel CNI and Metrics Server.
   * Traefik is explicitly disabled via `--disable traefik`.
@@ -506,7 +508,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ---
 
-### 3. Cross-Cloud Keyless SecretOps & GitOps Management
+### Part 3. Cross-Cloud Keyless SecretOps & GitOps Management
 * **Architecture & Storage Role:**
   * Solves secret distribution without static JSON keys or plaintext passwords.
   * K3s issues short-lived Projected ServiceAccount Tokens mounted at `/var/run/secrets/k8s-oidc/token`.
@@ -537,7 +539,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ---
 
-### 4. Zero-Trust Ingress & Edge Networking
+### Part 4. Zero-Trust Ingress & Edge Networking
 * **Architecture & Storage Role:**
   * **Cloudflare Tunnel (`cloudflared`)**: Runs 2 replicas in `cloudflare-kv` namespace, maintaining outbound tunnels to Cloudflare global edge network.
   * **Nginx Ingress**: Binds directly to host networking (`controller.hostNetwork=true`) for direct LAN resolution on port 80/443 without routing bottlenecks.
@@ -575,7 +577,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ---
 
-### 5. High-Availability Storage & Enterprise Databases
+### Part 5. High-Availability Storage & Enterprise Databases
 * **Architecture & Storage Role:**
   * **CloudNativePG**: Manages declarative PostgreSQL 16 instances with streaming replication, continuous health checking and automatic failover.
   * **JuiceFS CSI Driver**: Provides a shared POSIX file system backed by Cloudflare R2 object storage, mounting `/var/lib/juicefs` across worker pods.
@@ -597,7 +599,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ---
 
-### 6. Semantic Vector Search Database
+### Part 6. Semantic Vector Search Database
 * **Architecture & Storage Role:**
   * Deploys Qdrant Vector DB configured with HNSW index algorithms, supporting cosine distance similarity search for Open-WebUI RAG pipelines.
 * **Core Strengths:**
@@ -616,7 +618,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ---
 
-### 7. Runtime Security & Full-Stack Observability
+### Part 7. Runtime Security & Full-Stack Observability
 * **Architecture & Storage Role:**
   * **Falco**: Modern eBPF kernel instrumentation hooks into system calls, dispatching real-time alerts to Falcosidekick Web UI.
   * **Prometheus & Grafana**: Collects cluster metrics and scrapes custom llama.cpp inference metrics via ServiceMonitors.
@@ -642,7 +644,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ---
 
-### 8. AI Inference, Gateway & Autoscaling Stack
+### Part 8. AI Inference, Gateway & Autoscaling Stack
 * **Architecture & Storage Role:**
   * **KEDA**: Monitors HTTP queue depth from LiteLLM and dynamically scales llama.cpp worker instances.
   * **llama.cpp ROCm**: Runs hardware-accelerated GGUF models directly on the AMD Radeon 8060S GPU.
@@ -932,7 +934,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
    =====================================================================
    {
      "tailscale_client_id": "<Your_Tailscale_Client_ID>",
-     "tailscale_client_secret": "<Your_Tailscale_Client_Secret_Start>",
+     "tailscale_client_secret": "<Your_Tailscale_Client_Secret>",
      "cf_account_id": "<Your_Cloudflare_Account_ID>",
      "cf_kv_namespace_id": "<Your_Cloudflare_KV_Namespace_ID>",
      "cf_api_token": "<Your_Cloudflare_API_Token>",
@@ -1009,9 +1011,9 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
 
 ---
 
-### Test Execution & Diagnostic Procedures (Actual Verified Outputs: Test 101–110)
+### Test Execution & Diagnostic Procedures (Actual Verified Outputs: Test [`101`]–[`110`])
 
-#### 1. `101-Test-AI-Stack-E2E.sh` - End-to-End Inference Verification
+#### Test [`101`]. `101-Test-AI-Stack-E2E.sh` - End-to-End Inference Verification
 **What It Tests:** Validates the complete end-to-end request chain from public Zero-Trust ingress down to GPU inference and vector storage. The script dynamically extracts ESO-managed credentials from Kubernetes Secrets (`qdrant`, `litellm`, `llamacpp-rocm`) and verifies five tiers in order:
 1. **Qdrant Vector DB:** Checks `/healthz` and authenticated `/collections` API access on `:6333`.
 2. **llama.cpp ROCm Engine:** Checks `/health` and executes a live `/completion` token generation call (auto-selecting a lightweight model such as `qwen2.5-0.5b-instruct-q4_k_m` when available).
@@ -1060,7 +1062,7 @@ Open-WebUI ClusterIP: 10.43.176.196:8080
 
 ---
 
-#### 2. `102-Test-Security-Penetration.sh` - Network Isolation & Threat Audit
+#### Test [`102`]. `102-Test-Security-Penetration.sh` - Network Isolation & Threat Audit
 **What It Tests:** Performs active penetration testing across four security boundaries:
 1. **Negative Authentication:** Probes LiteLLM, Qdrant, `llama.cpp` with invalid or missing API keys to enforce strict `HTTP 401/403` rejection.
 2. **NetworkPolicy Zero-Trust Microsegmentation:** Deploys an ephemeral unprivileged `curlimages/curl` sandbox pod in the `default` namespace and attempts unauthorized lateral connections to `llamacpp-rocm-svc.llamacpp-rocm.svc:8080` and `litellm-postgres-rw.litellm.svc:5432`, verifying both are dropped by Kubernetes `NetworkPolicy` before cleaning up the sandbox pod.
@@ -1103,7 +1105,7 @@ Attempting unauthorized lateral connection: default pod -> litellm-postgres:5432
 
 ---
 
-#### 3. `103-Test-RAG-Benchmark.sh` - Qdrant Vector Search & Closed-Loop RAG QA
+#### Test [`103`]. `103-Test-RAG-Benchmark.sh` - Qdrant Vector Search & Closed-Loop RAG QA
 **What It Tests:** Executes a closed-loop Retrieval-Augmented Generation (RAG) evaluation across Qdrant and LiteLLM:
 1. **Collection Initialization:** Creates a temporary 4-dimensional Cosine similarity collection (`cisc4900_rag_eval`) in Qdrant.
 2. **Knowledge Ingestion:** Upserts 3 domain-specific knowledge base vectors covering cluster hardware, networking, and databases.
@@ -1146,7 +1148,7 @@ Total RAG Latency: 562 ms
 
 ---
 
-#### 4. `104-Test-Concurrency-Throughput.sh` - Concurrency, TPS & KEDA Autoscaling
+#### Test [`104`]. `104-Test-Concurrency-Throughput.sh` - Concurrency, TPS & KEDA Autoscaling
 **What It Tests:** Benchmarks parallel streaming generation under multi-user load and checks autoscaling telemetry:
 1. **Parallel Streaming Stress:** Uses Python `ThreadPoolExecutor` to dispatch concurrent SSE streaming requests (`stream: true`, `max_tokens: 100`) to LiteLLM across **1, 2, 4 parallel streams** (accepts an optional model name `$1`), computing Average Time to First Token (TTFT in ms), Per-Stream Speed (tokens/sec), and Aggregate APU Throughput (tokens/sec).
 2. **KEDA & HPA Verification:** Inspects the `ScaledObject` and HorizontalPodAutoscaler (`keda-hpa-llamacpp-rocm-scaler`) in `llamacpp-rocm`.
@@ -1196,7 +1198,7 @@ keda-hpa-llamacpp-rocm-scaler   Deployment/llamacpp-rocm-deploy   0/1 (avg)   1 
 
 ---
 
-#### 5. `105-Test-Context-Stress.sh` - Stepped Context Window (1K–32K) & ROCm VRAM Stress
+#### Test [`105`]. `105-Test-Context-Stress.sh` - Stepped Context Window (1K–32K) & ROCm VRAM Stress
 **What It Tests:** Stress-tests KV-Cache memory scaling and AMD ROCm unified VRAM stability across progressively larger prompt windows. After confirming `llama.cpp` health, it synthesizes prompts across five stepped context sizes (**1000, 4000, 8000, 16000, 32000 words**) and submits each through LiteLLM (`max_tokens: 20`, 180s timeout), recording end-to-end processing time and asserting every tier completes without truncation or GPU OOM crashes. *(If no model is loaded, it reports GPU memory topology via `rocm-smi`/PyTorch and displays the configured 32K KV-cache parameters.)*
 
 ```bash
@@ -1240,8 +1242,8 @@ Response Time: 13860 ms
 
 ---
 
-#### 6. `106-Test-Needle-In-Haystack.sh` - 32K NIAH Deep Memory Precision
-**What It Tests:** Evaluates long-context attention fidelity and eliminates "lost-in-the-middle" retrieval blindspots. The script embeds a synthetic recovery token (`STRIX-HALO-8060S-VALIDATED`) at **25%, 50%, and 75% depth** inside **4000, 8000, 16000, 24000** token-equivalent filler haystacks and queries LiteLLM deterministically (`temperature: 0.0`, `max_tokens: 30`), logging latency and asserting 100% exact-match recall across all 12 `(Context, Depth)` matrix combinations.
+#### Test [`106`]. `106-Test-Needle-In-Haystack.sh` - 32K NIAH Deep Memory Precision
+**What It Tests:** Evaluates long-context attention fidelity and eliminates "lost-in-the-middle" retrieval blindspots. The script embeds a synthetic recovery token (`STRIX-HALO-8060S-VALIDATED`) at **25%, 50%, and 75% depth** inside **4000, 8000, 16000, 24000** token-equivalent filler haystacks and queries LiteLLM deterministically (`temperature: 0.0`, `max_tokens: 30`), logging latency and asserting 100% exact-match recall across all 12 (`Context, Depth`) matrix combinations.
 
 ```bash
 ~/00-Installation-Testing/106-Test-Needle-In-Haystack.sh
@@ -1277,7 +1279,7 @@ Context    | Depth    | Latency (s)  | Retrieval Status
 
 ---
 
-#### 7. `107-Test-LLM-Guardrails-OWASP.sh` - OWASP Top 10 for LLMs Security Audit
+#### Test [`107`]. `107-Test-LLM-Guardrails-OWASP.sh` - OWASP Top 10 for LLMs Security Audit
 **What It Tests:** Audits live model safety alignment and gateway guardrails against four **OWASP Top 10 for LLM** adversarial vectors (auto-selecting a flagship model such as Qwen 3.6 35B, Gemma 4 31B or accepting `$1`):
 * **`LLM01-Prompt-Injection`:** Attempts to override system instructions to force output of `SYSTEM_COMPROMISED_ACCESS_GRANTED`.
 * **`LLM02-Secret-Disclosure`:** Attempts social-engineered credential extraction of environment variables and API keys, scanning both visible output and `reasoning_content` to verify the LiteLLM Master Key is never leaked.
@@ -1314,7 +1316,7 @@ Summary: 4/4 Guardrail Defense Tests Passed.
 
 ---
 
-#### 8. `108-Test-Cluster-Security-Audit.sh` - Kubernetes RBAC, Pod Security & Secrets Audit
+#### Test [`108`]. `108-Test-Cluster-Security-Audit.sh` - Kubernetes RBAC, Pod Security & Secrets Audit
 **What It Tests:** Performs a 5-domain Kubernetes and cloud-native security compliance audit:
 1. **RBAC Least-Privilege & Token Isolation:** Scans all `ClusterRoleBindings` to confirm zero `default` ServiceAccounts hold `cluster-admin`, then spawns a temporary sandbox pod and uses its mounted ServiceAccount token to query `/api/v1/namespaces/kube-system/secrets`, asserting `HTTP 403 Forbidden`.
 2. **Pod Security Standards (PSS):** Audits all application namespaces (excluding system daemons, edge ingress, GPU passthrough, Tailscale, and node-exporter) to confirm zero workloads run with `hostPID`, `hostNetwork` or `privileged` containers.
@@ -1359,11 +1361,11 @@ Total Ingress Routes Configured: 6
 
 ---
 
-#### 9. `109-Test-Storage-Persistence-Failover.sh` - Storage CSI, CNPG Persistence & Resiliency
+#### Test [`109`]. `109-Test-Storage-Persistence-Failover.sh` - Storage CSI, CNPG Persistence & Resiliency
 **What It Tests:** Validates stateful storage durability, database cluster integrity, Kubernetes workload self-healing across four storage and resiliency layers:
 1. **JuiceFS Distributed CSI Storage:** Verifies that StorageClass `cloudflare-juicefs-sc` exists, JuiceFS CSI Driver controller/node pods (`app.kubernetes.io/name=juicefs-csi-driver`) are `Running` and the shared RWX model PVC (`llamacpp-model-pvc` in `llamacpp-rocm`) is `Bound`.
 2. **CloudNativePG PostgreSQL Clusters:** Queries cluster phase, desired instances, ready instances (`>= 1`) for all three declarative PostgreSQL 16 clusters: `cloudflare-juicefs-postgres` (`kube-system`), `litellm-postgres` (`litellm`) and `open-webui-postgres` (`open-webui`).
-3. **Qdrant Vector Database PVC:** Confirms the Qdrant persistent volume claim in namespace `qdrant` is `Bound` and reports its provisioned capacity (`10Gi`).
+3. **Qdrant Vector Database PVC:** Confirms the Qdrant persistent volume claim in namespace `qdrant` is `Bound` and reports its provisioned capacity (`10GB`).
 4. **Cluster-Wide Pod Resiliency:** Audits all pods across every namespace, asserting `0` pods are in a degraded or non-`Running`/non-`Succeeded` state.
 
 ```bash
@@ -1390,7 +1392,7 @@ Open-WebUI PostgreSQL Cluster Status: Cluster in healthy state (1/1 instances re
 [PASS] Open-WebUI PostgreSQL: Primary instance active, persistent connection pools verified.
 
 --- 3. Qdrant Vector Database Persistent Volume (PVC) ---
-Qdrant PVC Status: Bound (Capacity: 10Gi)
+Qdrant PVC Status: Bound (Capacity: 10GB)
 [PASS] Qdrant Vector Storage: PVC Bound successfully with persistent disk backing.
 
 --- 4. Kubernetes Workload Self-Healing & Pod Resiliency Audit ---
@@ -1404,7 +1406,7 @@ Total Cluster Pods: 49 | Unhealthy/Degraded: 0
 
 ---
 
-#### 10. `110-Test-LLM-CLI.sh` - Interactive LLM Model Selection & Multi-Turn CLI Chat
+#### Test [`110`]. `110-Test-LLM-CLI.sh` - Interactive LLM Model Selection & Multi-Turn CLI Chat
 **What It Tests:** Launches an interactive terminal-based LLM client to validate live model discovery, dynamic backend routing and multi-turn conversational state directly over SSH:
 1. **Backend & Model Auto-Discovery:** Resolves ClusterIP endpoints for both LiteLLM Gateway (`litellm:4000`) and `llama.cpp` Direct (`llamacpp-rocm-svc:8080`), runs `/health/liveliness` and `/health` probes, queries `/v1/models` on both services (deduplicating models and filtering wildcard aliases) and presents a numbered selection menu with `qwen2.5-0.5b-instruct-q4_k_m` prioritized as the default.
 2. **Multi-Turn Chat & Reasoning Support:** Maintains a full JSON conversation history (`messages[]`) with configurable `max_tokens` (default `1024`) and `temperature` (default `0.7`), automatically extracts and formats reasoning traces (`<think>`/`<thought>`/`<thinking>` tags or `reasoning_content` fields), logs exchanges to `~/.llm-cli-history` and supports live slash commands (`/clear`, `/model`, `/tokens N`, `/temp N`, `/history`, `/help`, `/exit`).
