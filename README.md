@@ -1453,8 +1453,8 @@ Select a model [1-4, default: 1]: <b>1</b>
    /exit    - Exit the chat session
 ==================================================================
 
-<b>You [turn 1]: What is Kubernetes? Reply in one concise sentence.</b>
-AI: <b>Kubernetes is a scalable and modular container orchestration platform that enables easy deployment, management, and scaling of applications.
+<b>You [turn 1]: What is Kubernetes? Reply in one concise sentence.
+AI: Kubernetes is a scalable and modular container orchestration platform that enables easy deployment, management, and scaling of applications.
 
 You [turn 2]: /history
 [INFO] Current conversation: 1 turn(s)
