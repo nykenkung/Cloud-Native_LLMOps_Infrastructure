@@ -169,19 +169,19 @@ This project was developed incrementally over a 45-week timeline, solving comple
 <b>+=======================================================================================================+
 |                                  [1] External Network & Cloud Services                                |
 |                                                                                                       |
-|</b>  +---------------------+  +--------------------+  +----------------------+  +----------------------+  <b>|
-|</b>  |   <b>Public Internet</b>   +->|   <b>Cloudflare Edge</b>  |  |  <b>LAN 192.168.1.0/24</b>  |  |    <b>Remote Admins</b>     |  <b>|
-|</b>  |    <b>HTTPS Clients</b>    |  |  *.kung.nyc (DNS)  |  |      <b>*.sslip.io</b>      |  |    <b>Tailscale VPN</b>     |  <b>|
-|</b>  +---------------------+  +-------+------+-----+  +----------+-----------+  +----------+-----------+  <b>|
+|  +---------------------+  +--------------------+  +----------------------+  +----------------------+  |
+|  |   Public Internet</b>   +->|   <b>Cloudflare Edge  |  |  LAN 192.168.1.0/24  |  |    Remote Admins     |  |
+|  |    HTTPS Clients    |  |  *.kung.nyc (DNS)  |  |      *.sslip.io      |  |    Tailscale VPN     |  |
+|  +---------------------+  +-------</b>+<b>------</b>+<b>-----+  +----------</b>+<b>-----------+  +----------</b>+<b>-----------+  |
 |</b>                                   ^      |                   |                         |              <b>|
-|</b>  +---------------------------+    |      |                   |                         |              <b>|
-|</b>  |  <b>External Cloud Backends</b>  |    |      |                   |                         |              <b>|
-|</b>  |  - Cloudflare R2 (S3)     |    |      |                   |                         |              <b>|
-|</b>  |  - GCP WIF & Secret Mgr   | DNS Sync  | Outbound          | Direct LAN              | WireGuard    <b>|
-|</b>  |    (my-cisc4900-config)   | (CronJob) |  Tunnel           | HTTP/HTTPS              | Mesh VPN     <b>|
-|</b>  |  - GitHub Repo & Pages    |    |      |                   |                         |              <b>|
-|</b>  |    (GitOps + OIDC JWKS)   |    |      |                   |                         |              <b>|
-|</b>  +---------------------------+    |      |                   |                         |              <b>|
+|  +---------------------------+</b>    |      |                   |                         |              <b>|
+|  |  External Cloud Backends  |</b>    |      |                   |                         |              <b>|
+|  |</b>  - Cloudflare R2 (S3)     <b>|</b>    |      |                   |                         |              <b>|
+|  |</b>  - GCP WIF & Secret Mgr   <b>|</b> DNS Sync  | Outbound          | Direct LAN              | WireGuard    <b>|
+|  |</b>    (my-cisc4900-config)   <b>|</b> (CronJob) |  Tunnel           | HTTP/HTTPS              | Mesh VPN     <b>|
+|  |</b>  - GitHub Repo & Pages    <b>|</b>    |      |                   |                         |              <b>|
+|  |</b>    (GitOps + OIDC JWKS)   <b>|</b>    |      |                   |                         |              <b>|
+|  +---------------------------+</b>    |      |                   |                         |              <b>|
 |</b>                                   |      |                   |                         |              <b>|
 +===================================</b>|<b>======</b>|<b>===================</b>|<b>=========================</b>|<b>==============+</b>
                                     ^      |                   |                         |
@@ -189,24 +189,24 @@ This project was developed incrementally over a 45-week timeline, solving comple
 <b>+===================================</b>|<b>======</b>|<b>===================</b>|<b>=========================</b>|<b>==============+
 |                                 [2] K3s Cluster: Zero-Trust Edge Ingress                              |
 |                                                                                                       |
-|</b>  +---------------------------------+  +------------------------------+  +--------------------------+  <b>|
-|</b>  |          <b>Cloudflare Tunnel</b>      |  |        <b>Ingress-Nginx</b>         |  |    <b>Tailscale Operator</b>    |  <b>|
-|</b>  |        (cloudflared x2 pods)    |  |    (hostNetwork :80/443)     |  |     (WireGuard Mesh)     |  <b>|
-|</b>  +------------------+--------------+  +-------------+----------------+  +------------+-------------+  <b>|
+|  +---------------------------------+  +------------------------------+  +--------------------------+  |
+|  |          Cloudflare Tunnel      |  |        Ingress-Nginx         |  |    Tailscale Operator    |  |
+|  |</b>        (cloudflared x2 pods)    <b>|  |</b>    (hostNetwork :80/443)     <b>|  |</b>     (WireGuard Mesh)     <b>|  |
+|  +------------------</b>+<b>--------------+  +-------------</b>+<b>----------------+  +------------</b>+<b>-------------+  |
 |</b>                     |                               |                                |                <b>|
 +=====================</b>|<b>===============================</b>|<b>================================</b>|<b>================+</b>
                       |                               |                                |
                       +-------------------------------+--------------------------------+
-                                                      | Route by Hostname (HTTPS/HTTP)
+                                                      | Route by Hostname (http/https)
              +----------------------------------------+-------------------------------------+ Management
              v open-webui.kung.nyc                    v api.kung.nyc                        v  Portals*
 <b>+============</b>|<b>========================================</b>|<b>=================================================+
 |            [3] Application & AI API Gateway [Zero-Trust NetworkPolicy Enforced]           |  *qdrant  |
 |                                                                                           |           |
-|</b>  +-------- [NP: Ingress Only] ---------+   OpenAI API   +-- [NP: WebUI/Ingress Only] --+  <b>|  *argocd  |
-|</b>  |          <b>Open-WebUI Portal</b>          |    (/v1/*)     |       <b>LiteLLM Gateway</b>        |  <b>|           |
-|</b>  |   open-webui-svc.open-webui:8080    +--------------->+     litellm.litellm:4000     |  <b>|  *falco   |
-|</b>  +--------+-------------+--------------+                +--------+-------+-------------+  <b>|           |
+|  +--------</b> [NP: Ingress Only] <b>---------+</b>   OpenAI API   <b>+--</b> [NP: WebUI/Ingress Only] <b>--+  |  *argocd  |
+|  |          Open-WebUI Portal          |</b>    (/v1/*)     <b>|       LiteLLM Gateway        |  |           |
+|  |</b>   open-webui-svc.open-webui:8080    +--------------->+     litellm.litellm:4000     <b>|  |  *falco   |
+|  +--------</b>+<b>-------------</b>+<b>--------------+                +--------</b>+<b>-------</b>+<b>-------------+  |           |
 |</b>           |             |                                        |       |                <b>|  *grafana |
 +===========</b>|<b>=============</b>|<b>========================================</b>|<b>=======</b>|<b>============================+</b>
             |             |                                        |       |
@@ -214,17 +214,17 @@ This project was developed incrementally over a 45-week timeline, solving comple
 <b>+===========</b>|<b>=============</b>|<b>========================================</b>|<b>=======</b>|<b>============================+
 |</b>           |             |   <b>[4] Inference, Vector & Autoscaling</b>  |       |                            <b>|
 |</b>           |             v                                        |       v                            <b>|
-|</b>           |   +---------+------------------------+               |  +----+- [NP: LiteLLM Only] ----+  <b>|
-|</b>           |   |         <b>Qdrant Vector DB</b>         |               |  |      <b>llama.cpp ROCm Server</b>   |  <b>|
-|</b>           |   |        qdrant.qdrant:6333        |               |  |     llamacpp-rocm-svc:8080   |  <b>|
-|</b>           |   |     (HNSW | qdrant.kung.nyc)     |               |  |    (Lateral Access BLOCKED)  |  <b>|
-|</b>           |   +---------+------------------------+               |  +----+------------------+------+  <b>|
+|</b>           |   <b>+---------+------------------------+</b>               |  <b>+----</b>+<b>-</b> [NP: LiteLLM Only] <b>----+  |
+|</b>           |   <b>|         Qdrant Vector DB         |</b>               |  <b>|      llama.cpp ROCm Server   |  |
+|</b>           |   <b>|</b>        qdrant.qdrant:6333        <b>|</b>               |  <b>|</b>     llamacpp-rocm-svc:8080   <b>|  |
+|</b>           |   <b>|</b>     (HNSW | qdrant.kung.nyc)     <b>|</b>               |  <b>|</b>    (Lateral Access BLOCKED)  <b>|  |
+|</b>           |   <b>+---------</b>+<b>------------------------+</b>               |  <b>+----</b>+<b>------------------</b>+<b>------+  |
 |</b>           |             |                                        |       |  /dev/dxg        |         <b>|
 |</b>           |             v Persistent Volume                      |       v librocdxg.so     |         <b>|
-|</b>           |   +---------+------------------------+               |  +----+---------------+  |         <b>|
-|</b>           |   |      <b>Qdrant Local PVC (10GB)</b>     |               |  |   <b>AMD Radeon 8060S</b> |  |         <b>|
-|</b>           |   |   (Persistent Vector Storage)    |               |  |  (128GB RAM / APU) |  |         <b>|
-|</b>           |   +----------------------------------+               |  +--------------------+  |         <b>|
+|</b>           |   <b>+---------</b>+<b>------------------------+</b>               |  <b>+----</b>+<b>---------------+</b>  |         <b>|
+|</b>           |   <b>|      Qdrant Local PVC (10GB)     |</b>               |  <b>|   AMD Radeon 8060S |</b>  |         <b>|
+|</b>           |   <b>|</b>   (Persistent Vector Storage)    <b>|</b>               |  <b>|</b>  (128GB RAM / APU) <b>|</b>  |         <b>|
+|</b>           |   <b>+----------------------------------+</b>               |  <b>+--------------------+</b>  |         <b>|
 |</b>           |                                                      |                          |         <b>|
 +===========</b>|<b>======================================================</b>|<b>==========================</b>|<b>=========+</b>
             |                                                      |                          |
@@ -232,12 +232,12 @@ This project was developed incrementally over a 45-week timeline, solving comple
 <b>+===========</b>|<b>======================================================</b>|<b>==========================</b>|<b>=========+
 |                                [5] High-Availability Storage & Databases                              |
 |                                                                                                       |
-|</b>  +-------- [NP: App-Only :5432 | Direct Access BLOCKED] --------+       +--------------------------+  <b>|
-|</b>  |         <b>CloudNativePG PostgreSQL 16 (High-Availability)</b>      |       |    <b>JuiceFS CSI Storage</b>   |  <b>|
-|</b>  |                 - open-webui-postgres-rw:5432                |       |    (cloudflare-juicefs)  |  <b>|
-|</b>  |                 - litellm-postgres-rw:5432                   |       |    /HuggingFace-Models   |  <b>|
-|</b>  |                 - juicefs-postgres-rw:5432 (Metadata) <------+<------+      (Syncs to R2 S3)    |  <b>|
-|</b>  +--------------------------------------------------------------+       +--------------------------+  <b>|
+|  +--------</b> [NP: App-Only :5432 | Direct Access BLOCKED] <b>--------+       +--------------------------+  |
+|  |         CloudNativePG PostgreSQL 16 (High-Availability)      |       |    JuiceFS CSI Storage   |  |
+|  |</b>                 - open-webui-postgres-rw:5432                <b>|       |</b>    (cloudflare-juicefs)  <b>|  |
+|  |</b>                 - litellm-postgres-rw:5432                   <b>|       |</b>    /HuggingFace-Models   <b>|  |
+|  |</b>                 - juicefs-postgres-rw:5432 (Metadata) <------+<------+      (Syncs to R2 S3)    <b>|  |
+|  +--------------------------------------------------------------+       +--------------------------+  |
 |                                                                                                       |
 +===========</b>:<b>===========================</b>:<b>==================================</b>:<b>============================+</b>
             ^     GitOps Sync           ^    Hourly Secret Sync            ^  eBPF / Metrics
@@ -245,12 +245,12 @@ This project was developed incrementally over a 45-week timeline, solving comple
 <b>+===========</b>:<b>===========================</b>:<b>==================================</b>:<b>============================+
 |                                [6] GitOps, SecretOps, Security & Observability                        |
 |                                                                                                       |
-|</b>  +-------------------------+  +--------------------------+  +--------------------------------------+  <b>|
-|</b>  |         <b>Argo CD</b>         |  |  <b>External Secrets (ESO)</b>  |  |  <b>Falco eBPF / Prometheus / Grafana</b>   |  <b>|
-|</b>  |    argocd-server:443    |  |    ClusterSecretStore:   |  |  - Falcosidekick UI (:2802)          |  <b>|
-|</b>  |    (argocd.kung.nyc)    |  |     gcp-secret-store     |  |  - Prometheus (:9090) -> KEDA        |  <b>|
-|</b>  |   (GitHub Repo Sync)    |  | (GCP WIF / GitHub OIDC)  |  |  - Grafana (:80 | grafana.kung.nyc)  |  <b>|
-|</b>  +-------------------------+  +--------------------------+  +--------------------------------------+  <b>|
+|  +-------------------------+  +--------------------------+  +--------------------------------------+  |
+|  |         Argo CD         |  |  External Secrets (ESO)  |  |  Falco eBPF / Prometheus / Grafana   |  |
+|  |</b>    argocd-server:443    <b>|  |</b>    ClusterSecretStore:   <b>|  |</b>  - Falcosidekick UI (:2802)          <b>|  |
+|  |</b>    (argocd.kung.nyc)    <b>|  |</b>     gcp-secret-store     <b>|  |</b>  - Prometheus (:9090) -> KEDA        <b>|  |
+|  |</b>   (GitHub Repo Sync)    <b>|  |</b> (GCP WIF / GitHub OIDC)  <b>|  |</b>  - Grafana (:80 | grafana.kung.nyc)  <b>|  |
+|  +-------------------------+  +--------------------------+  +--------------------------------------+  |
 |                                                                                                       |
 +=======================================================================================================+</b>
            Legend: [NP: ...] = Kubernetes NetworkPolicy Zero-Trust Microsegmentation Boundary
