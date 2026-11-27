@@ -740,41 +740,41 @@ To set up passwordless SSH authentication between your Windows client and WSL2 U
 
    **Interactive Console Menu Layout (`Menu.sh`):**
    <pre>
-    <b>[0]</b> Install ALL               ,<b>[A]</b> Run Test, <b>[A+]</b> Restart, <b>[A-]</b> Uninstall (ALL)
-    <b>[1]</b> Install Hardware-OS-Config,<b>[B]</b> Run Test, <b>[B+]</b> Restart, <b>[B-]</b> Uninstall (1)
-    <b>[2]</b> Install AMD-ROCm-DXG      ,<b>[C]</b> Run Test, <b>[C+]</b> Restart, <b>[C-]</b> Uninstall (2)
-    <b>[3]</b> Install Kubernetes        ,<b>[D]</b> Run Test, <b>[D+]</b> Restart, <b>[D-]</b> Uninstall (3)
-    <b>[4]</b> Install Helm              ,<b>[E]</b> Run Test, <b>[E+]</b> Restart, <b>[E-]</b> Uninstall (4)
-    <b>[5]</b> Install External-Secrets  ,<b>[F]</b> Run Test, <b>[F+]</b> Restart, <b>[F-]</b> Uninstall (5)
-    <b>[6]</b> Install Tailscale-Operator,<b>[G]</b> Run Test, <b>[G+]</b> Restart, <b>[G-]</b> Uninstall (6)
-    <b>[7]</b> Install Cloudflare-Tunnel ,<b>[H]</b> Run Test, <b>[H+]</b> Restart, <b>[H-]</b> Uninstall (7)
-    <b>[8]</b> Install Ingress-Nginx     ,<b>[I]</b> Run Test, <b>[I+]</b> Restart, <b>[I-]</b> Uninstall (8)
-    <b>[9]</b> Install JuiceFS-CSI       ,<b>[J]</b> Run Test, <b>[J+]</b> Restart, <b>[J-]</b> Uninstall (9)
-   <b>[10]</b> Install CloudNativePG-DB  ,<b>[K]</b> Run Test, <b>[K+]</b> Restart, <b>[K-]</b> Uninstall (10)
-   <b>[11]</b> Install Qdrant-Vector-DB  ,<b>[L]</b> Run Test, <b>[L+]</b> Restart, <b>[L-]</b> Uninstall (11)
-   <b>[12]</b> Install ArgoCD-GitOps     ,<b>[M]</b> Run Test, <b>[M+]</b> Restart, <b>[M-]</b> Uninstall (12)
-   <b>[13]</b> Install Falco-Security    ,<b>[N]</b> Run Test, <b>[N+]</b> Restart, <b>[N-]</b> Uninstall (13)
-   <b>[14]</b> Install Grafana-Prometheus,<b>[O]</b> Run Test, <b>[O+]</b> Restart, <b>[O-]</b> Uninstall (14)
-   <b>[15]</b> Install KEDA-Autoscaler   ,<b>[P]</b> Run Test, <b>[P+]</b> Restart, <b>[P-]</b> Uninstall (15)
-   <b>[16]</b> Install LLaMAcpp-ROCm     ,<b>[Q]</b> Run Test, <b>[Q+]</b> Restart, <b>[Q-]</b> Uninstall (16)
-   <b>[17]</b> Install LiteLLM-Gateway   ,<b>[R]</b> Run Test, <b>[R+]</b> Restart, <b>[R-]</b> Uninstall (17)
-   <b>[18]</b> Install Open-WebUI        ,<b>[S]</b> Run Test, <b>[S+]</b> Restart, <b>[S-]</b> Uninstall (18)
+    [<b>0</b>] Install ALL               ,[<b>A</b>] Run Test, [<b>A+</b>] Restart, [<b>A-</b>] Uninstall (ALL)
+    [<b>1</b>] Install Hardware-OS-Config,[<b>B</b>] Run Test, [<b>B+</b>] Restart, [<b>B-</b>] Uninstall (1)
+    [<b>2</b>] Install AMD-ROCm-DXG      ,[<b>C</b>] Run Test, [<b>C+</b>] Restart, [<b>C-</b>] Uninstall (2)
+    [<b>3</b>] Install Kubernetes        ,[<b>D</b>] Run Test, [<b>D+</b>] Restart, [<b>D-</b>] Uninstall (3)
+    [<b>4</b>] Install Helm              ,[<b>E</b>] Run Test, [<b>E+</b>] Restart, [<b>E-</b>] Uninstall (4)
+    [<b>5</b>] Install External-Secrets  ,[<b>F</b>] Run Test, [<b>F+</b>] Restart, [<b>F-</b>] Uninstall (5)
+    [<b>6</b>] Install Tailscale-Operator,[<b>G</b>] Run Test, [<b>G+</b>] Restart, [<b>G-</b>] Uninstall (6)
+    [<b>7</b>] Install Cloudflare-Tunnel ,[<b>H</b>] Run Test, [<b>H+</b>] Restart, [<b>H-</b>] Uninstall (7)
+    [<b>8</b>] Install Ingress-Nginx     ,[<b>I</b>] Run Test, [<b>I+</b>] Restart, [<b>I-</b>] Uninstall (8)
+    [<b>9</b>] Install JuiceFS-CSI       ,[<b>J</b>] Run Test, [<b>J+</b>] Restart, [<b>J-</b>] Uninstall (9)
+   [<b>10</b>] Install CloudNativePG-DB  ,[<b>K</b>] Run Test, [<b>K+</b>] Restart, [<b>K-</b>] Uninstall (10)
+   [<b>11</b>] Install Qdrant-Vector-DB  ,[<b>L</b>] Run Test, [<b>L+</b>] Restart, [<b>L-</b>] Uninstall (11)
+   [<b>12</b>] Install ArgoCD-GitOps     ,[<b>M</b>] Run Test, [<b>M+</b>] Restart, [<b>M-</b>] Uninstall (12)
+   [<b>13</b>] Install Falco-Security    ,[<b>N</b>] Run Test, [<b>N+</b>] Restart, [<b>N-</b>] Uninstall (13)
+   [<b>14</b>] Install Grafana-Prometheus,[<b>O</b>] Run Test, [<b>O+</b>] Restart, [<b>O-</b>] Uninstall (14)
+   [<b>15</b>] Install KEDA-Autoscaler   ,[<b>P</b>] Run Test, [<b>P+</b>] Restart, [<b>P-</b>] Uninstall (15)
+   [<b>16</b>] Install LLaMAcpp-ROCm     ,[<b>Q</b>] Run Test, [<b>Q+</b>] Restart, [<b>Q-</b>] Uninstall (16)
+   [<b>17</b>] Install LiteLLM-Gateway   ,[<b>R</b>] Run Test, [<b>R+</b>] Restart, [<b>R-</b>] Uninstall (17)
+   [<b>18</b>] Install Open-WebUI        ,[<b>S</b>] Run Test, [<b>S+</b>] Restart, [<b>S-</b>] Uninstall (18)
 
-   <b>[91]</b> Check Cluster Deployment      <b>[92]</b> Export ESO Secrets (GCP JSON)
+   [<b>91</b>] Check Cluster Deployment      [<b>92</b>] Export ESO Secrets (GCP JSON)
    --------------------------------------------------------------------------------
-   <b>[100]</b> Download LLM: High-speed download HuggingFace LLM models to /HuggingFace-Models
-   <b>[101]</b> Test AI Stack E2E: End-to-end AI inference, full stack pipeline verification
-   <b>[102]</b> Test Security Penetration: NetworkPolicy, pen-test, Falco runtime audit
-   <b>[103]</b> Test RAG Benchmark (Retrieval): Qdrant vector search, closed-loop QA evaluation
-   <b>[104]</b> Test Concurrency Throughput: Multi-user concurrency, TPS, TTFT latency test
-   <b>[105]</b> Test Context Stress: Stepped context window (1K~32K), memory pressure test
-   <b>[106]</b> Test Needle In Haystack: 32K long-context precision retrieval verification
-   <b>[107]</b> Test LLM Guardrails OWASP (Safety): Prompt injection defense, OWASP Top 10 audit
-   <b>[108]</b> Test Cluster Security: Kubernetes permissions, Pod Security, Secret isolation
-   <b>[109]</b> Test Storage Persistence Failover: CSI volume durability, pod self-healing
-   <b>[110]</b> Test LLM CLI (Interactive): Interactive LLM model selection, terminal chat
+   [<b>100</b>] Download LLM: High-speed download HuggingFace LLM models to /HuggingFace-Models
+   [<b>101</b>] Test AI Stack E2E: End-to-end AI inference, full stack pipeline verification
+   [<b>102</b>] Test Security Penetration: NetworkPolicy, pen-test, Falco runtime audit
+   [<b>103</b>] Test RAG Benchmark (Retrieval): Qdrant vector search, closed-loop QA evaluation
+   [<b>104</b>] Test Concurrency Throughput: Multi-user concurrency, TPS, TTFT latency test
+   [<b>105</b>] Test Context Stress: Stepped context window (1K~32K), memory pressure test
+   [<b>106</b>] Test Needle In Haystack: 32K long-context precision retrieval verification
+   [<b>107</b>] Test LLM Guardrails OWASP (Safety): Prompt injection defense, OWASP Top 10 audit
+   [<b>108</b>] Test Cluster Security: Kubernetes permissions, Pod Security, Secret isolation
+   [<b>109</b>] Test Storage Persistence Failover: CSI volume durability, pod self-healing
+   [<b>110</b>] Test LLM CLI (Interactive): Interactive LLM model selection, terminal chat
 
-   Select one or more options (Example: 91 101 110) [Ctrl+C to Quit]:
+   Select one or more options (Example: <b>91 101 110</b>) [Ctrl+C to Quit]:
    </pre>
 
    * **Components Management ([`0`] to [`18`] & [`A`] to [`S`] with/without [`+`]/[`-`]):**
