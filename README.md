@@ -926,41 +926,41 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
    ```
 
    **Export JSON Output Structure for `my-cisc4900-config` with 30 Consolidated Keys:**
-   <pre>
+   ```
    =====================================================================
     [92] Exporting ESO Secrets for 'my-cisc4900-config'
    =====================================================================
    {
-     "tailscale_client_id": "<i><Your_Tailscale_Client_ID></i>",
-     "tailscale_client_secret": "<i><Your_Tailscale_Client_Secret_Start></i>",
-     "cf_account_id": "<i><Your_Cloudflare_Account_ID></i>",
-     "cf_kv_namespace_id": "<i><Your_Cloudflare_KV_Namespace_ID></i>",
-     "cf_api_token": "<i><Your_Cloudflare_API_Token></i>",
-     "cf_tunnel_id": "<i><Your_Cloudflare_Tunnel_ID></i>",
-     "juicefs_username": "<i><Your_JuiceFS_Username></i>",
-     "juicefs_password": "<i><Your_JuiceFS_Password></i>",
-     "juicefs_name": "<i><Your_JuiceFS_Name></i>",
-     "juicefs_metaurl": "postgres://<i><Your_JuiceFS_Postgres_Username:Password@Postgres_URL></i>:5432/<i><Database_Name></i>",
+     "tailscale_client_id": "<Your_Tailscale_Client_ID>",
+     "tailscale_client_secret": "<Your_Tailscale_Client_Secret_Start>",
+     "cf_account_id": "<Your_Cloudflare_Account_ID>",
+     "cf_kv_namespace_id": "<Your_Cloudflare_KV_Namespace_ID>",
+     "cf_api_token": "<Your_Cloudflare_API_Token>",
+     "cf_tunnel_id": "<Your_Cloudflare_Tunnel_ID>",
+     "juicefs_username": "<Your_JuiceFS_Username>",
+     "juicefs_password": "<Your_JuiceFS_Password>",
+     "juicefs_name": "<Your_JuiceFS_Name>",
+     "juicefs_metaurl": "postgres://<Your_JuiceFS_Postgres_Username:Password@Postgres_URL>:5432/<Database_Name>",
      "juicefs_storage": "s3",
-     "juicefs_bucket": "<i><Your_JuiceFS_CloudflareR2_Bucket_URL></i>/<i><Bucket_Name></i>",
-     "juicefs_access_key": "<i><Your_JuiceFS_CloudflareR2_Access_Key></i>",
-     "juicefs_secret_key": "<i><Your_JuiceFS_CloudflareR2_Secret_Key></i>",
-     "qdrant_key": "<i><Your_Qdrant_Key></i>",
-     "qdrant_read_only_key": "<i><Your_Qdrant_Read_Only_Key></i>",
-     "argocd_admin_password": "<i><Your_ArgoCD_Bcrypt_Admin_Password></i>",
-     "llamacpp_api_key": "<i><Your_Llamacpp_API_Key></i>",
-     "litellm_username": "<i><Your_LiteLLM_Username></i>",
-     "litellm_password": "<i><Your_LiteLLM_Password></i>",
-     "litellm_database_url": "postgresql://<i><Your_LiteLLM_Postgres_Username:Password@LiteLLM_Postgres_URL></i>:5432/<i><Database_Name></i>",
-     "litellm_master_key": "<i><Your_LiteLLM_Master_Key></i>",
-     "openwebui_openai_api_keys": "<i><Your_OpenWebUI_API_Key></i>",
-     "openwebui_secret_key": "<i><Your_OpenWebUI_Secret_Key></i>",
-     "openwebui_db_username": "<i><Your_OpenWebUI_Postgres_Username></i>",
-     "openwebui_db_password": "<i><Your_OpenWebUI_Postgres_Password></i>",
-     "openwebui_db_url": "postgresql://<i><Your_OpenWebUI_Postgres_Username:Password@Postgres_URL></i>:5432/<i><Database_Name></i>",
+     "juicefs_bucket": "<Your_JuiceFS_CloudflareR2_Bucket_URL>/<Bucket_Name>",
+     "juicefs_access_key": "<Your_JuiceFS_CloudflareR2_Access_Key>",
+     "juicefs_secret_key": "<Your_JuiceFS_CloudflareR2_Secret_Key>",
+     "qdrant_key": "<Your_Qdrant_Key>",
+     "qdrant_read_only_key": "<Your_Qdrant_Read_Only_Key>",
+     "argocd_admin_password": "<Your_ArgoCD_Bcrypt_Admin_Password>",
+     "llamacpp_api_key": "<Your_Llamacpp_API_Key>",
+     "litellm_username": "<Your_LiteLLM_Username>",
+     "litellm_password": "<Your_LiteLLM_Password>",
+     "litellm_database_url": "postgresql://<Your_LiteLLM_Postgres_Username:Password@LiteLLM_Postgres_URL>:5432/<Database_Name>",
+     "litellm_master_key": "<Your_LiteLLM_Master_Key>",
+     "openwebui_openai_api_keys": "<Your_OpenWebUI_API_Key>",
+     "openwebui_secret_key": "<Your_OpenWebUI_Secret_Key>",
+     "openwebui_db_username": "<Your_OpenWebUI_Postgres_Username>",
+     "openwebui_db_password": "<Your_OpenWebUI_Postgres_Password>",
+     "openwebui_db_url": "postgresql://<Your_OpenWebUI_Postgres_Username:Password@Postgres_URL>:5432/<Database_Name>",
      "openwebui_vector_db": "qdrant",
-     "openwebui_qdrant_uri": "<i><Your_OpenWebUI_Qdrant_URL></i>:6333",
-     "openwebui_qdrant_api_key": "<i><Your_OpenWebUI_Qdrant_API_Key></i>"
+     "openwebui_qdrant_uri": "<Your_OpenWebUI_Qdrant_URL>:6333",
+     "openwebui_qdrant_api_key": "<Your_OpenWebUI_Qdrant_API_Key>"
    }
    =====================================================================
     [OK] Successfully exported 30 secret keys
@@ -975,7 +975,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
        * Tip: Disable or destroy older versions to stay within the
          GCP Free Tier limit (<= 6 active secret versions).
    =====================================================================
-   </pre>
+   ```
 
    Then copy JSON output or upload the local JSON file to Google Cloud Secret Manager:
    * Open [Google Cloud Console Secret Manager](https://console.cloud.google.com/security/secret-manager/secrets)
