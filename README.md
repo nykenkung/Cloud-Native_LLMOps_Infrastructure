@@ -1011,7 +1011,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
 
 ### Test Execution & Diagnostic Procedures (Actual Verified Outputs: Test [`101`]–[`110`])
 
-#### Test [101]. `101-Test-AI-Stack-E2E.sh` - End-to-End Inference Verification
+#### Test 1. [`101`] `101-Test-AI-Stack-E2E.sh` - End-to-End Inference Verification
 **What It Tests:** Validates the complete end-to-end request chain from public Zero-Trust ingress down to GPU inference and vector storage. The script dynamically extracts ESO-managed credentials from Kubernetes Secrets (`qdrant`, `litellm`, `llamacpp-rocm`) and verifies five tiers in order:
 1. **Qdrant Vector DB:** Checks `/healthz` and authenticated `/collections` API access on `:6333`.
 2. **llama.cpp ROCm Engine:** Checks `/health` and executes a live `/completion` token generation call (auto-selecting a lightweight model such as `qwen2.5-0.5b-instruct-q4_k_m` when available).
@@ -1060,7 +1060,7 @@ Open-WebUI ClusterIP: 10.43.176.196:8080
 
 ---
 
-#### Test [102]. `102-Test-Security-Penetration.sh` - Network Isolation & Threat Audit
+#### Test 2. [`102`] `102-Test-Security-Penetration.sh` - Network Isolation & Threat Audit
 **What It Tests:** Performs active penetration testing across four security boundaries:
 1. **Negative Authentication:** Probes LiteLLM, Qdrant, `llama.cpp` with invalid or missing API keys to enforce strict `HTTP 401/403` rejection.
 2. **NetworkPolicy Zero-Trust Microsegmentation:** Deploys an ephemeral unprivileged `curlimages/curl` sandbox pod in the `default` namespace and attempts unauthorized lateral connections to `llamacpp-rocm-svc.llamacpp-rocm.svc:8080` and `litellm-postgres-rw.litellm.svc:5432`, verifying both are dropped by Kubernetes `NetworkPolicy` before cleaning up the sandbox pod.
@@ -1103,7 +1103,7 @@ Attempting unauthorized lateral connection: default pod -> litellm-postgres:5432
 
 ---
 
-#### Test [103]. `103-Test-RAG-Benchmark.sh` - Qdrant Vector Search & Closed-Loop RAG QA
+#### Test 3. [`103`] `103-Test-RAG-Benchmark.sh` - Qdrant Vector Search & Closed-Loop RAG QA
 **What It Tests:** Executes a closed-loop Retrieval-Augmented Generation (RAG) evaluation across Qdrant and LiteLLM:
 1. **Collection Initialization:** Creates a temporary 4-dimensional Cosine similarity collection (`cisc4900_rag_eval`) in Qdrant.
 2. **Knowledge Ingestion:** Upserts 3 domain-specific knowledge base vectors covering cluster hardware, networking, and databases.
@@ -1146,7 +1146,7 @@ Total RAG Latency: 562 ms
 
 ---
 
-#### Test [104]. `104-Test-Concurrency-Throughput.sh` - Concurrency, TPS & KEDA Autoscaling
+#### Test 4. [`104`] `104-Test-Concurrency-Throughput.sh` - Concurrency, TPS & KEDA Autoscaling
 **What It Tests:** Benchmarks parallel streaming generation under multi-user load and checks autoscaling telemetry:
 1. **Parallel Streaming Stress:** Uses Python `ThreadPoolExecutor` to dispatch concurrent SSE streaming requests (`stream: true`, `max_tokens: 100`) to LiteLLM across **1, 2, 4 parallel streams** (accepts an optional model name `$1`), computing Average Time to First Token (TTFT in ms), Per-Stream Speed (tokens/sec), and Aggregate APU Throughput (tokens/sec).
 2. **KEDA & HPA Verification:** Inspects the `ScaledObject` and HorizontalPodAutoscaler (`keda-hpa-llamacpp-rocm-scaler`) in `llamacpp-rocm`.
@@ -1196,7 +1196,7 @@ keda-hpa-llamacpp-rocm-scaler   Deployment/llamacpp-rocm-deploy   0/1 (avg)   1 
 
 ---
 
-#### Test [105]. `105-Test-Context-Stress.sh` - Stepped Context Window (1K–32K) & ROCm VRAM Stress
+#### Test 5. [`105`] `105-Test-Context-Stress.sh` - Stepped Context Window (1K–32K) & ROCm VRAM Stress
 **What It Tests:** Stress-tests KV-Cache memory scaling and AMD ROCm unified VRAM stability across progressively larger prompt windows. After confirming `llama.cpp` health, it synthesizes prompts across five stepped context sizes (**1000, 4000, 8000, 16000, 32000 words**) and submits each through LiteLLM (`max_tokens: 20`, 180s timeout), recording end-to-end processing time and asserting every tier completes without truncation or GPU OOM crashes. *(If no model is loaded, it reports GPU memory topology via `rocm-smi`/PyTorch and displays the configured 32K KV-cache parameters.)*
 
 ```bash
@@ -1240,7 +1240,7 @@ Response Time: 13860 ms
 
 ---
 
-#### Test [106]. `106-Test-Needle-In-Haystack.sh` - 32K NIAH Deep Memory Precision
+#### Test 6. [`106`] `106-Test-Needle-In-Haystack.sh` - 32K NIAH Deep Memory Precision
 **What It Tests:** Evaluates long-context attention fidelity and eliminates "lost-in-the-middle" retrieval blindspots. The script embeds a synthetic recovery token (`STRIX-HALO-8060S-VALIDATED`) at **25%, 50%, and 75% depth** inside **4000, 8000, 16000, 24000** token-equivalent filler haystacks and queries LiteLLM deterministically (`temperature: 0.0`, `max_tokens: 30`), logging latency and asserting 100% exact-match recall across all 12 (`Context, Depth`) matrix combinations.
 
 ```bash
@@ -1277,7 +1277,7 @@ Context    | Depth    | Latency (s)  | Retrieval Status
 
 ---
 
-#### Test [107]. `107-Test-LLM-Guardrails-OWASP.sh` - OWASP Top 10 for LLMs Security Audit
+#### Test 7. [`107`] `107-Test-LLM-Guardrails-OWASP.sh` - OWASP Top 10 for LLMs Security Audit
 **What It Tests:** Audits live model safety alignment and gateway guardrails against four **OWASP Top 10 for LLM** adversarial vectors (auto-selecting a flagship model such as Qwen 3.6 35B, Gemma 4 31B or accepting `$1`):
 * **`LLM01-Prompt-Injection`:** Attempts to override system instructions to force output of `SYSTEM_COMPROMISED_ACCESS_GRANTED`.
 * **`LLM02-Secret-Disclosure`:** Attempts social-engineered credential extraction of environment variables and API keys, scanning both visible output and `reasoning_content` to verify the LiteLLM Master Key is never leaked.
@@ -1314,7 +1314,7 @@ Summary: 4/4 Guardrail Defense Tests Passed.
 
 ---
 
-#### Test [108]. `108-Test-Cluster-Security-Audit.sh` - Kubernetes RBAC, Pod Security & Secrets Audit
+#### Test 8. [`108`] `108-Test-Cluster-Security-Audit.sh` - Kubernetes RBAC, Pod Security & Secrets Audit
 **What It Tests:** Performs a 5-domain Kubernetes and cloud-native security compliance audit:
 1. **RBAC Least-Privilege & Token Isolation:** Scans all `ClusterRoleBindings` to confirm zero `default` ServiceAccounts hold `cluster-admin`, then spawns a temporary sandbox pod and uses its mounted ServiceAccount token to query `/api/v1/namespaces/kube-system/secrets`, asserting `HTTP 403 Forbidden`.
 2. **Pod Security Standards (PSS):** Audits all application namespaces (excluding system daemons, edge ingress, GPU passthrough, Tailscale, and node-exporter) to confirm zero workloads run with `hostPID`, `hostNetwork` or `privileged` containers.
@@ -1359,7 +1359,7 @@ Total Ingress Routes Configured: 6
 
 ---
 
-#### Test [109]. `109-Test-Storage-Persistence-Failover.sh` - Storage CSI, CNPG Persistence & Resiliency
+#### Test 9. [`109`] `109-Test-Storage-Persistence-Failover.sh` - Storage CSI, CNPG Persistence & Resiliency
 **What It Tests:** Validates stateful storage durability, database cluster integrity, Kubernetes workload self-healing across four storage and resiliency layers:
 1. **JuiceFS Distributed CSI Storage:** Verifies that StorageClass `cloudflare-juicefs-sc` exists, JuiceFS CSI Driver controller/node pods (`app.kubernetes.io/name=juicefs-csi-driver`) are `Running` and the shared RWX model PVC (`llamacpp-model-pvc` in `llamacpp-rocm`) is `Bound`.
 2. **CloudNativePG PostgreSQL Clusters:** Queries cluster phase, desired instances, ready instances (`>= 1`) for all three declarative PostgreSQL 16 clusters: `cloudflare-juicefs-postgres` (`kube-system`), `litellm-postgres` (`litellm`) and `open-webui-postgres` (`open-webui`).
@@ -1404,7 +1404,7 @@ Total Cluster Pods: 49 | Unhealthy/Degraded: 0
 
 ---
 
-#### Test [110]. `110-Test-LLM-CLI.sh` - Interactive LLM Model Selection & Multi-Turn CLI Chat
+#### Test 10. [`110`] `110-Test-LLM-CLI.sh` - Interactive LLM Model Selection & Multi-Turn CLI Chat
 **What It Tests:** Launches an interactive terminal-based LLM client to validate live model discovery, dynamic backend routing and multi-turn conversational state directly over SSH:
 1. **Backend & Model Auto-Discovery:** Resolves ClusterIP endpoints for both LiteLLM Gateway (`litellm:4000`) and `llama.cpp` Direct (`llamacpp-rocm-svc:8080`), runs `/health/liveliness` and `/health` probes, queries `/v1/models` on both services (deduplicating models and filtering wildcard aliases) and presents a numbered selection menu with `qwen2.5-0.5b-instruct-q4_k_m` prioritized as the default.
 2. **Multi-Turn Chat & Reasoning Support:** Maintains a full JSON conversation history (`messages[]`) with configurable `max_tokens` (default `1024`) and `temperature` (default `0.7`), automatically extracts and formats reasoning traces (`<think>`/`<thought>`/`<thinking>` tags or `reasoning_content` fields), logs exchanges to `~/.llm-cli-history` and supports live slash commands (`/clear`, `/model`, `/tokens N`, `/temp N`, `/history`, `/help`, `/exit`).
