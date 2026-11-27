@@ -1009,7 +1009,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
 
 ---
 
-### Test Execution & Diagnostic Procedures (Actual Verified Outputs: Test [`101`]–[`110`])
+## Test Execution & Diagnostic Procedures (Actual Verified Outputs: Test [`101`]–[`110`])
 
 ### Test [`101`]. `101-Test-AI-Stack-E2E.sh` - End-to-End Inference Verification
 **What It Tests:** Validates the complete end-to-end request chain from public Zero-Trust ingress down to GPU inference and vector storage. The script dynamically extracts ESO-managed credentials from Kubernetes Secrets (`qdrant`, `litellm`, `llamacpp-rocm`) and verifies five tiers in order:
