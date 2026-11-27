@@ -969,15 +969,15 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
     1. Open: https://console.cloud.google.com/security/secret-manager/secrets
     2. Click "Create secret", set Name to: my-cisc4900-config
        (If 'my-cisc4900-config' already exists, open it and click "New version".)
-    3. Copy the JSON output above and paste it into "Secret value"
-       (or save as .json and upload your file on Google Cloud Secret Manager.)
+    3. Copy the JSON output above (including the enclosing {} braces) and paste it
+       into "Secret value" (or upload JSON file on Google Cloud Secret Manager.)
     4. Click "Create secret" / "Add new version".
        * Tip: Disable or destroy older versions to stay within the
          GCP Free Tier limit (<= 6 active secret versions).
    =====================================================================
    ```
 
-   Then copy JSON output or upload the local JSON file to Google Cloud Secret Manager:
+   Then copy the JSON output (including enclosing {} braces) or upload the exported JSON file to Google Cloud Secret Manager:
    * Open [Google Cloud Console Secret Manager](https://console.cloud.google.com/security/secret-manager/secrets)
    * Click **Create secret** -> set **Name** to `my-cisc4900-config` (or open the existing `my-cisc4900-config` secret and click **New version**).
    * Paste the JSON output (or upload `~/00-Installation-Testing/My-CISC4900-Config.json`) into **Secret value**, then click **Create secret** / **Add new version**. *(To stay within the GCP Free Tier limit of <= 6 active versions, disable or destroy older versions when rotating.)*
