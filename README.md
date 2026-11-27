@@ -197,7 +197,6 @@ This project was developed incrementally over a 45-week timeline, solving comple
 +=====================</b>|<b>===============================</b>|<b>================================</b>|<b>================+</b>
                       |                               |                                |
                       +-------------------------------+--------------------------------+
-                                                      |
                                                       | Route by Hostname (HTTPS/HTTP)
              +----------------------------------------+-------------------------------------+ Management
              v open-webui.kung.nyc                    v api.kung.nyc                        v  Portals*
