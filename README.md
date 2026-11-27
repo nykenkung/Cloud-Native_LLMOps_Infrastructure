@@ -1029,7 +1029,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
 
 --- 1. Testing Qdrant Vector Database ---
 Qdrant ClusterIP: 10.43.70.79:6333
-Qdrant /healthz: <b>healthz check passed
+<b>Qdrant /healthz: healthz check passed
 [OK] Qdrant Collections API (authenticated): OK</b>
 
 --- 2. Testing llama.cpp ROCm Inference Engine ---
