@@ -181,8 +181,8 @@ else:
  1. Open: https://console.cloud.google.com/security/secret-manager/secrets
  2. Click "Create secret", set Name to: {gcp_secret_name}
     (If '{gcp_secret_name}' already exists, open it and click "New version".)
- 3. Copy the JSON output above and paste it into "Secret value"
-    (or save as .json and upload your file on Google Cloud Secret Manager.)
+ 3. Copy the JSON output above (including the enclosing {} braces) and paste it
+    into "Secret value" (or upload JSON file on Google Cloud Secret Manager.)
  4. Click "Create secret" / "Add new version".
     * Tip: Disable or destroy older versions to stay within the
       GCP Free Tier limit (<= 6 active secret versions).
