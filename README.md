@@ -1182,10 +1182,10 @@ Results for Concurrency 4:
   - Aggregate APU Throughput: 94.30 tokens/sec</b>
 
 --- Checking GPU & KEDA Autoscaler Metrics ---
-NAME                   SCALETARGETKIND      SCALETARGETNAME        MIN   MAX   READY   ACTIVE   FALLBACK   PAUSED   TRIGGERS     AUTHENTICATIONS   AGE
-<b>llamacpp-rocm-scaler   apps/v1.Deployment   llamacpp-rocm-deploy   1     1     True    False    False      False    prometheus                     2d23h</b>
+<b>NAME                   SCALETARGETKIND      SCALETARGETNAME        MIN   MAX   READY   ACTIVE   FALLBACK   PAUSED   TRIGGERS     AUTHENTICATIONS   AGE
+llamacpp-rocm-scaler   apps/v1.Deployment   llamacpp-rocm-deploy   1     1     True    False    False      False    prometheus                     2d23h
 NAME                            REFERENCE                         TARGETS     MINPODS   MAXPODS   REPLICAS   AGE
-<b>keda-hpa-llamacpp-rocm-scaler   Deployment/llamacpp-rocm-deploy   0/1 (avg)   1         1         1          2d23h</b>
+keda-hpa-llamacpp-rocm-scaler   Deployment/llamacpp-rocm-deploy   0/1 (avg)   1         1         1          2d23h</b>
 
 ==================================================================
  [OK] Multi-User Concurrency & TTFT Benchmark Completed!
@@ -1419,8 +1419,8 @@ Open-WebUI PostgreSQL Cluster Status: Cluster in healthy state (1/1 instances re
 
 Discovering available AI backends...
 
-  ✓ LiteLLM Gateway  : http://10.43.137.145:4000
-  ✓ llama.cpp Direct : http://10.43.225.228:8080
+  <b>✓ LiteLLM Gateway  : http://10.43.137.145:4000
+  ✓ llama.cpp Direct : http://10.43.225.228:8080</b>
 
 ==================================================================
  [110] Interactive LLM CLI Chat
@@ -1428,14 +1428,14 @@ Discovering available AI backends...
 
 Available Models:
 
-   1) qwen2.5-0.5b-instruct-q4_k_m             [LiteLLM] (Default)
+   <b>1) qwen2.5-0.5b-instruct-q4_k_m             [LiteLLM] (Default)
    2) Muse-Glimmer-30B-Q4_K_M                  [LiteLLM]
    3) Qwen_Qwen3.6-35B-A3B-Q4_K_M              [LiteLLM]
-   4) google_gemma-4-31B-it-Q4_K_M             [LiteLLM]
+   4) google_gemma-4-31B-it-Q4_K_M             [LiteLLM]</b>
 
 Select a model [1-4, default: 1]: <b>1</b>
-[OK] Model: qwen2.5-0.5b-instruct-q4_k_m via LiteLLM
-     Endpoint: http://10.43.137.145:4000/v1/chat/completions
+<b>[OK] Model: qwen2.5-0.5b-instruct-q4_k_m via LiteLLM
+     Endpoint: http://10.43.137.145:4000/v1/chat/completions</b>
 
 ==================================================================
  LLM Interactive Chat Session
@@ -1453,13 +1453,13 @@ Select a model [1-4, default: 1]: <b>1</b>
    /exit    - Exit the chat session
 ==================================================================
 
-You [turn 1]: <b>What is Kubernetes? Reply in one concise sentence.</b>
-AI: <b>Kubernetes is a scalable and modular container orchestration platform that enables easy deployment, management, and scaling of applications.</b>
+<b>You [turn 1]: What is Kubernetes? Reply in one concise sentence.</b>
+AI: <b>Kubernetes is a scalable and modular container orchestration platform that enables easy deployment, management, and scaling of applications.
 
-You [turn 2]: <b>/history</b>
+You [turn 2]: /history
 [INFO] Current conversation: 1 turn(s)
-You [turn 2]: <b>/exit</b>
-[INFO] Chat session ended. Goodbye!
+You [turn 2]: /exit
+[INFO] Chat session ended. Goodbye!</b>
 
 ==================================================================
  [OK] LLM CLI Chat Session Finished.
