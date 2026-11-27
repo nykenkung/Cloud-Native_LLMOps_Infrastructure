@@ -214,7 +214,7 @@ This project was developed incrementally over a 45-week timeline, solving comple
 <b>+===========</b>|<b>=============</b>|<b>========================================</b>|<b>=======</b>|<b>============================+
 |</b>           |             |   <b>[4] Inference, Vector & Autoscaling</b>  |       |                            <b>|
 |</b>           |             v                                        |       v                            <b>|
-|</b>           |   <b>+---------+------------------------+</b>               |  <b>+----</b>+<b>-</b> [NP: LiteLLM Only] <b>----+  |
+|</b>           |   <b>+---------</b>+<b>------------------------+</b>               |  <b>+----</b>+<b>-</b> [NP: LiteLLM Only] <b>----+  |
 |</b>           |   <b>|         Qdrant Vector DB         |</b>               |  <b>|      llama.cpp ROCm Server   |  |
 |</b>           |   <b>|</b>        qdrant.qdrant:6333        <b>|</b>               |  <b>|</b>     llamacpp-rocm-svc:8080   <b>|  |
 |</b>           |   <b>|</b>     (HNSW | qdrant.kung.nyc)     <b>|</b>               |  <b>|</b>    (Lateral Access BLOCKED)  <b>|  |
