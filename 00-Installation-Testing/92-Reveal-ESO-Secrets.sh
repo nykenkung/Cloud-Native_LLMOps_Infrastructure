@@ -1,9 +1,6 @@
 #!/usr/bin/env bash
 # =====================================================================
 #  [92] Export Consolidated ESO Secrets for GCP Secret Manager (JSON)
-#  Reconstructs the 'my-cisc4900-config' JSON payload from Kubernetes
-#  Secrets managed by ESO and Cloudflare Tunnel Secret for upload to:
-#  Google Cloud Console -> Secret Manager -> my-cisc4900-config
 # =====================================================================
 set -euo pipefail
 
@@ -19,28 +16,24 @@ if [ "${1:-}" = "-h" ] || [ "${1:-}" = "--help" ]; then
   cat <<'EOF'
 Usage: 92-Reveal-ESO-Secrets.sh [gcp-secret-name]
 
-Reconstruct consolidated JSON payload from Kubernetes Secrets synced by
-External Secrets Operator (ESO), for uploading to Google Cloud Console
-Secret Manager (Secret name: my-cisc4900-config).
+Export ESO-managed Kubernetes Secrets as a consolidated JSON payload
+for Google Cloud Secret Manager (default: my-cisc4900-config).
 
-Outputs pure JSON to stdout and status diagnostics to stderr.
+Outputs pure JSON to stdout and instructions/warnings to stderr.
 Example:
-  ./92-Reveal-ESO-Secrets.sh > My-CISC4900-Config.json
+  ./92-Reveal-ESO-Secrets.sh > secrets.json
 EOF
   exit 0
 fi
 
 SECRET_NAME="${1:-my-cisc4900-config}"
 
-if ! command -v kubectl >/dev/null 2>&1; then
-  echo "[FAIL] kubectl is not installed." >&2
-  exit 1
-fi
-
-if ! command -v python3 >/dev/null 2>&1; then
-  echo "[FAIL] python3 is not installed." >&2
-  exit 1
-fi
+for cmd in kubectl python3; do
+  if ! command -v "$cmd" >/dev/null 2>&1; then
+    echo "[FAIL] $cmd is not installed." >&2
+    exit 1
+  fi
+done
 
 if ! kubectl get nodes >/dev/null 2>&1; then
   echo "[FAIL] Cannot connect to Kubernetes cluster (KUBECONFIG=${KUBECONFIG:-unset})." >&2
@@ -55,7 +48,6 @@ import sys
 
 gcp_secret_name = sys.argv[1]
 
-# Canonical field order & Kubernetes Secret sources
 CANONICAL_SOURCES = [
     ("llamacpp_api_key", [("llamacpp-rocm", "llamacpp-api-key", "api-key")]),
     ("litellm_username", [
@@ -99,33 +91,25 @@ secret_cache = {}
 
 
 def get_secret_data(ns, name):
-    cache_key = (ns, name)
-    if cache_key in secret_cache:
-        return secret_cache[cache_key]
-    res = subprocess.run(
-        ["kubectl", "get", "secret", name, "-n", ns, "-o", "json"],
-        capture_output=True,
-        text=True,
-    )
-    if res.returncode != 0:
-        secret_cache[cache_key] = None
-        return None
-    raw = json.loads(res.stdout)
-    decoded = {}
-    for k, v in (raw.get("data") or {}).items():
-        try:
-            decoded[k] = base64.b64decode(v).decode("utf-8")
-        except Exception:
-            decoded[k] = v
-    secret_cache[cache_key] = decoded
-    return decoded
+    key = (ns, name)
+    if key not in secret_cache:
+        res = subprocess.run(
+            ["kubectl", "get", "secret", name, "-n", ns, "-o", "json"],
+            capture_output=True,
+            text=True,
+        )
+        if res.returncode != 0:
+            secret_cache[key] = None
+        else:
+            raw = json.loads(res.stdout).get("data") or {}
+            secret_cache[key] = {
+                k: base64.b64decode(v).decode("utf-8", errors="replace")
+                for k, v in raw.items()
+            }
+    return secret_cache[key]
 
 
-print(
-    f">>> [92] Exporting ESO Secrets as GCP Secret Manager JSON ('{gcp_secret_name}')...",
-    file=sys.stderr,
-    flush=True,
-)
+print(f">>> [92] Exporting ESO Secrets for '{gcp_secret_name}'...", file=sys.stderr, flush=True)
 
 result = {}
 missing = []
@@ -145,8 +129,8 @@ for prop_name, candidates in CANONICAL_SOURCES:
     if value is not None:
         result[prop_name] = value
     else:
-        primary_ns, primary_sec, primary_key = candidates[0]
-        missing.append(f"{prop_name} ({primary_ns}/{primary_sec}[{primary_key}])")
+        ns, sec, key = candidates[0]
+        missing.append(f"{prop_name} ({ns}/{sec}[{key}])")
 
 # Dynamically append any extra ExternalSecret properties referencing gcp_secret_name
 es_res = subprocess.run(
@@ -155,21 +139,15 @@ es_res = subprocess.run(
     text=True,
 )
 if es_res.returncode == 0:
-    try:
-        es_items = json.loads(es_res.stdout).get("items", [])
-    except Exception:
-        es_items = []
-    for es in es_items:
+    for es in json.loads(es_res.stdout).get("items", []):
         ns = es.get("metadata", {}).get("namespace", "")
         spec = es.get("spec", {})
         target_name = spec.get("target", {}).get("name") or es.get("metadata", {}).get("name", "")
         for entry in spec.get("data") or []:
             remote_ref = entry.get("remoteRef") or {}
-            if remote_ref.get("key") != gcp_secret_name:
-                continue
             prop = remote_ref.get("property")
             sec_key = entry.get("secretKey")
-            if not prop or not sec_key or prop in result:
+            if remote_ref.get("key") != gcp_secret_name or not prop or not sec_key or prop in result:
                 continue
             data = get_secret_data(ns, target_name)
             if data is not None and sec_key in data:
@@ -177,30 +155,33 @@ if es_res.returncode == 0:
                 missing = [m for m in missing if not m.startswith(f"{prop} ")]
 
 if not result:
-    print(
-        f"[FAIL] No ESO secrets found in Kubernetes for GCP Secret '{gcp_secret_name}'.",
-        file=sys.stderr,
-    )
+    print(f"[FAIL] No ESO secrets found in Kubernetes for '{gcp_secret_name}'.", file=sys.stderr)
     sys.exit(1)
 
 print(json.dumps(result, indent=2, ensure_ascii=False), flush=True)
 
 if missing:
-    print(
-        f"[WARN] Exported {len(result)} keys; missing {len(missing)} key(s):",
-        file=sys.stderr,
-    )
+    print(f"[WARN] Exported {len(result)} keys; missing {len(missing)} key(s):", file=sys.stderr)
     for item in missing:
         print(f"  - {item}", file=sys.stderr)
 else:
-    print(
-        f"[OK] Exported {len(result)}/{len(CANONICAL_SOURCES)} keys matching My-CISC4900-Config.json.",
-        file=sys.stderr,
-    )
+    print(f"[OK] Exported {len(result)} secret keys.", file=sys.stderr)
 
 print(
-    "     Upload to: https://console.cloud.google.com/security/secret-manager/secrets "
-    f"(Secret Name: {gcp_secret_name})",
+    f"""
+=====================================================================
+ Next Steps: Upload to Google Cloud Secret Manager
+=====================================================================
+ 1. Open: https://console.cloud.google.com/security/secret-manager/secrets
+ 2. Click "Create secret":
+    - Set Name to: {gcp_secret_name}
+    (If '{gcp_secret_name}' already exists, open it and click "New version".)
+ 3. Copy the JSON output above and paste it into "Secret value"
+    (or upload your exported .json file).
+ 4. Click "Create secret" / "Add new version".
+    * Tip: Disable or destroy older versions to stay within the
+      GCP Free Tier limit (<= 6 active secret versions).
+=====================================================================""",
     file=sys.stderr,
 )
 PYEOF
