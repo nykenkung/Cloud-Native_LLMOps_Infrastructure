@@ -959,7 +959,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
      "openwebui_db_password": "</b><i>&lt;Your_OpenWebUI_Postgres_Password&gt;</i><b>",
      "openwebui_db_url": "</b>postgresql://<i>&lt;Your_OpenWebUI_Postgres_Username:Password@Postgres_URL&gt;</i>:5432/<i>&lt;Database_Name&gt;</i><b>",
      "openwebui_vector_db": "</b>qdrant<b>",
-     "openwebui_qdrant_uri": "</b><i>&lt;Your_OpenWebUI_Qdrant_URL&gt;</i>:6333",
+     "openwebui_qdrant_uri": "</b><i>&lt;Your_OpenWebUI_Qdrant_URL&gt;</i>:6333<b>",
      "openwebui_qdrant_api_key": "</b><i>&lt;Your_OpenWebUI_Qdrant_API_Key&gt;</i><b>"
    }</b>
    =====================================================================
