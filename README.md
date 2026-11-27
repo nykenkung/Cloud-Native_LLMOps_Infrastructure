@@ -43,7 +43,7 @@
 
 **CISC4900 Cloud-Native Scalable AI Infrastructure** is an enterprise-grade private cloud platform designed for production-level Large Language Model (LLM) serving, semantic search and Retrieval-Augmented Generation (RAG). 
 
-Operating on physical AMD hardware (**AMD Ryzen AI Max+ 395 APU with Radeon 8060S Strix Halo gfx1151 GPU, 128GB Unified Host RAM and ~62GB shared VRAM allocation**), the platform completely removes dependency on third-party commercial AI APIs (e.g., OpenAI, Anthropic), saving organizations hundreds of thousands of dollars annually while ensuring complete data sovereignty and zero telemetry leaks.
+Operating on physical AMD hardware (**AMD Ryzen AI Max+ 395 APU with Radeon 8060S Strix Halo gfx1151 GPU, 128GB Unified Host RAM and ~62GB shared VRAM allocation**), the platform completely removes dependency on third-party commercial AI APIs (e.g., OpenAI, Anthropic, Google), saving organizations hundreds of thousands of dollars annually while ensuring complete data sovereignty and zero telemetry leaks.
 
 ### Key Architectural Pillars
 
@@ -53,7 +53,7 @@ Operating on physical AMD hardware (**AMD Ryzen AI Max+ 395 APU with Radeon 8060
 
 * **Keyless Cross-Cloud SecretOps**
   
-  Eliminates static credentials and plaintext tokens across all repositories. External Secrets Operator (ESO) leverages Kubernetes Projected ServiceAccount Tokens and an OIDC Identity Provider on GitHub Pages to federate with Google Cloud Workload Identity (WIF), dynamically retrieving secrets from Google Secret Manager under strict Free-Tier quotas (≤ 6 active versions and ≤ 10,000 monthly access calls).
+  Eliminates static credentials and plaintext tokens across all repositories. External Secrets Operator (ESO) leverages Kubernetes Projected ServiceAccount Tokens and an OIDC Identity Provider on GitHub Pages to federate with Google Cloud Workload Identity (WIF), dynamically retrieving secrets from Google Secret Manager under strict Free-Tier quotas (≤ 6 active versions and ≤ 10000 monthly access calls).
 
 * **Declarative GitOps Continuous Delivery**
   
@@ -256,29 +256,29 @@ This project was developed incrementally over a 45-week timeline, solving comple
            Legend: [NP: ...] = Kubernetes NetworkPolicy Zero-Trust Microsegmentation Boundary
 </pre>
 
-### [1] External Network & Cloud Services
+### [`1`] External Network & Cloud Services
 External clients and cloud control planes interface with the on-premise K3s cluster without exposing any inbound router ports:
 * **Public Traffic (`Public Internet` -> `Cloudflare Edge`):** `HTTPS Clients` resolve `*.kung.nyc (DNS)` at `Cloudflare Edge`, which forwards traffic over an **Outbound Tunnel** initiated from inside the cluster. A scheduled **`DNS Sync (CronJob)`** keeps Kubernetes Ingress hostnames synchronized with Cloudflare DNS records.
 * **Local & Remote Private Access:** `LAN 192.168.1.0/24` clients connect directly via `*.sslip.io`, while `Remote Admins` connect over an encrypted `Tailscale VPN`.
 * **External Cloud Backends:** `Cloudflare R2 (S3 Object Store)` provides durable object storage over the **S3 API**; `GCP WIF & Secret Mgr (my-cisc4900-config)` serves secrets via keyless **OIDC/WIF** authentication; and `GitHub Repo & Pages` hosts both declarative **GitOps** manifests and public **OIDC JWKS** discovery metadata.
 
-### [2] K3s Cluster: Zero-Trust Edge Ingress
+### [`2`] K3s Cluster: Zero-Trust Edge Ingress
 Three specialized edge gateways terminate external connections and **`Route by Hostname (HTTPS/HTTP)`** to internal Kubernetes services:
 * **`Cloudflare Tunnel (cloudflared x2 pods)`:** Maintains dual-replica outbound tunnels to `Cloudflare Edge`, routing `open-webui.kung.nyc`, `api.kung.nyc` and management portals (`qdrant` / `argocd` / `falco` / `grafana`).
 * **`Ingress-Nginx (hostNetwork :80/443)`:** Handles high-throughput local LAN routing (`*.sslip.io`) directly on host ports `:80/443`.
 * **`Tailscale Operator (WireGuard Mesh)`:** Bridges authorized `Remote Admins` directly into the cluster network over WireGuard.
 
-### [3] Application & AI API Gateway [`Zero-Trust NetworkPolicy Enforced`]
+### [`3`] Application & AI API Gateway [`Zero-Trust NetworkPolicy Enforced`]
 Application traffic is strictly segmented using Kubernetes `NetworkPolicy` (`[NP: ...]`) microsegmentation:
 * **`Open-WebUI Portal` (`open-webui-svc.open-webui:8080`):** Enforces **`[NP: Ingress Only]`**, accepting user sessions via `open-webui.kung.nyc`. It communicates with **`LiteLLM Gateway`** via **`OpenAI API (/v1/*)`**, queries **`Qdrant Vector DB`** via **`REST/gRPC API Key (:6333)`** for RAG retrieval and persists chat history to PostgreSQL on **`:5432`**.
 * **`LiteLLM Gateway` (`litellm.litellm:4000`):** Enforces **`[NP: WebUI/Ingress Only]`**, serving both internal requests from `Open-WebUI Portal` and external **`Public API`** calls via `api.kung.nyc`. It authenticates downstream inference requests to **`llama.cpp ROCm Server`** using an internal **`Bearer Token`** and writes audit/routing logs to PostgreSQL on **`:5432`**.
 
-### [4] Inference, Vector & Autoscaling
+### [`4`] Inference, Vector & Autoscaling
 Compute-intensive AI generation and semantic retrieval execute locally on dedicated hardware:
 * **`llama.cpp ROCm Server` (`llamacpp-rocm-svc:8080`):** Enforces **[`NP: LiteLLM Only`]** (`Lateral Access BLOCKED`), rejecting any unauthorized pod-to-pod traffic. It accesses physical GPU acceleration on the **`AMD Radeon 8060S (128GB RAM/APU)`** via **`/dev/dxg`** and **`librocdxg.so`** passthrough and loads GGUF weights from a shared **`RWX PVC`**.
 * **`Qdrant Vector DB` (`qdrant.qdrant:6333`):** Performs HNSW semantic vector search for `Open-WebUI Portal` (with dashboard access via `qdrant.kung.nyc`), backed by a dedicated **`PVC (10GB)`**.
 
-### [5] High-Availability Storage & Databases
+### [`5`] High-Availability Storage & Databases
 Stateful workloads and large model artifacts are decoupled from ephemeral pods:
 * **`CloudNativePG PostgreSQL 16 (High-Availability)`:** Enforces **`[NP: App-Only :5432 | Direct Access BLOCKED]`**, isolating three dedicated high-availability database clusters:
   * `open-webui-postgres-rw:5432` (Open-WebUI state & users)
@@ -286,7 +286,7 @@ Stateful workloads and large model artifacts are decoupled from ephemeral pods:
   * `juicefs-postgres-rw:5432 (Metadata)` (JuiceFS filesystem metadata engine)
 * **`JuiceFS CSI Storage (cloudflare-juicefs)`:** Mounts **`/HuggingFace-Models`** as a shared POSIX `RWX PVC` for `llama.cpp ROCm Server`, storing metadata in `juicefs-postgres-rw:5432` and persisting model blobs to **`Cloudflare R2`** via the **S3 API**.
 
-### [6] GitOps, SecretOps, Security & Observability
+### [`6`] GitOps, SecretOps, Security & Observability
 A unified control plane governs deployment, credential injection, runtime defense and autoscaling across all cluster tiers:
 * **`Argo CD` (`argocd-server:443` / `argocd.kung.nyc`):** Continuously reconciles cluster state from `GitHub Repo & Pages` via **`GitOps Sync (Server-Side Apply)`**.
 * **`External Secrets (ESO)` (`ClusterSecretStore: gcp-secret-store`):** Authenticates to `GCP WIF & Secret Mgr` using K3s projected OIDC tokens and executes **`Hourly Secret Sync (30 Keys -> K8s Secrets)`** across all namespaces with zero static credentials.
@@ -690,28 +690,48 @@ A unified control plane governs deployment, credential injection, runtime defens
 
 ## 🚀 Quick Start & Deployment Guide
 
-### Phase 1: Passwordless Enterprise SSH Setup
-To set up passwordless SSH authentication between your Windows client and WSL2 Ubuntu server:
+### Phase 1: Install OpenSSH Server & Establish SSH Connection on Ubuntu/Linux Host
+To deploy on a bare-metal, WSL (Windows Subsystem for Linux), macOS, or virtual machine Ubuntu/Linux server:
 
-1. **Test Standard Password Login:**
-   ```powershell
-   ssh <username>@<server_ip>
+1. **Install & Enable OpenSSH Server on Ubuntu/Linux Host:**
+   ```bash
+   sudo apt-get update -y && sudo apt-get install -y openssh-server
+   sudo systemctl enable --now ssh
    ```
-   *(First-time connection records the host fingerprint in `C:\Users\<windows_user>\.ssh\known_hosts` as `<server_ip> ssh-ed25519 ...`)*
+   *(If UFW firewall is enabled, allow SSH traffic: `sudo ufw allow OpenSSH`)*
 
-2. **Generate Enterprise Standard Keypair (ed25519):**
+---
+
+### Optional: Passwordless Enterprise SSH Setup
+To set up passwordless SSH authentication between your preferred client OS and Ubuntu/Linux host server:
+
+1. **Test Standard Password Login via Windows `PowerShell` or `CMD` (Windows Command Prompt), for macOS, open `Terminal`, or input in Linux client shell:**
+   ```powershell
+   ssh <Username>@<Server_IP>
+   ```
+   *First-time connection would store the host fingerprint at Windows `%USERPROFILE%\.ssh\known_hosts` (full path: `C:\Users\<Windows_User>\.ssh\known_hosts`), or macOS/Linux client at `~/.ssh/known_hosts` (macOS full path: `/Users/<macOS_User>/.ssh/known_hosts`) as new line: `<Server_IP> ssh-ed25519 <Host_Public_Key>`.*
+
+2. **Generate Enterprise Standard ed25519 SSH Keypair via Windows `PowerShell` or `CMD`, macOS `Terminal` or Linux client shell:**
    ```powershell
    ssh-keygen -t ed25519
    ```
-   *(Generates private key `C:\Users\<windows_user>\.ssh\id_ed25519` and public key `id_ed25519.pub`)*
+   *Generate private key `id_ed25519` and public key `id_ed25519.pub` at Windows directory `%USERPROFILE%\.ssh\` or macOS/Linux client directory `~/.ssh/`.*
 
-3. **Deploy Public Key to Server via PowerShell:**
+3. **Deploy Public Key to Server via Windows `PowerShell`, macOS `Terminal` or Linux client shell:**
+   On Windows `PowerShell`, input:
    ```powershell
-   type "$env:USERPROFILE\.ssh\id_ed25519.pub" | ssh <username>@<server_ip> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
+   type "$env:USERPROFILE\.ssh\id_ed25519.pub" | ssh <Username>@<Server_IP> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
    ```
-   *(Installed on server at `/home/<username>/.ssh/authorized_keys`)*
+   On macOS `Terminal` or Linux client shell, input:
+   ```bash
+   ssh-copy-id -i ~/.ssh/id_ed25519.pub <Username>@<Server_IP>
+   ```
+   *(Alternatively, if `ssh-copy-id` is unavailable in older macOS/Linux version, use instead: `cat ~/.ssh/id_ed25519.pub | ssh <Username>@<Server_IP> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"`)*
 
-4. **Configure Windows SSH Host Shortcut (`C:\Users\<windows_user>\.ssh\config`):**
+   Install authorized key on Linux/Ubuntu host server at `~/.ssh/authorized_keys` (full path: `/home/<Username>/.ssh/authorized_keys`)*
+
+4. **Configure Client's SSH Host Shortcut:**
+   On Windows, manually create or edit existed SSH Host Shortcut file (`C:\Users\<windows_user>\.ssh\config`):
    ```ssh-config
    Host WSL_SSH <server_ip>
        HostName <server_ip>
@@ -719,23 +739,80 @@ To set up passwordless SSH authentication between your Windows client and WSL2 U
        IdentityFile ~/.ssh/id_ed25519
    ```
 
+   On macOS `Terminal` or Linux client shell, input to write the SSH Host Shortcut file (`~/.ssh/config`):**
+   ```bash
+   cat << 'EOF' >> ~/.ssh/config
+   Host WSL_SSH <server_ip>
+       HostName <server_ip>
+       User <username>
+       IdentityFile ~/.ssh/id_ed25519
+   EOF
+   chmod 600 ~/.ssh/config
+   ```
+
 5. **Verify Passwordless Access:**
    ```powershell
    ssh WSL_SSH
    ```
-
 ---
 
 ### Phase 2: Silent File Synchronization & Management Console
-1. **Windows Silent Sync (and Clean Reset):**
-   Execute the silent batch synchronizer from your local repository:
-   ```powershell
-   (Windows) <Your folder>\Cloud-Native_LLMOps_Infrastructure\00-Installation-Testing\Copy-SSH.bat
-   ```
-2. **Launch Master Interactive Console on Ubuntu Server:**
-   ```bash
-   (Windows) ssh WSL_SSH
-   (Ubuntu) ~/00-Installation-Testing/Menu.sh
+
+#### 1. Synchronize Project Files to Ubuntu/Linux Host Server (`~/`)
+* **On Windows, Manually Run Automated Batch from your local repository:**
+  ```powershell
+  <Your folder>\Cloud-Native_LLMOps_Infrastructure\00-Installation-Testing\Copy-SSH.bat
+  ```
+
+* **On macOS/Linux client, Manuallly Sync via `rsync` / `scp` (`.bat` is Windows-only):**
+  From the root of your locally cloned `Cloud-Native_LLMOps_Infrastructure` repository, sync all module directories (`00-*` through `18-*` and `K8s-OIDC-Provider`) to `~/` on the target server, normalize line endings, and mark scripts executable:
+  ```bash
+  cd /path/to/Cloud-Native_LLMOps_Infrastructure
+
+  # Sync all project folders to the remote Ubuntu server home directory
+  rsync -avz --progress \
+    00-Installation-Testing 01-Hardware-OS-Configuration 02-AMD-ROCm-DXG \
+    03-Kubernetes 04-Helm 05-External-Secrets-Operator 06-Tailscale-Operator \
+    07-Cloudflare-Tunnel 08-Ingress-Nginx 09-JuiceFS-CSI-Driver \
+    10-CloudNativePG-DB 11-Qdrant-Vector-DB 12-ArgoCD-GitOps \
+    13-Falco-Security 14-Grafana-Prometheus-Stack 15-KEDA-Autoscaler \
+    16-LLaMAcpp-ROCm 17-LiteLLM-Gateway 18-Open-WebUI K8s-OIDC-Provider \
+    WSL_SSH:~/
+
+  # Strip any Windows CRLF line endings and grant execute permissions
+  ssh WSL_SSH "sed -i 's/\r$//' ~/00-Installation-Testing/*.sh ~/04-Helm/*.sh && chmod +x ~/00-Installation-Testing/*.sh ~/04-Helm/*.sh"
+  ```
+  *(If `rsync` is not installed, use `scp -r 00-Installation-Testing 01-* ... 18-* K8s-OIDC-Provider WSL_SSH:~/` instead.)*
+
+* **Direct Local Linux Host (No Remote Transfer Needed):**
+  If you cloned the repository directly on the target Ubuntu server, copy the directories into `~/` and grant execute permissions:
+  ```bash
+  cd /path/to/Cloud-Native_LLMOps_Infrastructure
+  cp -r 00-Installation-Testing 01-Hardware-OS-Configuration 02-AMD-ROCm-DXG \
+    03-Kubernetes 04-Helm 05-External-Secrets-Operator 06-Tailscale-Operator \
+    07-Cloudflare-Tunnel 08-Ingress-Nginx 09-JuiceFS-CSI-Driver \
+    10-CloudNativePG-DB 11-Qdrant-Vector-DB 12-ArgoCD-GitOps \
+    13-Falco-Security 14-Grafana-Prometheus-Stack 15-KEDA-Autoscaler \
+    16-LLaMAcpp-ROCm 17-LiteLLM-Gateway 18-Open-WebUI K8s-OIDC-Provider ~/
+  chmod +x ~/00-Installation-Testing/*.sh ~/04-Helm/*.sh
+  ```
+
+#### 2. Launch Master Interactive Console (`Menu.sh`)
+* **From Windows (PowerShell):**
+  ```powershell
+  ssh WSL_SSH
+  ~/00-Installation-Testing/Menu.sh
+  ```
+* **From macOS or Remote Linux Terminal:**
+  ```bash
+  ssh WSL_SSH
+  ~/00-Installation-Testing/Menu.sh
+  # Or launch directly in a single interactive TTY command:
+  ssh -t WSL_SSH "~/00-Installation-Testing/Menu.sh"
+  ```
+* **Directly on the Ubuntu / Linux Host:**
+  ```bash
+  ~/00-Installation-Testing/Menu.sh
    ```
 
    **Interactive Console Menu Layout (`Menu.sh`):**
