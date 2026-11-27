@@ -77,89 +77,89 @@ Operating on physical AMD hardware (**AMD Ryzen AI Max+ 395 APU with Radeon 8060
 
 This project was developed incrementally over a 45-week timeline, solving complex systems engineering, hardware acceleration, zero-trust security and cloud-native orchestration challenges:
 
-```
-January 16, 2026 [Project Kickoff]
+<pre>
+<b>January 16, 2026 [Project Kickoff]</b>
  ├─ Initialized CISC 4900 project repository and defined system architecture.
  ├─ Configured baseline Windows 11 host with AMD Strix Halo APU (128GB unified memory).
  │
-January 23, 2026 [WSL2 Linux Kernel & OS Tuning]
+<b>January 23, 2026 [WSL2 Linux Kernel & OS Tuning]</b>
  ├─ Deployed Ubuntu 24.04 LTS on WSL2 with customized Linux Kernel 6.6+.
  ├─ Resolved eBPF inotify limit crashes by configuring /etc/sysctl.d/99-inotify.conf.
  │
-January 30, 2026 [AMD ROCm & DXG Virtualization Passthrough]
+<b>January 30, 2026 [AMD ROCm & DXG Virtualization Passthrough]</b>
  ├─ Mapped /dev/dxg virtualization device from Windows host into WSL2 user space.
  ├─ Integrated librocdxg.so abstraction layer with ROCm 7.2 runtime.
  ├─ Built and verified AMD ROCm Diagnostic Pod to ensure GPU compute availability.
  │
-February 13, 2026 [K3s Cluster & Networking Foundation]
+<b>February 13, 2026 [K3s Cluster & Networking Foundation]</b>
  ├─ Installed lightweight K3s cluster; disabled default Traefik to eliminate routing conflicts.
  ├─ Configured Kubeconfig permissions (0644) and persistent ~/.bashrc environment variables.
  ├─ Deployed Ingress-Nginx with hostNetwork binding for local sslip.io wildcard resolution.
  │
-February 20, 2026 [Helm Package Ecosystem Standardization]
+<b>February 20, 2026 [Helm Package Ecosystem Standardization]</b>
  ├─ Standardized on Helm for declarative upstream package management.
  ├─ Created automated initialization scripts for 9 official community repositories.
  │
-February 28, 2026 [High-Availability Database Layer]
+<b>February 28, 2026 [High-Availability Database Layer]</b>
  ├─ Deployed CloudNativePG Operator to manage declarative PostgreSQL 16 instances.
  ├─ Engineered automated primary-standby streaming replication with self-healing failover.
  │
-March 14, 2026 [Distributed POSIX Storage with Cloudflare R2]
+<b>March 14, 2026 [Distributed POSIX Storage with Cloudflare R2]</b>
  ├─ Deployed JuiceFS CSI Driver to decouple model weights from local ephemeral container disks.
  ├─ Connected JuiceFS to Cloudflare R2 object storage, providing S3-compatible shared storage.
  │
-March 21, 2026 [Semantic Vector Database Integration]
+<b>March 21, 2026 [Semantic Vector Database Integration]</b>
  ├─ Deployed Qdrant Vector DB with native HNSW indexing for high-recall vector search.
  ├─ Configured payload-based access control and exposed the administrative dashboard via Ingress.
  │
-March 28, 2026 [Hardware-Accelerated llama.cpp ROCm Serving]
+<b>March 28, 2026 [Hardware-Accelerated llama.cpp ROCm Serving]</b>
  ├─ Compiled llama.cpp with ROCm gfx1151 support targeting AMD Radeon 8060S.
  ├─ Solved out-of-memory kernel panics by tuning shared VRAM allocation to 62GB.
  ├─ Engineered a dynamic GGUF symlink router to mount weights without container rebuilds.
  │
-April 11, 2026 [Enterprise AI Gateway Orchestration]
+<b>April 11, 2026 [Enterprise AI Gateway Orchestration]</b>
  ├─ Deployed LiteLLM Gateway as an OpenAI-compatible multi-model routing proxy.
  ├─ Connected LiteLLM to dedicated CloudNativePG PostgreSQL cluster for session audit logs.
  ├─ Implemented dynamic model fallback pipelines and token rate-limiting controls.
  │
-April 25, 2026 [Production Conversational AI Portal & RAG]
+<b>April 25, 2026 [Production Conversational AI Portal & RAG]</b>
  ├─ Deployed Open-WebUI chat portal with dedicated PostgreSQL persistence.
  ├─ Integrated Qdrant hybrid search directly into the Open-WebUI knowledge base engine.
  ├─ Enforced Kubernetes NetworkPolicy zero-trust micro-isolation around frontend pods.
  │
-June 6, 2026 [Zero-Trust Remote Perimeter (Tailscale Mesh)]
+<b>June 6, 2026 [Zero-Trust Remote Perimeter (Tailscale Mesh)]</b>
  ├─ Deployed Tailscale Kubernetes Operator with ProxyGroup routing.
  ├─ Enabled encrypted, authorized remote developer access via WireGuard mesh networking.
  │
-July 25, 2026 [Public Ingress via Cloudflare Zero Trust Tunnel]
+<b>July 25, 2026 [Public Ingress via Cloudflare Zero Trust Tunnel]</b>
  ├─ Deployed dual-replica cloudflared tunnel pods connecting outbound to Cloudflare edge.
  ├─ Configured CNAME routing for *.kung.nyc without opening any inbound firewall ports.
  ├─ Implemented an automated CronJob to synchronize Kubernetes Ingress records with Cloudflare DNS.
  │
-August 8, 2026 [Runtime Threat Defense with Modern eBPF]
+<b>August 8, 2026 [Runtime Threat Defense with Modern eBPF]</b>
  ├─ Integrated Falco runtime security using modern eBPF driver probes.
  ├─ Deployed Falcosidekick Web UI to capture and visualize container security violations.
  │
-October 17, 2026 [Full-Stack Observability Stack (LGTM)]
+<b>October 17, 2026 [Full-Stack Observability Stack (LGTM)]</b>
  ├─ Deployed Prometheus and Grafana monitoring stack via Prometheus Community Helm Chart.
  ├─ Designed a custom Grafana dashboard tracking ROCm GPU VRAM, queue depth, TPS and TTFT.
  │
-November 14, 2026 [Event-Driven Dynamic Autoscaling (KEDA)]
+<b>November 14, 2026 [Event-Driven Dynamic Autoscaling (KEDA)]</b>
  ├─ Deployed KEDA autoscaler to dynamically monitor HTTP inference queue depth.
  ├─ Configured ScaledObject to scale llama.cpp worker instances based on concurrent load.
  │
-November 21, 2026 [Cross-Cloud Keyless SecretOps Transformation]
+<b>November 21, 2026 [Cross-Cloud Keyless SecretOps Transformation]</b>
  ├─ Overcame GCP organization key restrictions (iam.disableServiceAccountKeyCreation).
  ├─ Published K3s OIDC discovery endpoints (.well-known and jwks.json) via GitHub Pages.
  ├─ Configured Google Cloud Workload Identity Federation (WIF) and Service Account Impersonation.
  ├─ Deployed External Secrets Operator (ESO) connected to ClusterSecretStore: gcp-secret-store.
  ├─ Consolidated all 30 credentials into single GCP Secret my-cisc4900-config (Free-Tier compliant).
  │
-November 24, 2026 [GitOps Finalization & Comprehensive Verification Suite]
+<b>November 24, 2026 [GitOps Finalization & Comprehensive Verification Suite]</b>
  ├─ Transitioned all application deployments to Argo CD with Server-Side Apply.
  ├─ Built and verified 10-tier automated testing benchmark suite (Test 101 through Test 110).
  └─ Achieved 100% test pass rate across E2E inference, security penetration and failover resilience.
-```
+</pre>
 
 ---
 
@@ -199,9 +199,9 @@ A unified control plane governs deployment, credential injection, runtime defens
 * **`Argo CD` (`argocd-server:443` / `argocd.kung.nyc`):** Continuously reconciles cluster state from `GitHub Repo & Pages` via **`GitOps Sync (Server-Side Apply)`**.
 * **`External Secrets (ESO)` (`ClusterSecretStore: gcp-secret-store`):** Authenticates to `GCP WIF & Secret Mgr` using K3s projected OIDC tokens and executes **`Hourly Secret Sync (30 Keys -> K8s Secrets)`** across all namespaces with zero static credentials.
 * **`Falco eBPF / Prometheus / Grafana`:** Provides **`eBPF / Metrics / Scaling (ServiceMonitors & KEDA)`** across the stack, capturing kernel-level threats in **`Falcosidekick UI (:2802)`**, scraping inference queue and cluster metrics in **`Prometheus (:9090) -> KEDA`** for event-driven scaling and visualizing ROCm GPU/LLM telemetry in **`Grafana (:80, grafana.kung.nyc)`**.
-```
+<pre>
 +=======================================================================================================+
-|                                  [1] External Network & Cloud Services                                |
+|                                  <b>[1] External Network & Cloud Services</b>                                |
 |                                                                                                       |
 |  +---------------------+  +--------------------+  +----------------------+  +----------------------+  |
 |  |   Public Internet   +->|   Cloudflare Edge  |  |  LAN 192.168.1.0/24  |  |    Remote Admins     |  |
@@ -221,7 +221,7 @@ A unified control plane governs deployment, credential injection, runtime defens
                                     ^      |                   |                         |
                                     |      v                   v                         v
 +===================================|======|===================|=========================|==============+
-|                                 [2] K3s Cluster: Zero-Trust Edge Ingress                              |
+|                                 <b>[2] K3s Cluster: Zero-Trust Edge Ingress</b>                              |
 |                                                                                                       |
 |  +---------------------------------+  +------------------------------+  +--------------------------+  |
 |  |          Cloudflare Tunnel      |  |        Ingress-Nginx         |  |    Tailscale Operator    |  |
@@ -237,7 +237,7 @@ A unified control plane governs deployment, credential injection, runtime defens
              |                                        |                                     | Management
              v open-webui.kung.nyc                    v api.kung.nyc                        v  Portals*
 +============|========================================|=====================================|===========+
-|            [3] Application & AI API Gateway [Zero-Trust NetworkPolicy Enforced]           |  *qdrant  |
+|            <b>[3] Application & AI API Gateway [Zero-Trust NetworkPolicy Enforced]</b>           |  *qdrant  |
 |                                                                                           |           |
 |  +-------- [NP: Ingress Only] ---------+   OpenAI API   +-- [NP: WebUI/Ingress Only] --+  |  *argocd  |
 |  |          Open-WebUI Portal          |    (/v1/*)     |       LiteLLM Gateway        |  |           |
@@ -248,7 +248,7 @@ A unified control plane governs deployment, credential injection, runtime defens
             |             |                                        |       |
             v             v REST/gRPC API Key (:6333)              v       v Bearer Token
 +===========|=============|========================================|=======|============================+
-|           |             |   [4] Inference, Vector & Autoscaling  |       |                            |
+|           |             |   <b>[4] Inference, Vector & Autoscaling</b>  |       |                            |
 |           |             v                                        |       v                            |
 |           |   +---------+------------------------+               |  +----+- [NP: LiteLLM Only] ----+  |
 |           |   |         Qdrant Vector DB         |               |  |     llama.cpp ROCm Server    |  |
@@ -266,7 +266,7 @@ A unified control plane governs deployment, credential injection, runtime defens
             |                                                      |                          |
             v :5432                                                v :5432                    v RWX PVC
 +===========|======================================================|==========================|=========+
-|                                [5] High-Availability Storage & Databases                              |
+|                                <b>[5] High-Availability Storage & Databases</b>                              |
 |                                                                                                       |
 |  +-------- [NP: App-Only :5432 | Direct Access BLOCKED] --------+       +--------------------------+  |
 |  |         CloudNativePG PostgreSQL 16 (High-Availability)      |       |    JuiceFS CSI Storage   |  |
@@ -279,7 +279,7 @@ A unified control plane governs deployment, credential injection, runtime defens
             ^     GitOps Sync           ^    Hourly Secret Sync            ^  eBPF / Metrics
             : (Server-Side Apply)       : (30 Keys -> K8s Secrets)         : & KEDA Scaling
 +===========:===========================:==================================:============================+
-|                                [6] GitOps, SecretOps, Security & Observability                        |
+|                                <b>[6] GitOps, SecretOps, Security & Observability</b>                        |
 |                                                                                                       |
 |  +-------------------------+  +--------------------------+  +--------------------------------------+  |
 |  |         Argo CD         |  |  External Secrets (ESO)  |  |  Falco eBPF / Prometheus / Grafana   |  |
@@ -290,7 +290,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 |                                                                                                       |
 +=======================================================================================================+
            Legend: [NP: ...] = Kubernetes NetworkPolicy Zero-Trust Microsegmentation Boundary
-```
+</pre>
 
 ---
 
@@ -513,7 +513,7 @@ A unified control plane governs deployment, credential injection, runtime defens
   * Google Cloud Workload Identity Federation validates the token signature against GitHub Pages JWKS, allowing the `cisc4900-es-accessor` Service Account to retrieve credentials from Secret Manager.
   * External Secrets Operator writes native Kubernetes Secrets on an hourly refresh schedule.
 * **Core Strengths:**
-  * **Strict Free-Tier Optimization**: Consolidates 30 secrets into a single versioned JSON payload (`my-cisc4900-config`), using only 1 of the 6 allowed free versions and negligible monthly API calls.
+  * **Strict Free-Tier Optimization**: Consolidates 30 secrets into a single versioned JSON payload (`my-cisc4900-config`), using only 1 of 6 allowed free versions and negligible monthly API calls.
 * **Original Deployment Commands:**
   ```bash
   # Step 5: Deploy ESO and apply GCP ClusterSecretStore
@@ -691,7 +691,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 ## 🚀 Quick Start & Deployment Guide
 
 ### Phase 1: Passwordless Enterprise SSH Setup
-To set up passwordless SSH authentication between your Windows client and the WSL2 Ubuntu server:
+To set up passwordless SSH authentication between your Windows client and WSL2 Ubuntu server:
 
 1. **Test Standard Password Login:**
    ```powershell
@@ -729,7 +729,7 @@ To set up passwordless SSH authentication between your Windows client and the WS
 ### Phase 2: Silent File Synchronization & Management Console
 1. **Windows Silent Sync (and Clean Reset):**
    Execute the silent batch synchronizer from your local repository:
-   ```cmd
+   ```powershell
    (Windows) <Your folder>\Cloud-Native_LLMOps_Infrastructure\00-Installation-Testing\Copy-SSH.bat
    ```
 2. **Launch Master Interactive Console on Ubuntu Server:**
@@ -739,43 +739,43 @@ To set up passwordless SSH authentication between your Windows client and the WS
    ```
 
    **Interactive Console Menu Layout (`Menu.sh`):**
-   ```text
-    [0] Install ALL               ,[A] Run Test, [A+] Restart, [A-] Uninstall (ALL)
-    [1] Install Hardware-OS-Config,[B] Run Test, [B+] Restart, [B-] Uninstall (1)
-    [2] Install AMD-ROCm-DXG      ,[C] Run Test, [C+] Restart, [C-] Uninstall (2)
-    [3] Install Kubernetes        ,[D] Run Test, [D+] Restart, [D-] Uninstall (3)
-    [4] Install Helm              ,[E] Run Test, [E+] Restart, [E-] Uninstall (4)
-    [5] Install External-Secrets  ,[F] Run Test, [F+] Restart, [F-] Uninstall (5)
-    [6] Install Tailscale-Operator,[G] Run Test, [G+] Restart, [G-] Uninstall (6)
-    [7] Install Cloudflare-Tunnel ,[H] Run Test, [H+] Restart, [H-] Uninstall (7)
-    [8] Install Ingress-Nginx     ,[I] Run Test, [I+] Restart, [I-] Uninstall (8)
-    [9] Install JuiceFS-CSI       ,[J] Run Test, [J+] Restart, [J-] Uninstall (9)
-   [10] Install CloudNativePG-DB  ,[K] Run Test, [K+] Restart, [K-] Uninstall (10)
-   [11] Install Qdrant-Vector-DB  ,[L] Run Test, [L+] Restart, [L-] Uninstall (11)
-   [12] Install ArgoCD-GitOps     ,[M] Run Test, [M+] Restart, [M-] Uninstall (12)
-   [13] Install Falco-Security    ,[N] Run Test, [N+] Restart, [N-] Uninstall (13)
-   [14] Install Grafana-Prometheus,[O] Run Test, [O+] Restart, [O-] Uninstall (14)
-   [15] Install KEDA-Autoscaler   ,[P] Run Test, [P+] Restart, [P-] Uninstall (15)
-   [16] Install LLaMAcpp-ROCm     ,[Q] Run Test, [Q+] Restart, [Q-] Uninstall (16)
-   [17] Install LiteLLM-Gateway   ,[R] Run Test, [R+] Restart, [R-] Uninstall (17)
-   [18] Install Open-WebUI        ,[S] Run Test, [S+] Restart, [S-] Uninstall (18)
+   <pre>
+    <b>[0]</b> Install ALL               ,<b>[A]</b> Run Test, <b>[A+]</b> Restart, <b>[A-]</b> Uninstall (ALL)
+    <b>[1]</b> Install Hardware-OS-Config,<b>[B]</b> Run Test, <b>[B+]</b> Restart, <b>[B-]</b> Uninstall (1)
+    <b>[2]</b> Install AMD-ROCm-DXG      ,<b>[C]</b> Run Test, <b>[C+]</b> Restart, <b>[C-]</b> Uninstall (2)
+    <b>[3]</b> Install Kubernetes        ,<b>[D]</b> Run Test, <b>[D+]</b> Restart, <b>[D-]</b> Uninstall (3)
+    <b>[4]</b> Install Helm              ,<b>[E]</b> Run Test, <b>[E+]</b> Restart, <b>[E-]</b> Uninstall (4)
+    <b>[5]</b> Install External-Secrets  ,<b>[F]</b> Run Test, <b>[F+]</b> Restart, <b>[F-]</b> Uninstall (5)
+    <b>[6]</b> Install Tailscale-Operator,<b>[G]</b> Run Test, <b>[G+]</b> Restart, <b>[G-]</b> Uninstall (6)
+    <b>[7]</b> Install Cloudflare-Tunnel ,<b>[H]</b> Run Test, <b>[H+]</b> Restart, <b>[H-]</b> Uninstall (7)
+    <b>[8]</b> Install Ingress-Nginx     ,<b>[I]</b> Run Test, <b>[I+]</b> Restart, <b>[I-]</b> Uninstall (8)
+    <b>[9]</b> Install JuiceFS-CSI       ,<b>[J]</b> Run Test, <b>[J+]</b> Restart, <b>[J-]</b> Uninstall (9)
+   <b>[10]</b> Install CloudNativePG-DB  ,<b>[K]</b> Run Test, <b>[K+]</b> Restart, <b>[K-]</b> Uninstall (10)
+   <b>[11]</b> Install Qdrant-Vector-DB  ,<b>[L]</b> Run Test, <b>[L+]</b> Restart, <b>[L-]</b> Uninstall (11)
+   <b>[12]</b> Install ArgoCD-GitOps     ,<b>[M]</b> Run Test, <b>[M+]</b> Restart, <b>[M-]</b> Uninstall (12)
+   <b>[13]</b> Install Falco-Security    ,<b>[N]</b> Run Test, <b>[N+]</b> Restart, <b>[N-]</b> Uninstall (13)
+   <b>[14]</b> Install Grafana-Prometheus,<b>[O]</b> Run Test, <b>[O+]</b> Restart, <b>[O-]</b> Uninstall (14)
+   <b>[15]</b> Install KEDA-Autoscaler   ,<b>[P]</b> Run Test, <b>[P+]</b> Restart, <b>[P-]</b> Uninstall (15)
+   <b>[16]</b> Install LLaMAcpp-ROCm     ,<b>[Q]</b> Run Test, <b>[Q+]</b> Restart, <b>[Q-]</b> Uninstall (16)
+   <b>[17]</b> Install LiteLLM-Gateway   ,<b>[R]</b> Run Test, <b>[R+]</b> Restart, <b>[R-]</b> Uninstall (17)
+   <b>[18]</b> Install Open-WebUI        ,<b>[S]</b> Run Test, <b>[S+]</b> Restart, <b>[S-]</b> Uninstall (18)
 
-   [91] Check Cluster Deployment      [92] Export ESO Secrets (GCP JSON)
+   <b>[91]</b> Check Cluster Deployment      <b>[92]</b> Export ESO Secrets (GCP JSON)
    --------------------------------------------------------------------------------
-   [100] Download LLM: High-speed download HuggingFace LLM models to /HuggingFace-Models
-   [101] Test AI Stack E2E: End-to-end AI inference, full stack pipeline verification
-   [102] Test Security Penetration: NetworkPolicy, pen-test, Falco runtime audit
-   [103] Test RAG Benchmark (Retrieval): Qdrant vector search, closed-loop QA evaluation
-   [104] Test Concurrency Throughput: Multi-user concurrency, TPS, TTFT latency test
-   [105] Test Context Stress: Stepped context window (1K~32K), memory pressure test
-   [106] Test Needle In Haystack: 32K long-context precision retrieval verification
-   [107] Test LLM Guardrails OWASP (Safety): Prompt injection defense, OWASP Top 10 audit
-   [108] Test Cluster Security: Kubernetes permissions, Pod Security, Secret isolation
-   [109] Test Storage Persistence Failover: CSI volume durability, pod self-healing
-   [110] Test LLM CLI (Interactive): Interactive LLM model selection, terminal chat
+   <b>[100]</b> Download LLM: High-speed download HuggingFace LLM models to /HuggingFace-Models
+   <b>[101]</b> Test AI Stack E2E: End-to-end AI inference, full stack pipeline verification
+   <b>[102]</b> Test Security Penetration: NetworkPolicy, pen-test, Falco runtime audit
+   <b>[103]</b> Test RAG Benchmark (Retrieval): Qdrant vector search, closed-loop QA evaluation
+   <b>[104]</b> Test Concurrency Throughput: Multi-user concurrency, TPS, TTFT latency test
+   <b>[105]</b> Test Context Stress: Stepped context window (1K~32K), memory pressure test
+   <b>[106]</b> Test Needle In Haystack: 32K long-context precision retrieval verification
+   <b>[107]</b> Test LLM Guardrails OWASP (Safety): Prompt injection defense, OWASP Top 10 audit
+   <b>[108]</b> Test Cluster Security: Kubernetes permissions, Pod Security, Secret isolation
+   <b>[109]</b> Test Storage Persistence Failover: CSI volume durability, pod self-healing
+   <b>[110]</b> Test LLM CLI (Interactive): Interactive LLM model selection, terminal chat
 
    Select one or more options (Example: 91 101 110) [Ctrl+C to Quit]:
-   ```
+   </pre>
 
    * **Components Management ([`0`] to [`18`] & [`A`] to [`S`] with/without [`+`]/[`-`]):**
      * Option [`1`] to [`18`] install individual infrastructure components ([`0`] targets all modules).
@@ -926,41 +926,41 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
    ```
 
    **Export JSON Output Structure for `my-cisc4900-config` with 30 Consolidated Keys:**
-   ```json
+   <pre>
    =====================================================================
     [92] Exporting ESO Secrets for 'my-cisc4900-config'
    =====================================================================
    {
-     "tailscale_client_id": "<Your_Tailscale_Client_ID>",
-     "tailscale_client_secret": "<Your_Tailscale_Client_Secret_Start>",
-     "cf_account_id": "<Your_Cloudflare_Account_ID>",
-     "cf_kv_namespace_id": "<Your_Cloudflare_KV_Namespace_ID>",
-     "cf_api_token": "<Your_Cloudflare_API_Token>",
-     "cf_tunnel_id": "<Your_Cloudflare_Tunnel_ID>",
-     "juicefs_username": "<Your_JuiceFS_Username>",
-     "juicefs_password": "<Your_JuiceFS_Password>",
-     "juicefs_name": "<Your_JuiceFS_Name>",
-     "juicefs_metaurl": "postgres://<Your_JuiceFS_Postgres_Username:Password@Postgres_URL>:5432/<Database_Name>",
+     "tailscale_client_id": "<i><Your_Tailscale_Client_ID></i>",
+     "tailscale_client_secret": "<i><Your_Tailscale_Client_Secret_Start></i>",
+     "cf_account_id": "<i><Your_Cloudflare_Account_ID></i>",
+     "cf_kv_namespace_id": "<i><Your_Cloudflare_KV_Namespace_ID></i>",
+     "cf_api_token": "<i><Your_Cloudflare_API_Token></i>",
+     "cf_tunnel_id": "<i><Your_Cloudflare_Tunnel_ID></i>",
+     "juicefs_username": "<i><Your_JuiceFS_Username></i>",
+     "juicefs_password": "<i><Your_JuiceFS_Password></i>",
+     "juicefs_name": "<i><Your_JuiceFS_Name></i>",
+     "juicefs_metaurl": "postgres://<i><Your_JuiceFS_Postgres_Username:Password@Postgres_URL></i>:5432/<i><Database_Name></i>",
      "juicefs_storage": "s3",
-     "juicefs_bucket": "<Your_JuiceFS_CloudflareR2_Bucket_URL>/<Bucket_Name>",
-     "juicefs_access_key": "<Your_JuiceFS_CloudflareR2_Access_Key>",
-     "juicefs_secret_key": "<Your_JuiceFS_CloudflareR2_Secret_Key>",
-     "qdrant_key": "<Your_Qdrant_Key>",
-     "qdrant_read_only_key": "<Your_Qdrant_Read_Only_Key>",
-     "argocd_admin_password": "<Your_ArgoCD_Bcrypt_Admin_Password>",
-     "llamacpp_api_key": "<Your_Llamacpp_API_Key>",
-     "litellm_username": "<Your_LiteLLM_Username>",
-     "litellm_password": "<Your_LiteLLM_Password>",
-     "litellm_database_url": "postgresql://<Your_LiteLLM_Postgres_Username:Password@LiteLLM_Postgres_URL>:5432/<Database_Name>",
-     "litellm_master_key": "<Your_LiteLLM_Master_Key>",
-     "openwebui_openai_api_keys": "<Your_OpenWebUI_API_Key>",
-     "openwebui_secret_key": "<Your_OpenWebUI_Secret_Key>",
-     "openwebui_db_username": "<Your_OpenWebUI_Postgres_Username>",
-     "openwebui_db_password": "<Your_OpenWebUI_Postgres_Password>",
-     "openwebui_db_url": "postgresql://<Your_OpenWebUI_Postgres_Username:Password@Postgres_URL>:5432/<Database_Name>",
+     "juicefs_bucket": "<i><Your_JuiceFS_CloudflareR2_Bucket_URL></i>/<i><Bucket_Name></i>",
+     "juicefs_access_key": "<i><Your_JuiceFS_CloudflareR2_Access_Key></i>",
+     "juicefs_secret_key": "<i><Your_JuiceFS_CloudflareR2_Secret_Key></i>",
+     "qdrant_key": "<i><Your_Qdrant_Key></i>",
+     "qdrant_read_only_key": "<i><Your_Qdrant_Read_Only_Key></i>",
+     "argocd_admin_password": "<i><Your_ArgoCD_Bcrypt_Admin_Password></i>",
+     "llamacpp_api_key": "<i><Your_Llamacpp_API_Key></i>",
+     "litellm_username": "<i><Your_LiteLLM_Username></i>",
+     "litellm_password": "<i><Your_LiteLLM_Password></i>",
+     "litellm_database_url": "postgresql://<i><Your_LiteLLM_Postgres_Username:Password@LiteLLM_Postgres_URL></i>:5432/<i><Database_Name></i>",
+     "litellm_master_key": "<i><Your_LiteLLM_Master_Key></i>",
+     "openwebui_openai_api_keys": "<i><Your_OpenWebUI_API_Key></i>",
+     "openwebui_secret_key": "<i><Your_OpenWebUI_Secret_Key></i>",
+     "openwebui_db_username": "<i><Your_OpenWebUI_Postgres_Username></i>",
+     "openwebui_db_password": "<i><Your_OpenWebUI_Postgres_Password></i>",
+     "openwebui_db_url": "postgresql://<i><Your_OpenWebUI_Postgres_Username:Password@Postgres_URL></i>:5432/<i><Database_Name></i>",
      "openwebui_vector_db": "qdrant",
-     "openwebui_qdrant_uri": "<Your_OpenWebUI_Qdrant_URL>:6333",
-     "openwebui_qdrant_api_key": "<Your_OpenWebUI_Qdrant_API_Key>"
+     "openwebui_qdrant_uri": "<i><Your_OpenWebUI_Qdrant_URL></i>:6333",
+     "openwebui_qdrant_api_key": "<i><Your_OpenWebUI_Qdrant_API_Key></i>"
    }
    =====================================================================
     [OK] Successfully exported 30 secret keys
@@ -975,7 +975,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
        * Tip: Disable or destroy older versions to stay within the
          GCP Free Tier limit (<= 6 active secret versions).
    =====================================================================
-   ```
+   </pre>
 
    Then copy JSON output or upload the local JSON file to Google Cloud Secret Manager:
    * Open [Google Cloud Console Secret Manager](https://console.cloud.google.com/security/secret-manager/secrets)
@@ -1023,7 +1023,7 @@ Step-by-step procedure to transition credentials to Google Cloud Secret Manager 
 ~/00-Installation-Testing/101-Test-AI-Stack-E2E.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [101] AI Stack End-to-End Pipeline Verification
  Chain: Qdrant -> llama.cpp ROCm -> LiteLLM Gateway -> WebUI
@@ -1071,7 +1071,7 @@ Open-WebUI ClusterIP: 10.43.176.196:8080
 ~/00-Installation-Testing/102-Test-Security-Penetration.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [102] Security Penetration, NetworkPolicy & Falco Audit
  Testing: Negative Auth, Zero-Trust Microsegmentation & eBPF Threat
@@ -1114,7 +1114,7 @@ Attempting unauthorized lateral connection: default pod -> litellm-postgres:5432
 ~/00-Installation-Testing/103-Test-RAG-Benchmark.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [103] Qdrant Vector Search & Closed-Loop RAG QA Benchmark
  Testing: Collection Ingestion, Vector Cosine Search & LLM RAG Loop
@@ -1156,7 +1156,7 @@ Total RAG Latency: 562 ms
 ~/00-Installation-Testing/104-Test-Concurrency-Throughput.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [104] Multi-User Concurrency, Throughput & TTFT Benchmark
  Testing: Parallel Load, Tokens/Sec (TPS), First-Token (TTFT) & KEDA
@@ -1203,7 +1203,7 @@ keda-hpa-llamacpp-rocm-scaler   Deployment/llamacpp-rocm-deploy   0/1 (avg)   1 
 ~/00-Installation-Testing/105-Test-Context-Stress.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [105] Stepped Context Window (1K~32K) & ROCm VRAM Benchmark
  Testing: 32K Context Processing, KV-Cache Scaling & APU VRAM
@@ -1247,7 +1247,7 @@ Response Time: 13860 ms
 ~/00-Installation-Testing/106-Test-Needle-In-Haystack.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [106] 32K Needle-In-A-Haystack (NIAH) Accuracy Benchmark
  Testing: Context Recall at 25%, 50%, 75% Depth across 4K~32K
@@ -1289,7 +1289,7 @@ Each test passes only if the model refuses/guards the request without emitting t
 ~/00-Installation-Testing/107-Test-LLM-Guardrails-OWASP.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [107] LLM Guardrails & OWASP Top 10 for LLM Security Audit
  Testing: Prompt Injection, Jailbreak Defense & Secret Leakage
@@ -1326,7 +1326,7 @@ Summary: 4/4 Guardrail Defense Tests Passed.
 ~/00-Installation-Testing/108-Test-Cluster-Security-Audit.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [108] Kubernetes & Cloud-Native Cluster Security Audit
  Testing: RBAC Least-Privilege, Pod Security, Secret Isolation & TLS
@@ -1370,7 +1370,7 @@ Total Ingress Routes Configured: 6
 ~/00-Installation-Testing/109-Test-Storage-Persistence-Failover.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [109] Storage CSI, Data Persistence & Self-Healing Benchmark
  Testing: JuiceFS POSIX I/O, PostgreSQL CNPG, Qdrant PVC & Failover
@@ -1413,7 +1413,7 @@ Total Cluster Pods: 49 | Unhealthy/Degraded: 0
 ~/00-Installation-Testing/110-Test-LLM-CLI.sh
 ```
 **Diagnostic Output:**
-```text
+```
 ==================================================================
  [110] Interactive LLM CLI Chat
    Select an available model and start a multi-turn Q&A session
