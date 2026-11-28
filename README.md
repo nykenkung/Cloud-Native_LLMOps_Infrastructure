@@ -1091,7 +1091,7 @@ To establish zero-trust remote access:
       ~/00-Installation-Testing/05-External-Secrets-Operator.sh -restart
       kubectl get externalsecrets -A
       ```
-      Confirm the output of all `ClusterSecretStore` called `gcp-secret-store` show **`STATUS: SecretSynced`** | **`READY: True`**:
+      Confirm output of all `ClusterSecretStore` named `gcp-secret-store` show **`STATUS: SecretSynced`** | **`READY: True`**:
       <pre>
       NAMESPACE          NAME                            STORETYPE            STORE              <b>STATUS         READY</b>
       argocd             argocd-secret-patch             ClusterSecretStore   gcp-secret-store   <b>SecretSynced   True</b>
