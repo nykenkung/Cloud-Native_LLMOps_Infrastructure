@@ -75,7 +75,7 @@ scp ^
  "07-Cloudflare-Tunnel\7-Cloudflare-KV-CronJob.yaml" ^
  "07-Cloudflare-Tunnel\8-Cloudflared-Tunnel-Deployment.yaml" ^
  "07-Cloudflare-Tunnel\My-Cloudflare-KV-ExternalSecret.yaml" ^
- "07-Cloudflare-Tunnel\My-Cloudflare-Tunnel-ExternalSecret.yaml" ^
+ "07-Cloudflare-Tunnel\My-Cloudflared-Tunnel-ExternalSecret.yaml" ^
  %TARGET%:~/07-Cloudflare-Tunnel/
 
 scp "08-Ingress-Nginx\1-Ingress-Nginx-Namespace.yaml" %TARGET%:~/08-Ingress-Nginx/

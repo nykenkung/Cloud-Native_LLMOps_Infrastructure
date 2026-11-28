@@ -369,7 +369,7 @@ A unified control plane governs deployment, credential injection, runtime defens
 │   ├── 7-Cloudflare-KV-CronJob.yaml      # Automated CronJob syncing Kubernetes Ingress domains to Cloudflare DNS
 │   ├── 8-Cloudflared-Tunnel-Deployment.yaml # High-Availability dual-replica cloudflared tunnel deployment
 │   ├── My-Cloudflare-KV-ExternalSecret.yaml # Sync Cloudflare Account ID and API Token from Google Secret Manager
-│   └── My-Cloudflare-Tunnel-ExternalSecret.yaml # Sync CLOUDFLARE_TUNNEL_ID (cf_tunnel_id) from Google Secret Manager
+│   └── My-Cloudflared-Tunnel-ExternalSecret.yaml # Sync CLOUDFLARE_TUNNEL_ID (cf_tunnel_id) from Google Secret Manager
 │
 ├── <b>08-Ingress-Nginx/</b>                     # High-performance local ingress controller
 │   └── 1-Ingress-Nginx-Namespace.yaml    # Namespace definition for ingress-nginx
@@ -556,7 +556,7 @@ A unified control plane governs deployment, credential injection, runtime defens
   # Step 7: Deploy Cloudflare Tunnel and CronJob Synchronizer
   kubectl apply -f ~/07-Cloudflare-Tunnel/1-Cloudflare-KV-Namespace.yaml
   kubectl apply -f ~/07-Cloudflare-Tunnel/My-Cloudflare-KV-ExternalSecret.yaml
-  kubectl apply -f ~/07-Cloudflare-Tunnel/My-Cloudflare-Tunnel-ExternalSecret.yaml
+  kubectl apply -f ~/07-Cloudflare-Tunnel/My-Cloudflared-Tunnel-ExternalSecret.yaml
   kubectl apply -f ~/07-Cloudflare-Tunnel/2-Cloudflare-KV-ServiceAccount.yaml
   kubectl apply -f ~/07-Cloudflare-Tunnel/3-Cloudflare-KV-RBAC.yaml
   kubectl apply -f ~/07-Cloudflare-Tunnel/4-Cloudflare-KV-RoleBinding.yaml
@@ -875,7 +875,7 @@ Before enabling cloud integrations, you can initialize the core AI inference sta
 ### Phase 4: Enabling Cloudflare Zero Trust & Tailscale Mesh Ingress
 To establish zero-trust remote access:
 1. **Cloudflare Tunnel Deployment:**
-   With External Secrets Operator (ESO) enabled, deploy `07-Cloudflare-Tunnel/My-Cloudflare-Tunnel-ExternalSecret.yaml` (or run `~/00-Installation-Testing/07-Cloudflare-Tunnel.sh -install`) so ESO automatically syncs `cf_tunnel_id` from GCP Secret Manager (`my-cisc4900-config`) into Kubernetes Secret `cloudflare-kv-secret` (`CLOUDFLARE_TUNNEL_ID`):
+   With External Secrets Operator (ESO) enabled, deploy `07-Cloudflare-Tunnel/My-Cloudflared-Tunnel-ExternalSecret.yaml` (or run `~/00-Installation-Testing/07-Cloudflare-Tunnel.sh -install`) so ESO automatically syncs `cf_tunnel_id` from GCP Secret Manager (`my-cisc4900-config`) into Kubernetes Secret `cloudflare-kv-secret` (`CLOUDFLARE_TUNNEL_ID`):
    ```bash
    kubectl create secret generic cloudflare-kv-secret -n cloudflare-kv \
      --from-literal=CLOUDFLARE_TUNNEL_ID="<your_cloudflare_tunnel_jwt>"
