@@ -705,19 +705,19 @@ To deploy on a bare-metal, WSL (Windows Subsystem for Linux), macOS, or virtual 
 ### Optional: Passwordless Enterprise SSH Setup
 To set up passwordless SSH authentication between your preferred client OS and Ubuntu/Linux host server:
 
-1. **Test Standard Password Login via Windows `PowerShell` or `CMD` (Windows Command Prompt), for macOS, open `Terminal`, or input in Linux client shell:**
+1. **Test Standard Password Login via Windows `PowerShell` or `CMD` (Windows Command Prompt), for macOS, open `Terminal`, or Input in Linux Client Shell:**
    ```powershell
    ssh <Username>@<Server_IP>
    ```
    *First-time connection would store the host fingerprint at Windows `%USERPROFILE%\.ssh\known_hosts` (full path: `C:\Users\<Windows_User>\.ssh\known_hosts`), or macOS/Linux client at `~/.ssh/known_hosts` (macOS full path: `/Users/<macOS_User>/.ssh/known_hosts`) as new line: `<Server_IP> ssh-ed25519 <Host_Public_Key>`.*
 
-2. **Generate Enterprise Standard ed25519 SSH Keypair via Windows `PowerShell` or `CMD`, macOS `Terminal` or Linux client shell:**
+2. **Generate Enterprise Standard ed25519 SSH Keypair via Windows `PowerShell` or `CMD`, macOS `Terminal` or Linux Client Shell:**
    ```powershell
    ssh-keygen -t ed25519
    ```
    *Generate private key `id_ed25519` and public key `id_ed25519.pub` at Windows directory `%USERPROFILE%\.ssh\` or macOS/Linux client directory `~/.ssh/`.*
 
-3. **Deploy Public Key to Server via Windows `PowerShell`, macOS `Terminal` or Linux client shell:**
+3. **Deploy Public Key to Server via Windows `PowerShell`, macOS `Terminal` or Linux Client Shell:**
    On Windows `PowerShell`, input:
    ```powershell
    type "$env:USERPROFILE\.ssh\id_ed25519.pub" | ssh <Username>@<Server_IP> "mkdir -p ~/.ssh && chmod 700 ~/.ssh && cat >> ~/.ssh/authorized_keys && chmod 600 ~/.ssh/authorized_keys"
@@ -730,7 +730,7 @@ To set up passwordless SSH authentication between your preferred client OS and U
 
    Install authorized key on Linux/Ubuntu host server at `~/.ssh/authorized_keys` (full path: `/home/<Username>/.ssh/authorized_keys`)*
 
-4. **Configure Client's SSH Host Shortcut:**
+4. **Configure Client's SSH Host Shortcut (SSH Host Named `WSL_SSH` In Whole Project):**
    On Windows, manually create or edit existed SSH Host Shortcut file (`C:\Users\<windows_user>\.ssh\config`):
    ```ssh-config
    Host WSL_SSH <server_ip>
@@ -759,18 +759,18 @@ To set up passwordless SSH authentication between your preferred client OS and U
 ### Phase 2: Silent File Synchronization & Management Console
 
 #### 1. Synchronize Project Files to Ubuntu/Linux Host Server (`~/`)
-* **On Windows, Manually Run Automated Batch from your local repository:**
+* **On Windows, manually run the automated batch `Copy-SSH.bat` From Your Local Repository:**
   ```powershell
-  <Your folder>\Cloud-Native_LLMOps_Infrastructure\00-Installation-Testing\Copy-SSH.bat
+  <Local_Repository_Folder>\Cloud-Native_LLMOps_Infrastructure\00-Installation-Testing\Copy-SSH.bat
   ```
 
-* **On macOS/Linux client, Manuallly Sync via `rsync` / `scp` (`.bat` is Windows-only):**
-  From the root of your locally cloned `Cloud-Native_LLMOps_Infrastructure` repository, sync all module directories (`00-*` through `18-*` and `K8s-OIDC-Provider`) to `~/` on the target server, normalize line endings, and mark scripts executable:
+* **On macOS/Linux client, Manuallly Sync via `scp` From Your Local Repository:**
+  From the root of locally cloned `Cloud-Native_LLMOps_Infrastructure` repository, copy all folders to the remote Ubuntu/Linux Host server (`WSL_SSH`) home directory `~/`, normalize line ending and change scripts permission executable:
   ```bash
-  cd /path/to/Cloud-Native_LLMOps_Infrastructure
+  cd <Local_Repository_Folder>/Cloud-Native_LLMOps_Infrastructure
 
-  # Sync all project folders to the remote Ubuntu server home directory
-  rsync -avz --progress \
+  # Copy all Folders to the Ubuntu/Linux Host server (`WSL_SSH`) Home Directory `~/`
+  scp -r \
     00-Installation-Testing 01-Hardware-OS-Configuration 02-AMD-ROCm-DXG \
     03-Kubernetes 04-Helm 05-External-Secrets-Operator 06-Tailscale-Operator \
     07-Cloudflare-Tunnel 08-Ingress-Nginx 09-JuiceFS-CSI-Driver \
@@ -779,38 +779,26 @@ To set up passwordless SSH authentication between your preferred client OS and U
     16-LLaMAcpp-ROCm 17-LiteLLM-Gateway 18-Open-WebUI K8s-OIDC-Provider \
     WSL_SSH:~/
 
-  # Strip any Windows CRLF line endings and grant execute permissions
+  # Strip any Windows CRLF Line Endings and Grant Execute Permissions
   ssh WSL_SSH "sed -i 's/\r$//' ~/00-Installation-Testing/*.sh ~/04-Helm/*.sh && chmod +x ~/00-Installation-Testing/*.sh ~/04-Helm/*.sh"
   ```
-  *(If `rsync` is not installed, use `scp -r 00-Installation-Testing 01-* ... 18-* K8s-OIDC-Provider WSL_SSH:~/` instead.)*
 
-* **Direct Local Linux Host (No Remote Transfer Needed):**
-  If you cloned the repository directly on the target Ubuntu server, copy the directories into `~/` and grant execute permissions:
+* **Only Local Ubuntu/Linux Host (Direct Git Clone, No Remote Transfer Needed):**
+  Directly on the Ubuntu/Linux Host server, clone the repository, move the project directories into `~/`, remove the temporary clone folder and grant execute permissions:
   ```bash
-  cd /path/to/Cloud-Native_LLMOps_Infrastructure
-  cp -r 00-Installation-Testing 01-Hardware-OS-Configuration 02-AMD-ROCm-DXG \
-    03-Kubernetes 04-Helm 05-External-Secrets-Operator 06-Tailscale-Operator \
-    07-Cloudflare-Tunnel 08-Ingress-Nginx 09-JuiceFS-CSI-Driver \
-    10-CloudNativePG-DB 11-Qdrant-Vector-DB 12-ArgoCD-GitOps \
-    13-Falco-Security 14-Grafana-Prometheus-Stack 15-KEDA-Autoscaler \
-    16-LLaMAcpp-ROCm 17-LiteLLM-Gateway 18-Open-WebUI K8s-OIDC-Provider ~/
+  cd ~
+  git clone https://github.com/nykenkung/Cloud-Native_LLMOps_Infrastructure.git
+  mv ~/Cloud-Native_LLMOps_Infrastructure/{00..18}-* ~/Cloud-Native_LLMOps_Infrastructure/K8s-OIDC-Provider ~/
+  rm -rf ~/Cloud-Native_LLMOps_Infrastructure
   chmod +x ~/00-Installation-Testing/*.sh ~/04-Helm/*.sh
   ```
 
-#### 2. Launch Master Interactive Console (`Menu.sh`)
-* **From Windows (PowerShell):**
+#### 2. Launch Master Interactive Console via Windows `PowerShell` or `CMD`, macOS `Terminal`, or Linux Client Shell:** (`~/00-Installation-Testing/Menu.sh`)
+* **From Windows `PowerShell` or `CMD`, or macOS `Terminal`, input:**
   ```powershell
-  ssh WSL_SSH
-  ~/00-Installation-Testing/Menu.sh
+  ssh WSL_SSH ~/00-Installation-Testing/Menu.sh
   ```
-* **From macOS or Remote Linux Terminal:**
-  ```bash
-  ssh WSL_SSH
-  ~/00-Installation-Testing/Menu.sh
-  # Or launch directly in a single interactive TTY command:
-  ssh -t WSL_SSH "~/00-Installation-Testing/Menu.sh"
-  ```
-* **Directly on the Ubuntu / Linux Host:**
+* **Directly on the Ubuntu/Linux Host Server, Run:**
   ```bash
   ~/00-Installation-Testing/Menu.sh
    ```
