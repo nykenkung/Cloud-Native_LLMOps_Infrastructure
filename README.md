@@ -1381,7 +1381,7 @@ Checking LLM Endpoint Status...
 ---
 
 ### Test [`106`]. 32K NIAH Deep Memory Precision (`106-Test-Needle-In-Haystack.sh`)
-**What It Tests:** Evaluates long-context attention fidelity and eliminates "lost-in-the-middle" retrieval blindspots. The script embeds a synthetic recovery token (`STRIX-HALO-8060S-VALIDATED`) at **25%, 50%, and 75% depth** inside **4000, 8000, 16000, 24000** token-equivalent filler haystacks and queries LiteLLM deterministically (`temperature: 0.0`, `max_tokens: 30`), logging latency and asserting 100% exact-match recall across all 12 (`Context, Depth`) matrix combinations.
+**What It Tests:** Evaluates long-context attention fidelity and eliminates "lost-in-the-middle" retrieval blindspots. The script embeds a synthetic recovery token (`STRIX-HALO-8060S-VALIDATED`) at **25%, 50%, 75% depth** inside **4000, 8000, 16000, 24000** token-equivalent filler haystacks and queries LiteLLM deterministically (`temperature: 0.0`, `max_tokens: 30`), logging latency and asserting 100% exact-match recall across all 12 (`Context, Depth`) matrix combinations.
 
 **Run Diagnostic Command:**
 ```bash
