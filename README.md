@@ -955,7 +955,7 @@ To establish zero-trust remote access:
      * **Grant Access -> Select Service Account:** `cisc4900-es-accessor`
      * **Service Account Impersonation Subject:** `system:serviceaccount:external-secrets:external-secrets`
      * **Token Path:** `/var/run/secrets/k8s-oidc/token`
-     * Download the generated credential configuration file as `05-External-Secrets-Operator/wif-credentials.json` (`Excluded from pushing Git via add to `.gitignore` in root`)
+     * Download the generated credential configuration file as `05-External-Secrets-Operator/wif-credentials.json` *(Excluded from pushing Git via add to `.gitignore` in Root Directory)*
 
 4. **Apply WIF Configuration Secret in Kubernetes:**
    ```bash
