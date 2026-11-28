@@ -730,7 +730,7 @@ To set up passwordless SSH authentication between your preferred client OS and U
 
    Install authorized key on Linux/Ubuntu host server at `~/.ssh/authorized_keys` (full path: `/home/<Username>/.ssh/authorized_keys`)*
 
-4. **Configure Client's SSH Host Shortcut (SSH Host Named `WSL_SSH` In Whole Project):**
+4. **Configure Client's SSH Host Shortcut (SSH Host named `WSL_SSH` in this project):**
    On Windows, manually create or edit existed SSH Host Shortcut file (`C:\Users\<windows_user>\.ssh\config`):
    ```ssh-config
    Host WSL_SSH <server_ip>
@@ -759,12 +759,12 @@ To set up passwordless SSH authentication between your preferred client OS and U
 ### Phase 2: Silent File Synchronization & Management Console
 
 #### 1. Synchronize Project Files to Ubuntu/Linux Host Server (`~/`)
-* **On Windows, manually run the automated batch `Copy-SSH.bat` From Your Local Repository:**
+* **On Windows, manually run the automated batch `Copy-SSH.bat` from your local repository:**
   ```powershell
   <Local_Repository_Folder>\Cloud-Native_LLMOps_Infrastructure\00-Installation-Testing\Copy-SSH.bat
   ```
 
-* **On macOS/Linux client, Manuallly Sync via `scp` From Your Local Repository:**
+* **On macOS/Linux client, manuallly sync via `scp` from your local repository:**
   From the root of locally cloned `Cloud-Native_LLMOps_Infrastructure` repository, copy all folders to the remote Ubuntu/Linux Host server (`WSL_SSH`) home directory `~/`, normalize line ending and change scripts permission executable:
   ```bash
   cd <Local_Repository_Folder>/Cloud-Native_LLMOps_Infrastructure
