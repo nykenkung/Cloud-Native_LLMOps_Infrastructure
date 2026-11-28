@@ -919,10 +919,10 @@ To establish zero-trust remote access:
    ```
 
    **Enable GitHub Pages in Your Repository:**
-   * Open your **GitHub Repository** -> **Settings** -> **Pages** (Left sidebar).
+   * Open your **GitHub Repository** -> **Settings** -> **Pages** (Left sidebar)
    * Under **Build and deployment**:
-     * **Source:** Select **`Deploy from a branch`**.
-     * **Branch:** Select **`main`** (or your default branch) and folder **`/ (root)`**, then click **Save**.
+     * **Source:** Select **`Deploy from a branch`**
+     * **Branch:** Select **`main`** (or your default branch) and folder **`/ (root)`**, then click **Save**
    * Wait ~1-2 minutes for the GitHub Pages deployment workflow to complete.
 
    **Verify OIDC Discovery Endpoint:**
@@ -1092,7 +1092,7 @@ To establish zero-trust remote access:
       ~/00-Installation-Testing/05-External-Secrets-Operator.sh -restart
       kubectl get externalsecrets -A
       ```
-      Confirm output of all `ClusterSecretStore` named `gcp-secret-store` show **`STATUS: SecretSynced`** | **`READY: True`**:
+      Confirm all `ClusterSecretStore` named `gcp-secret-store` show **`STATUS: SecretSynced`** and **`READY: True`**:
       <pre>
       <b>NAMESPACE          NAME                            STORETYPE            STORE              STATUS         READY</b>
       argocd             argocd-secret-patch             ClusterSecretStore   gcp-secret-store   <b>SecretSynced   True</b>
