@@ -965,7 +965,7 @@ To establish zero-trust remote access:
    ```
 
 5. **Update Argo CD Application Helm Parameters for External Secrets:**
-   Copy `audience` string value from JSON file `05-External-Secrets-Operator/wif-credentials.json` downloaded from GCP Workload Identity Pool in `Phase 5.3`. Go back to Argo CD Web UI (`https://argocd.kung.nyc`) > `Applications` > `external-secrets` > `Parameters` > `Edit` and paste below:
+   Go back to Argo CD Web UI (`https://argocd.kung.nyc`) > `Applications` > `external-secrets` > `Parameters` > `Edit`, paste below and replace the `audience` string value from JSON file `05-External-Secrets-Operator/wif-credentials.json` downloaded from GCP Workload Identity Pool in `Phase 5.3`:
    ```yaml
    installCRDs: true
    extraVolumes:
