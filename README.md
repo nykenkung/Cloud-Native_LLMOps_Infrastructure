@@ -896,8 +896,8 @@ To establish zero-trust remote access:
 * **Step 3 (GCP IAM & WIF Federation):** Create GCP Service Account (`cisc4900-es-accessor`) and Workload Identity Pool trusting the GitHub Pages OIDC Issuer, generating `05-External-Secrets-Operator/wif-credentials.json`
 * **Step 4 (Store WIF Config in K8s):** Load `wif-credentials.json` into Kubernetes Secret `gcp-wif-config` inside namespace `external-secrets`
 * **Step 5 (Inject Projected OIDC Token & Verify):** Configure Argo CD Helm parameters (`extraVolumes`, `extraVolumeMounts`, `extraEnv`), sync ESO, and inspect the pod to confirm `gcp-wif-config` and `k8s-oidc-token` are mounted
-* **Step 6 (Connect Secret Store):** Set your GCP `projectID` in `05-External-Secrets-Operator/Google-Cloud-Platform-CSS.yaml`, apply `ClusterSecretStore`, and verify `STATUS: Valid | READY: True`
-* **Step 7 (Consolidate & Sync Secrets):** Run `92-Reveal-ESO-Secrets.sh` to export all 30 cluster secrets into JSON, upload to GCP Secret Manager (`my-cisc4900-config`), and verify all 12 `ExternalSecrets` show `SecretSynced | True`.
+* **Step 6 (Connect Secret Store):** Set your GCP `projectID` in `05-External-Secrets-Operator/Google-Cloud-Platform-CSS.yaml`, apply `ClusterSecretStore`, and verify `STATUS: Valid` and `READY: True`
+* **Step 7 (Consolidate & Sync Secrets):** Run `92-Reveal-ESO-Secrets.sh` to export all Cluster Secrets into JSON, upload to GCP Secret Manager (`my-cisc4900-config`), and verify all `ExternalSecrets` show `SecretSynced : True`.
 
 ---
 
@@ -921,8 +921,8 @@ To establish zero-trust remote access:
    **Enable GitHub Pages in Your Repository:**
    * Open your **GitHub Repository** -> **Settings** -> **Pages** (Left sidebar)
    * Under **Build and deployment**:
-     * **Source:** Select **`Deploy from a branch`**
-     * **Branch:** Select **`main`** (or your default branch) and folder **`/ (root)`**, then click **Save**
+     * **Source:** Select `Deploy from a branch`
+     * **Branch:** Select `main`** and folder `/ (root)`, then click `Save`
    * Wait ~1-2 minutes for the GitHub Pages deployment workflow to complete.
 
    **Verify OIDC Discovery Endpoint:**
@@ -955,7 +955,7 @@ To establish zero-trust remote access:
      * **Grant Access -> Select Service Account:** `cisc4900-es-accessor`
      * **Service Account Impersonation Subject:** `system:serviceaccount:external-secrets:external-secrets`
      * **Token Path:** `/var/run/secrets/k8s-oidc/token`
-     * Download the generated credential configuration file as `05-External-Secrets-Operator/wif-credentials.json` *(excluded from Git via `.gitignore`)*.
+     * Download the generated credential configuration file as `05-External-Secrets-Operator/wif-credentials.json` (`Excluded from pushing Git via add to `.gitignore` in root`)
 
 4. **Apply WIF Configuration Secret in Kubernetes:**
    ```bash
@@ -965,7 +965,7 @@ To establish zero-trust remote access:
    ```
 
 5. **Update Argo CD Application Helm Parameters for External Secrets:**
-   Copy `audience` string value from JSON file `05-External-Secrets-Operator/wif-credentials.json` downloaded from GCP Workload Identity Pool in `Phase 5.3`. Then, go back to Argo CD Web UI (`https://argocd.kung.nyc`) > `Applications` > `external-secrets` > **Parameters** > **Edit**, paste below:
+   Copy `audience` string value from JSON file `05-External-Secrets-Operator/wif-credentials.json` downloaded from GCP Workload Identity Pool in `Phase 5.3`. Go back to Argo CD Web UI (`https://argocd.kung.nyc`) > `Applications` > `external-secrets` > `Parameters` > `Edit` and paste below:
    ```yaml
    installCRDs: true
    extraVolumes:
