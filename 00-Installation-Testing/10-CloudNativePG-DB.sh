@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [10] CloudNativePG Database Operator
 #  Enterprise HA PostgreSQL Operator & CRD Controller
 #
 #  Usage: ./10-CloudNativePG-DB.sh {-install|-test|-restart|-uninstall}
-# =====================================================================
+# ================================================================================
 set -e
 
 if [ -z "$KUBECONFIG" ]; then

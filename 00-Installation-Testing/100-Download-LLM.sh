@@ -1,20 +1,20 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [100] Download GGUF & Full-Directory HuggingFace Models
 #  Multi-Threaded Aria2 / HuggingFace CLI Downloader
 #
 #  Simple Installation Command:
 #    pip install "huggingface_hub[cli]" --break-system-packages
 #    HF_XET_HIGH_PERFORMANCE=1 huggingface-cli download Qwen/Qwen2.5-0.5B-Instruct-GGUF qwen2.5-0.5b-instruct-q4_k_m.gguf --local-dir ~/HuggingFace-Models/GGUF
-# =====================================================================
+# ================================================================================
 set -uo pipefail
 
-# ==============================================================================
+# ================================================================================
 # Configuration: Available Models
 #   - GGUF single file : "<repo> <default_file.gguf>"   -> saved to ~/HuggingFace-Models/GGUF/
 #   - Full directory   : "<repo>"                       -> saved to ~/HuggingFace-Models/<repo_name>/
 #                        "<repo> <custom_folder_name>"  -> saved to ~/HuggingFace-Models/<custom_folder_name>/
-# ==============================================================================
+# ================================================================================
 MODELS=(
   "bartowski/Qwen_Qwen3.6-35B-A3B-GGUF Qwen_Qwen3.6-35B-A3B-Q4_K_M.gguf"
   "Qwen/Qwen2.5-0.5B-Instruct-GGUF qwen2.5-0.5b-instruct-q4_k_m.gguf"
@@ -25,9 +25,7 @@ MODELS=(
 BASE_DIR="$HOME/HuggingFace-Models"
 GGUF_DIR="$BASE_DIR/GGUF"
 
-# ==============================================================================
 # Environment Setup
-# ==============================================================================
 export HF_XET_HIGH_PERFORMANCE=1
 
 if [ ! -d "$GGUF_DIR" ] || [ ! -w "$GGUF_DIR" ]; then
@@ -59,9 +57,7 @@ ensure_hf_cli() {
   fi
 }
 
-# ==============================================================================
 # Helper Functions
-# ==============================================================================
 parse_model_entry() {
   local entry="$1"
   M_REPO=""
@@ -228,18 +224,16 @@ install_all_models() {
   done
 }
 
-# ==============================================================================
 # Interactive Main Loop
-# ==============================================================================
 DELETE_LETTERS=(B C D E F G H I J K L M N O P Q R S T U V W X Y Z)
 
 while true; do
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " Available Models to Install"
   echo "   GGUF -> $GGUF_DIR"
   echo "   DIR  -> $BASE_DIR/<model_folder>"
-  echo "=================================================================="
+  echo "================================================================================"
   echo "[0] Install All"
   for i in "${!MODELS[@]}"; do
     parse_model_entry "${MODELS[$i]}"
@@ -251,9 +245,9 @@ while true; do
   done
 
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " Downloaded Models in $BASE_DIR"
-  echo "=================================================================="
+  echo "================================================================================"
   downloaded_paths=()
   downloaded_types=()
 

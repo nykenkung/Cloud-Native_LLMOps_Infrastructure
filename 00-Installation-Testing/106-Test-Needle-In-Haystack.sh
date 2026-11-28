@@ -11,10 +11,10 @@ fi
 
 fail_exit() { echo -e "$1"; exit 1; }
 
-echo "=================================================================="
+echo "================================================================================"
 echo " [106] 32K Needle-In-A-Haystack (NIAH) Accuracy Benchmark"
 echo " Testing: Context Recall at 25%, 50%, 75% Depth across 4K~32K"
-echo "=================================================================="
+echo "================================================================================"
 
 # Check cluster connectivity first
 if ! kubectl get nodes >/dev/null 2>&1; then
@@ -46,7 +46,7 @@ SECRET_NEEDLE="STRIX-HALO-8060S-VALIDATED"
 
 if [ "$LLAMA_READY" = "false" ]; then
   echo ""
-  echo "--- NIAH Long-Context Testing Protocol Configuration ---"
+  echo "=== NIAH Long-Context Testing Protocol Configuration ==="
   echo "Target Secret Needle: \"The secret master recovery token for CISC4900 is '$SECRET_NEEDLE'.\""
   echo "Retrieval Query:      \"What is the secret master recovery token for CISC4900?\""
   echo ""
@@ -158,6 +158,6 @@ if fail_count > 0:
 EOF
 
 echo ""
-echo "=================================================================="
+echo "================================================================================"
 echo " [OK] 32K Needle-In-A-Haystack Accuracy Benchmark Completed!"
-echo "=================================================================="
+echo "================================================================================"

@@ -11,10 +11,10 @@ fi
 
 fail_exit() { echo -e "$1"; exit 1; }
 
-echo "=================================================================="
+echo "================================================================================"
 echo " [103] Qdrant Vector Search & Closed-Loop RAG QA Benchmark"
 echo " Testing: Collection Ingestion, Vector Cosine Search & LLM RAG Loop"
-echo "=================================================================="
+echo "================================================================================"
 
 # Check cluster connectivity first
 if ! kubectl get nodes >/dev/null 2>&1; then
@@ -38,7 +38,7 @@ echo "Qdrant Endpoint: http://${QDRANT_IP}:6333"
 
 # Step 1: Initialize temporary evaluation collection
 echo ""
-echo "--- 1. Initializing Benchmark Collection ($COLLECTION_NAME) ---"
+echo "=== 1. Initializing Benchmark Collection ($COLLECTION_NAME) ==="
 curl -s -X DELETE -H "api-key: ${QDRANT_API_KEY}" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
 
 INIT_RES=$(curl -s -X PUT -H "api-key: ${QDRANT_API_KEY}" -H "Content-Type: application/json" \
@@ -53,7 +53,7 @@ fi
 
 # Step 2: Upsert sample knowledge embeddings
 echo ""
-echo "--- 2. Upserting Knowledge Base Documents with Embeddings ---"
+echo "=== 2. Upserting Knowledge Base Documents with Embeddings ==="
 UPSERT_PAYLOAD='{
   "points": [
     {
@@ -95,7 +95,7 @@ fi
 
 # Step 3: Perform Vector Similarity Retrieval
 echo ""
-echo "--- 3. Executing Vector Similarity Search (Top-K Cosine) ---"
+echo "=== 3. Executing Vector Similarity Search (Top-K Cosine) ==="
 SEARCH_PAYLOAD='{
   "vector": [0.93, 0.06, 0.01, 0.01],
   "limit": 1,
@@ -122,7 +122,7 @@ fi
 
 # Step 4: End-to-End RAG QA with LLM (if model available)
 echo ""
-echo "--- 4. End-to-End RAG QA with LLM Generation ---"
+echo "=== 4. End-to-End RAG QA with LLM Generation ==="
 LLAMA_IP=$(kubectl get svc -n llamacpp-rocm llamacpp-rocm-svc -o jsonpath='{.spec.clusterIP}' 2>/dev/null || echo "")
 LLAMA_READY=false
 if [ -n "$LLAMA_IP" ]; then
@@ -174,6 +174,6 @@ fi
 curl -s -X DELETE -H "api-key: ${QDRANT_API_KEY}" "http://${QDRANT_IP}:6333/collections/${COLLECTION_NAME}" >/dev/null 2>&1 || true
 
 echo ""
-echo "=================================================================="
+echo "================================================================================"
 echo " [OK] RAG Vector Benchmark Completed Successfully!"
-echo "=================================================================="
+echo "================================================================================"

@@ -11,10 +11,10 @@ fi
 
 fail_exit() { echo -e "$1"; exit 1; }
 
-echo "=================================================================="
+echo "================================================================================"
 echo " [104] Multi-User Concurrency, Throughput & TTFT Benchmark"
 echo " Testing: Parallel Load, Tokens/Sec (TPS), First-Token (TTFT) & KEDA"
-echo "=================================================================="
+echo "================================================================================"
 
 # Check cluster connectivity first
 if ! kubectl get nodes >/dev/null 2>&1; then
@@ -44,7 +44,7 @@ fi
 
 if [ "$LLAMA_READY" = "false" ]; then
   echo ""
-  echo "--- 1. Gateway High-Concurrency HTTP Benchmark (API Routing Layer) ---"
+  echo "=== 1. Gateway High-Concurrency HTTP Benchmark (API Routing Layer) ==="
   python3 - <<EOF
 import urllib.request
 import time
@@ -92,7 +92,7 @@ if errors > 0:
 EOF
 
   echo ""
-  echo "--- 2. Checking KEDA Autoscaler & Metric Endpoints ---"
+  echo "=== 2. Checking KEDA Autoscaler & Metric Endpoints ==="
   echo "KEDA ScaledObject in namespace llamacpp-rocm:"
   kubectl get scaledobject -n llamacpp-rocm 2>/dev/null || echo "No ScaledObject found"
   echo "HPA status in namespace llamacpp-rocm:"
@@ -107,7 +107,7 @@ fi
 
 # Live LLM Concurrency & TTFT Benchmark
 echo ""
-echo "--- Live LLM Concurrency & Streaming Generation Benchmark ---"
+echo "=== Live LLM Concurrency & Streaming Generation Benchmark ==="
 PYTHONUNBUFFERED=1 python3 - "$1" <<EOF
 import sys
 import os
@@ -200,11 +200,11 @@ for conc in concurrency_levels:
 EOF
 
 echo ""
-echo "--- Checking GPU & KEDA Autoscaler Metrics ---"
+echo "=== Checking GPU & KEDA Autoscaler Metrics ==="
 kubectl get scaledobject -n llamacpp-rocm 2>/dev/null || true
 kubectl get hpa -n llamacpp-rocm 2>/dev/null || true
 
 echo ""
-echo "=================================================================="
+echo "================================================================================"
 echo " [OK] Multi-User Concurrency & TTFT Benchmark Completed!"
-echo "=================================================================="
+echo "================================================================================"

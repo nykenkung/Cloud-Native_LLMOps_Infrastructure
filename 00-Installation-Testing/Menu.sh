@@ -55,9 +55,9 @@ run_step() {
 
 run_install_all() {
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " Running Full Installation Pipeline (Steps 1 -> 18)"
-  echo "=================================================================="
+  echo "================================================================================"
   for i in $(seq 1 18); do
     echo ""
     echo ">>> [INSTALL Step $i/18] Running $(get_script "$i")..."
@@ -67,17 +67,17 @@ run_install_all() {
     fi
   done
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " [OK] Full Installation Pipeline Completed Successfully!"
-  echo "=================================================================="
+  echo "================================================================================"
   return 0
 }
 
 run_test_all() {
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " Running Full Verification Pipeline (Steps 1 -> 18)"
-  echo "=================================================================="
+  echo "================================================================================"
   for i in $(seq 1 18); do
     echo ""
     echo ">>> [TEST Step $i/18] Running $(get_script "$i")..."
@@ -87,17 +87,17 @@ run_test_all() {
     fi
   done
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " [OK] Full Verification Pipeline Completed Successfully!"
-  echo "=================================================================="
+  echo "================================================================================"
   return 0
 }
 
 run_restart_all() {
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " Running Full Re-apply & Rollover Pipeline (Steps 1 -> 18)"
-  echo "=================================================================="
+  echo "================================================================================"
   for i in $(seq 1 18); do
     echo ""
     echo ">>> [RESTART Step $i/18] Running $(get_script "$i")..."
@@ -107,9 +107,9 @@ run_restart_all() {
     fi
   done
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " [OK] Full Re-apply & Rollover Pipeline Completed Successfully!"
-  echo "=================================================================="
+  echo "================================================================================"
   return 0
 }
 
@@ -124,18 +124,18 @@ run_uninstall_all() {
     return 0
   fi
 
-  echo "=================================================================="
+  echo "================================================================================"
   echo " Running Full Uninstallation Pipeline (Steps 18 -> 1)"
-  echo "=================================================================="
+  echo "================================================================================"
   for i in $(seq 18 -1 1); do
     echo ""
     echo ">>> [UNINSTALL Step $i/18] Running $(get_script "$i")..."
     run_step "$i" "-uninstall" || echo -e "[WARN] Step $i uninstall returned non-zero, continuing..."
   done
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " [OK] Full Uninstallation Pipeline (Steps 18 -> 1) Completed!"
-  echo "=================================================================="
+  echo "================================================================================"
   return 0
 }
 
@@ -278,7 +278,7 @@ run_task_queue() {
 }
 
 show_menu() {
-  echo ""
+  echo "================================================================================"
   echo " [0] Install ALL               ,[A] Run Test, [A+] Restart, [A-] Uninstall (ALL)"
   echo " [1] Install Hardware-OS-Config,[B] Run Test, [B+] Restart, [B-] Uninstall (1)"
   echo " [2] Install AMD-ROCm-DXG      ,[C] Run Test, [C+] Restart, [C-] Uninstall (2)"
@@ -313,7 +313,7 @@ show_menu() {
   echo "[109] Test Storage Persistence Failover: CSI volume durability, pod self-healing"
   echo "[110] Test LLM CLI (Interactive): Interactive LLM model selection, terminal chat"
   echo ""
-  echo -n "Select one or more options (Example: 91 101 110) [Ctrl+C to Quit]: "
+  echo -n "Select one or more options (Example: 91 101 110) [Blank to Quit]: "
 }
 
 # Handle CLI arguments (Strictly 0-18, A-S, A+-S+, A--S-, 91-92, 100-110; supports multiple sequential tasks)
@@ -330,7 +330,7 @@ while true; do
   show_menu
   read -r -a choices || { echo ""; exit 0; }
   if [ "${#choices[@]}" -eq 0 ]; then
-    continue
+    exit 0
   fi
   run_task_queue "${choices[@]}"
 done

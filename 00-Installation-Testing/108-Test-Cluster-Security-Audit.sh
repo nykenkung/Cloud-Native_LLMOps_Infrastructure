@@ -11,19 +11,19 @@ fi
 
 fail_exit() { echo -e "$1"; exit 1; }
 
-echo "=================================================================="
+echo "================================================================================"
 echo " [108] Kubernetes & Cloud-Native Cluster Security Audit"
 echo " Testing: RBAC Least-Privilege, Pod Security, Secret Isolation & TLS"
-echo "=================================================================="
+echo "================================================================================"
 
 # Check cluster connectivity first
 if ! kubectl get nodes >/dev/null 2>&1; then
   fail_exit "[FAIL] Cannot connect to Kubernetes cluster via KUBECONFIG=${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 fi
 
-# --- 1. Kubernetes RBAC Least-Privilege & Token Audit ---
+# 1. Kubernetes RBAC Least-Privilege & Token Audit
 echo ""
-echo "--- 1. RBAC Least-Privilege & ServiceAccount Token Audit ---"
+echo "=== 1. RBAC Least-Privilege & ServiceAccount Token Audit ==="
 
 # Check if default service account has dangerous wildcard permissions
 WILDCARD_ROLES=$(kubectl get clusterrolebindings -o json | python3 -c '
@@ -67,9 +67,9 @@ fi
 
 kubectl delete pod "$TEST_SA_POD" --grace-period=0 --force >/dev/null 2>&1 || true
 
-# --- 2. Pod Security Standards (PSS) & Privilege Escalation Audit ---
+# 2. Pod Security Standards (PSS) & Privilege Escalation Audit
 echo ""
-echo "--- 2. Pod Security Standards (PSS) & Privilege Escalation Audit ---"
+echo "=== 2. Pod Security Standards (PSS) & Privilege Escalation Audit ==="
 
 PRIV_AUDIT=$(kubectl get pods -A -o json | python3 -c '
 import sys, json
@@ -105,9 +105,9 @@ else
   fail_exit "[FAIL] Workload pods running with elevated privileges:\n$PRIV_AUDIT"
 fi
 
-# --- 3. Secrets Hygiene & External Secrets Operator (ESO) Audit ---
+# 3. Secrets Hygiene & External Secrets Operator (ESO) Audit
 echo ""
-echo "--- 3. Secrets Hygiene & Plaintext Credentials Audit ---"
+echo "=== 3. Secrets Hygiene & Plaintext Credentials Audit ==="
 
 SECRET_STATUS=$(kubectl get externalsecrets -A --no-headers 2>/dev/null | wc -l || echo "0")
 echo "[PASS] External Secrets Operator (ESO) Resources Registered: $SECRET_STATUS active ExternalSecrets."
@@ -124,9 +124,9 @@ else
   fail_exit "[FAIL] Missing required secrets: LiteLLM=$LITELLM_SEC, WebUI=$WEBUI_SEC, Qdrant=$QDRANT_SEC, llama.cpp=$LLAMA_SEC"
 fi
 
-# --- 4. Ingress Edge Security & Routing Audit ---
+# 4. Ingress Edge Security & Routing Audit
 echo ""
-echo "--- 4. Ingress Edge Security & Routing Audit ---"
+echo "=== 4. Ingress Edge Security & Routing Audit ==="
 
 INGRESSES=$(kubectl get ingress -A --no-headers 2>/dev/null | wc -l || echo "0")
 echo "Total Ingress Routes Configured: $INGRESSES"
@@ -141,9 +141,9 @@ fi
 echo "[PASS] Open-WebUI Ingress Route: HTTP $WEBUI_ING_CODE"
 echo "[PASS] LiteLLM Gateway Ingress Route: HTTP $LITELLM_ING_CODE"
 
-# --- 5. Falco Modern eBPF Security Sensor & Alert Audit ---
+# 5. Falco Modern eBPF Security Sensor & Alert Audit
 echo ""
-echo "--- 5. Falco Runtime eBPF Threat Sensor Live Audit ---"
+echo "=== 5. Falco Runtime eBPF Threat Sensor Live Audit ==="
 
 FALCO_STATUS=$(kubectl get daemonset -n falco falco -o jsonpath='{.status.numberReady}' 2>/dev/null || echo "0")
 if [ "$FALCO_STATUS" -ge 1 ]; then
@@ -154,6 +154,6 @@ else
 fi
 
 echo ""
-echo "=================================================================="
+echo "================================================================================"
 echo " [OK] Kubernetes & Cloud-Native Security Audit Completed!"
-echo "=================================================================="
+echo "================================================================================"

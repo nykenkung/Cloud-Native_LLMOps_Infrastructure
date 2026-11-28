@@ -805,6 +805,7 @@ To set up passwordless SSH authentication between your preferred client OS and U
 
    **Interactive Console Menu Layout (`Menu.sh`):**
    <pre>
+   ================================================================================
     [<b>0</b>] Install ALL               ,[<b>A</b>] Run Test, [<b>A+</b>] Restart, [<b>A-</b>] Uninstall (ALL)
     [<b>1</b>] Install Hardware-OS-Config,[<b>B</b>] Run Test, [<b>B+</b>] Restart, [<b>B-</b>] Uninstall (1)
     [<b>2</b>] Install AMD-ROCm-DXG      ,[<b>C</b>] Run Test, [<b>C+</b>] Restart, [<b>C-</b>] Uninstall (2)
@@ -839,7 +840,7 @@ To set up passwordless SSH authentication between your preferred client OS and U
    [<b>109</b>] Test Storage Persistence Failover: CSI volume durability, pod self-healing
    [<b>110</b>] Test LLM CLI (Interactive): Interactive LLM model selection, terminal chat
 
-   Select one or more options (Example: <b>91 101 110</b>) [Ctrl+C to Quit]:
+   Select one or more options (Example: 91 101 110) [Blank to Quit]:
    </pre>
 
    * **Components Management ([`0`] to [`18`] & [`A`] to [`S`] with/without [`+`]/[`-`]):**
@@ -1032,9 +1033,9 @@ To establish zero-trust remote access:
 
    **Export JSON Output Structure for `my-cisc4900-config` with 30 Consolidated Keys:**
    <pre>
-   =====================================================================
+   ================================================================================
     [92] Exporting ESO Secrets for 'my-cisc4900-config'
-   =====================================================================
+   ================================================================================
    <b>{
      "tailscale_client_id": "</b><i>&lt;Your_Tailscale_Client_ID&gt;</i><b>",
      "tailscale_client_secret": "</b><i>&lt;Your_Tailscale_Client_Secret&gt;</i><b>",
@@ -1067,10 +1068,10 @@ To establish zero-trust remote access:
      "openwebui_qdrant_uri": "</b><i>&lt;Your_OpenWebUI_Qdrant_URL&gt;</i>:6333<b>",
      "openwebui_qdrant_api_key": "</b><i>&lt;Your_OpenWebUI_Qdrant_API_Key&gt;</i><b>"
    }</b>
-   =====================================================================
+   ================================================================================
     [OK] Successfully exported 30 secret keys
     Next Steps: Upload to Google Cloud Secret Manager
-   =====================================================================
+   ================================================================================
     1. Open: https://console.cloud.google.com/security/secret-manager/secrets
     2. Click "Create secret", set Name to: my-cisc4900-config
        (If 'my-cisc4900-config' already exists, open it and click "New version".)
@@ -1079,7 +1080,7 @@ To establish zero-trust remote access:
     4. Click "Create secret" / "Add new version".
        * Tip: Disable or destroy older versions to stay within the
          GCP Free Tier limit (<= 6 active secret versions).
-   =====================================================================
+   ================================================================================
    </pre>
 
    Then copy the JSON output (`including the enclosing {} braces`) or upload the exported JSON file to Google Cloud Secret Manager:
@@ -1147,38 +1148,38 @@ To establish zero-trust remote access:
 ```
 **Example of Diagnostic Output:**
 <pre>
-==================================================================
+================================================================================
  [101] AI Stack End-to-End Pipeline Verification
  Chain: Qdrant -> llama.cpp ROCm -> LiteLLM Gateway -> WebUI
-==================================================================
+================================================================================
 
---- 1. Testing Qdrant Vector Database ---
+=== 1. Testing Qdrant Vector Database ===
 Qdrant ClusterIP: 10.43.70.79:6333
 <b>Qdrant /healthz: healthz check passed
 [OK] Qdrant Collections API (authenticated): OK</b>
 
---- 2. Testing llama.cpp ROCm Inference Engine ---
+=== 2. Testing llama.cpp ROCm Inference Engine ===
 llama.cpp ClusterIP: 10.43.225.228:8080
 <b>[OK] llama.cpp /health: {"status":"ok"}
 [OK] llama.cpp Test Generation (qwen2.5-0.5b-instruct-q4_k_m): OK</b>
 
---- 3. Testing LiteLLM API Gateway & Database ---
+=== 3. Testing LiteLLM API Gateway & Database ===
 LiteLLM ClusterIP: 10.43.137.145:4000
 <b>LiteLLM /health/liveliness: "I'm alive!"
 [OK] LiteLLM /v1/models (authenticated with Master Key): OK</b>
 
---- 4. Testing Open-WebUI Frontend & Ingress ---
+=== 4. Testing Open-WebUI Frontend & Ingress ===
 Open-WebUI ClusterIP: 10.43.176.196:8080
 <b>[OK] Open-WebUI /health: {"status":true}
 [OK] Ingress HTTP Route (open-webui.192.168.1.3.sslip.io): HTTP 200</b>
 
---- 5. Testing Cloudflare Zero Trust Tunnel & Public Endpoints ---
+=== 5. Testing Cloudflare Zero Trust Tunnel & Public Endpoints ===
 <b>[OK] Cloudflare Tunnel is Running (2 pods active)
 [OK] Public Zero Trust Endpoints: api.kung.nyc (HTTP 200), open-webui.kung.nyc (HTTP 200)</b>
 
-==================================================================
+================================================================================
  [OK] AI Stack End-to-End Pipeline Verification Finished!
-==================================================================
+================================================================================
 </pre>
 
 ---
@@ -1199,33 +1200,33 @@ Open-WebUI ClusterIP: 10.43.176.196:8080
 ```
 **Example of Diagnostic Output:**
 <pre>
-==================================================================
+================================================================================
  [102] Security Penetration, NetworkPolicy & Falco Audit
  Testing: Negative Auth, Zero-Trust Microsegmentation & eBPF Threat
-==================================================================
+================================================================================
 
---- 1. API Negative Authentication & RBAC Defense Pen-Test ---
+=== 1. API Negative Authentication & RBAC Defense Pen-Test ===
 <b>[PASS] LiteLLM Unauthorized Access Blocked: HTTP 401 (Invalid Token Rejected)
 [PASS] Qdrant Unauthorized Access Blocked: HTTP 401 (Missing API Key Rejected)
 [PASS] llama.cpp Unauthorized Access Blocked: HTTP 401 (Rejected)</b>
 
---- 2. NetworkPolicy Zero-Trust Microsegmentation Pen-Test ---
+=== 2. NetworkPolicy Zero-Trust Microsegmentation Pen-Test ===
 Deploying unprivileged sandbox pod in default namespace to test lateral movement...
 Attempting unauthorized lateral connection: default pod -> llamacpp-rocm:8080
 <b>[PASS] NetworkPolicy Active: Unauthorized access to llama.cpp successfully BLOCKED (Zero-Trust Dropped).</b>
 Attempting unauthorized lateral connection: default pod -> litellm-postgres:5432
 <b>[PASS] NetworkPolicy Active: Unauthorized direct access to PostgreSQL database BLOCKED.</b>
 
---- 3. API Gateway Malformed Input & Fuzzing Defense Pen-Test ---
+=== 3. API Gateway Malformed Input & Fuzzing Defense Pen-Test ===
 <b>[PASS] Gateway SQL Injection Fuzzing Handled Safely: HTTP 400 (No database panic/leak).
 [PASS] Ingress Path Traversal Defense: Arbitrary host /etc/passwd access prevented (No secret leakage).</b>
 
---- 4. Falco eBPF Runtime Threat Detection Audit ---
+=== 4. Falco eBPF Runtime Threat Detection Audit ===
 <b>[PASS] Falco Modern eBPF Sensor Active (1 DaemonSet pod, 5 Falcosidekick pod(s) Running).</b>
 
-==================================================================
+================================================================================
  [OK] Network & Gateway Penetration Test Completed!
-==================================================================
+================================================================================
 </pre>
 
 ---
@@ -1246,33 +1247,33 @@ Attempting unauthorized lateral connection: default pod -> litellm-postgres:5432
 ```
 **Example of Diagnostic Output:**
 <pre>
-==================================================================
+================================================================================
  [103] Qdrant Vector Search & Closed-Loop RAG QA Benchmark
  Testing: Collection Ingestion, Vector Cosine Search & LLM RAG Loop
-==================================================================
+================================================================================
 Qdrant Endpoint: http://10.43.70.79:6333
 
---- 1. Initializing Benchmark Collection (cisc4900_rag_eval) ---
+=== 1. Initializing Benchmark Collection (cisc4900_rag_eval) ===
 <b>[OK] Collection cisc4900_rag_eval created successfully.</b>
 
---- 2. Upserting Knowledge Base Documents with Embeddings ---
+=== 2. Upserting Knowledge Base Documents with Embeddings ===
 <b>[OK] 3 Knowledge Base points indexed successfully.</b>
 
---- 3. Executing Vector Similarity Search (Top-K Cosine) ---
+=== 3. Executing Vector Similarity Search (Top-K Cosine) ===
 Query Vector Target: Hardware Topic [0.93, 0.06, 0.01, 0.01]
 Retrieved Fact: "The CISC4900 cluster computing core is powered by AMD Radeon 8060S APU with 62GB unified VRAM."
 <b>Cosine Similarity Score: 0.9999
 [OK] Vector Similarity Search Accuracy: 100% (High Confidence)</b>
 
---- 4. End-to-End RAG QA with LLM Generation ---
+=== 4. End-to-End RAG QA with LLM Generation ===
 Prompting LiteLLM with Retrieved Context...
 RAG Answer: "The CISC4900 cluster computing core is powered by an AMD Radeon 8060S APU with 62GB unified"
 <b>Total RAG Latency: 562 ms
 [PASS] Ground Truth Verification: Model answered accurately based on retrieved vector context!</b>
 
-==================================================================
+================================================================================
  [OK] RAG Vector Benchmark Completed Successfully!
-==================================================================
+================================================================================
 </pre>
 
 ---
@@ -1292,13 +1293,13 @@ RAG Answer: "The CISC4900 cluster computing core is powered by an AMD Radeon 806
 ```
 **Example of Diagnostic Output:**
 <pre>
-==================================================================
+================================================================================
  [104] Multi-User Concurrency, Throughput & TTFT Benchmark
  Testing: Parallel Load, Tokens/Sec (TPS), First-Token (TTFT) & KEDA
-==================================================================
+================================================================================
 LiteLLM Gateway: http://10.43.137.145:4000
 
---- Live LLM Concurrency & Streaming Generation Benchmark ---
+=== Live LLM Concurrency & Streaming Generation Benchmark ===
 
 >>> Testing Concurrency Level: 1 parallel streams (model: qwen2.5-0.5b-instruct-q4_k_m)...
 Results for Concurrency 1:
@@ -1318,15 +1319,15 @@ Results for Concurrency 4:
   - Per-Stream Speed: 95.41 tokens/sec
   - Aggregate APU Throughput: 94.30 tokens/sec</b>
 
---- Checking GPU & KEDA Autoscaler Metrics ---
+=== Checking GPU & KEDA Autoscaler Metrics ===
 <b>NAME                   SCALETARGETKIND      SCALETARGETNAME        MIN   MAX   READY   ACTIVE   FALLBACK   PAUSED   TRIGGERS     AUTHENTICATIONS   AGE
 llamacpp-rocm-scaler   apps/v1.Deployment   llamacpp-rocm-deploy   1     1     True    False    False      False    prometheus                     2d23h
 NAME                            REFERENCE                         TARGETS     MINPODS   MAXPODS   REPLICAS   AGE
 keda-hpa-llamacpp-rocm-scaler   Deployment/llamacpp-rocm-deploy   0/1 (avg)   1         1         1          2d23h</b>
 
-==================================================================
+================================================================================
  [OK] Multi-User Concurrency & TTFT Benchmark Completed!
-==================================================================
+================================================================================
 </pre>
 
 ---
@@ -1343,38 +1344,38 @@ keda-hpa-llamacpp-rocm-scaler   Deployment/llamacpp-rocm-deploy   0/1 (avg)   1 
 ```
 **Example of Diagnostic Output:**
 <pre>
-==================================================================
+================================================================================
  [105] Stepped Context Window (1K~32K) & ROCm VRAM Benchmark
  Testing: 32K Context Processing, KV-Cache Scaling & APU VRAM
-==================================================================
+================================================================================
 Checking LLM Endpoint Status...
 <b>[OK] llama.cpp is ready for inference on http://10.43.225.228:8080</b>
 
 === Starting Stepped Context Length Benchmark ===
 
---- Testing Context Window: ~1000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ---
+=== Testing Context Window: ~1000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ===
 <b>Response Time: 911 ms
 [PASS] Successfully processed 1000 context without truncation or OOM.</b>
 
---- Testing Context Window: ~4000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ---
+=== Testing Context Window: ~4000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ===
 <b>Response Time: 1907 ms
 [PASS] Successfully processed 4000 context without truncation or OOM.</b>
 
---- Testing Context Window: ~8000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ---
+=== Testing Context Window: ~8000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ===
 <b>Response Time: 2738 ms
 [PASS] Successfully processed 8000 context without truncation or OOM.</b>
 
---- Testing Context Window: ~16000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ---
+=== Testing Context Window: ~16000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ===
 <b>Response Time: 5977 ms
 [PASS] Successfully processed 16000 context without truncation or OOM.</b>
 
---- Testing Context Window: ~32000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ---
+=== Testing Context Window: ~32000 words (model: qwen2.5-0.5b-instruct-q4_k_m) ===
 <b>Response Time: 13860 ms
 [PASS] Successfully processed 32000 context without truncation or OOM.</b>
 
-==================================================================
+================================================================================
  [OK] Stepped Context Window & Stress Test Completed!
-==================================================================
+================================================================================
 </pre>
 
 ---
@@ -1391,10 +1392,10 @@ Checking LLM Endpoint Status...
 ```
 **Example of Diagnostic Output:**
 <pre>
-==================================================================
+================================================================================
  [106] 32K Needle-In-A-Haystack (NIAH) Accuracy Benchmark
  Testing: Context Recall at 25%, 50%, 75% Depth across 4K~32K
-==================================================================
+================================================================================
 LiteLLM Gateway: http://10.43.137.145:4000
 
 === Starting Live Needle-In-A-Haystack (NIAH) Benchmark ===
@@ -1413,9 +1414,9 @@ LiteLLM Gateway: http://10.43.137.145:4000
 24000      | 50%      | 12.37        | PASSED (100%)     
 24000      | 75%      | 12.34        | PASSED (100%)</b>     
 
-==================================================================
+================================================================================
  [OK] 32K Needle-In-A-Haystack Accuracy Benchmark Completed!
-==================================================================
+================================================================================
 </pre>
 
 ---
@@ -1437,10 +1438,10 @@ Each test passes only if the model refuses/guards the request without emitting t
 ```
 **Example of Diagnostic Output:**
 <pre>
-==================================================================
+================================================================================
  [107] LLM Guardrails & OWASP Top 10 for LLM Security Audit
  Testing: Prompt Injection, Jailbreak Defense & Secret Leakage
-==================================================================
+================================================================================
 LiteLLM Gateway: http://10.43.137.145:4000
 
 === Executing Live OWASP LLM Attack Vectors & Guardrails Verification ===
@@ -1454,9 +1455,9 @@ LLM04-Exploit-Generation   | Malicious Code Gen         | DEFENDED       | Refus
 --------------------------------------------------------------------------------
 Summary: 4/4 Guardrail Defense Tests Passed.</b>
 
-==================================================================
+================================================================================
  [OK] LLM Guardrails & Security Audit Completed!
-==================================================================
+================================================================================
 </pre>
 
 ---
@@ -1478,34 +1479,34 @@ Summary: 4/4 Guardrail Defense Tests Passed.</b>
 ```
 **Example of Diagnostic Output:**
 <pre>
-==================================================================
+================================================================================
  [108] Kubernetes & Cloud-Native Cluster Security Audit
  Testing: RBAC Least-Privilege, Pod Security, Secret Isolation & TLS
-==================================================================
+================================================================================
 
---- 1. RBAC Least-Privilege & ServiceAccount Token Audit ---
+=== 1. RBAC Least-Privilege & ServiceAccount Token Audit ===
 <b>[PASS] Default ServiceAccounts: Zero wildcard cluster-admin bindings detected.
 [PASS] Unprivileged Pod Token Isolation: Access to cluster secrets rejected (HTTP 403 Forbidden).</b>
 
---- 2. Pod Security Standards (PSS) & Privilege Escalation Audit ---
+=== 2. Pod Security Standards (PSS) & Privilege Escalation Audit ===
 <b>[PASS] Workload Privilege Check: Zero application pods running with dangerous hostPID/hostNetwork/privileged.</b>
 
---- 3. Secrets Hygiene & Plaintext Credentials Audit ---
+=== 3. Secrets Hygiene & Plaintext Credentials Audit ===
 <b>[PASS] External Secrets Operator (ESO) Resources Registered: 12 active ExternalSecrets.
 [PASS] Database, Vector & Inference Secrets: Verified (my-litellm-postgres-config, my-open-webui-postgres-config, my-open-webui-qdrant-config, llamacpp-api-key).</b>
 
---- 4. Ingress Edge Security & Routing Audit ---
+=== 4. Ingress Edge Security & Routing Audit ===
 Total Ingress Routes Configured: 6
 <b>[PASS] Open-WebUI Ingress Route: HTTP 200
 [PASS] LiteLLM Gateway Ingress Route: HTTP 200</b>
 
---- 5. Falco Runtime eBPF Threat Sensor Live Audit ---
+=== 5. Falco Runtime eBPF Threat Sensor Live Audit ===
 <b>[PASS] Falco Modern eBPF Kernel Probe: Active & Ready (1 instances).
 [PASS] Falcosidekick Notification Forwarder: Ingress enabled at https://falco.kung.nyc</b>
 
-==================================================================
+================================================================================
  [OK] Kubernetes & Cloud-Native Security Audit Completed!
-==================================================================
+================================================================================
 </pre>
 
 ---
@@ -1527,17 +1528,17 @@ Total Ingress Routes Configured: 6
 ```
 Example of Diagnostic Output:
 <pre>
-==================================================================
+================================================================================
  [109] Storage CSI, Data Persistence & Self-Healing Benchmark
  Testing: JuiceFS POSIX I/O, PostgreSQL CNPG, Qdrant PVC & Failover
-==================================================================
+================================================================================
 
---- 1. JuiceFS Distributed CSI Storage & I/O Verification ---
+=== 1. JuiceFS Distributed CSI Storage & I/O Verification ===
 <b>[PASS] JuiceFS StorageClass 'cloudflare-juicefs-sc' is available.
 [PASS] JuiceFS CSI Driver Controller & Nodes: 4 active pods.
 [PASS] JuiceFS RWX PVC 'llamacpp-model-pvc' is Bound.</b>
 
---- 2. CloudNativePG PostgreSQL Enterprise Database Clusters ---
+=== 2. CloudNativePG PostgreSQL Enterprise Database Clusters ===
 <b>JuiceFS Metadata PostgreSQL Cluster Status: Cluster in healthy state (1/1 instances ready)
 [PASS] JuiceFS Metadata PostgreSQL: Primary instance active.
 LiteLLM PostgreSQL Cluster Status: Cluster in healthy state (1/1 instances ready)
@@ -1545,17 +1546,17 @@ LiteLLM PostgreSQL Cluster Status: Cluster in healthy state (1/1 instances ready
 Open-WebUI PostgreSQL Cluster Status: Cluster in healthy state (1/1 instances ready)
 [PASS] Open-WebUI PostgreSQL: Primary instance active, persistent connection pools verified.</b>
 
---- 3. Qdrant Vector Database Persistent Volume (PVC) ---
+=== 3. Qdrant Vector Database Persistent Volume (PVC) ===
 <b>Qdrant PVC Status: Bound (Capacity: 10GB)
 [PASS] Qdrant Vector Storage: PVC Bound successfully with persistent disk backing.</b>
 
---- 4. Kubernetes Workload Self-Healing & Pod Resiliency Audit ---
+=== 4. Kubernetes Workload Self-Healing & Pod Resiliency Audit ===
 <b>Total Cluster Pods: 49 | Unhealthy/Degraded: 0
 [PASS] Cluster Resiliency: 100% of cluster workloads in Running/Completed state.</b>
 
-==================================================================
+================================================================================
  [OK] Storage CSI, Persistence & Self-Healing Benchmark Finished!
-==================================================================
+================================================================================
 </pre>
 
 ---
@@ -1574,19 +1575,19 @@ Open-WebUI PostgreSQL Cluster Status: Cluster in healthy state (1/1 instances re
 ```
 **Example of Diagnostic Output:**
 <pre>
-==================================================================
+================================================================================
  [110] Interactive LLM CLI Chat
    Select an available model and start a multi-turn Q&A session
-==================================================================
+================================================================================
 
 Discovering available AI backends...
 
   <b>✓ LiteLLM Gateway  : http://10.43.137.145:4000
   ✓ llama.cpp Direct : http://10.43.225.228:8080</b>
 
-==================================================================
+================================================================================
  [110] Interactive LLM CLI Chat
-==================================================================
+================================================================================
 
 Available Models:
 
@@ -1599,9 +1600,9 @@ Select a model [1-4, default: 1]: <b>1</b>
 <b>[OK] Model: qwen2.5-0.5b-instruct-q4_k_m via LiteLLM
      Endpoint: http://10.43.137.145:4000/v1/chat/completions</b>
 
-==================================================================
+================================================================================
  LLM Interactive Chat Session
-==================================================================
+================================================================================
  Model   : qwen2.5-0.5b-instruct-q4_k_m
  Backend : LiteLLM (http://10.43.137.145:4000)
  Params  : max_tokens=1024, temperature=0.7
@@ -1613,7 +1614,7 @@ Select a model [1-4, default: 1]: <b>1</b>
    /temp    - Change temperature   (e.g. /temp 0.3)
    /history - Show conversation turn count
    /exit    - Exit the chat session
-==================================================================
+================================================================================
 
 <b>You [turn 1]: What is Kubernetes? Reply in one concise sentence.
 AI: Kubernetes is a scalable and modular container orchestration platform that enables easy deployment, management, and scaling of applications.
@@ -1623,9 +1624,9 @@ You [turn 2]: /history
 You [turn 2]: /exit
 [INFO] Chat session ended. Goodbye!</b>
 
-==================================================================
+================================================================================
  [OK] LLM CLI Chat Session Finished.
-==================================================================
+================================================================================
 </pre>
 
 ---

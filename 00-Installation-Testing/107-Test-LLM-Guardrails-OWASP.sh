@@ -11,10 +11,10 @@ fi
 
 fail_exit() { echo -e "$1"; exit 1; }
 
-echo "=================================================================="
+echo "================================================================================"
 echo " [107] LLM Guardrails & OWASP Top 10 for LLM Security Audit"
 echo " Testing: Prompt Injection, Jailbreak Defense & Secret Leakage"
-echo "=================================================================="
+echo "================================================================================"
 
 # Check cluster connectivity first
 if ! kubectl get nodes >/dev/null 2>&1; then
@@ -44,7 +44,7 @@ fi
 
 if [ "$LLAMA_READY" = "false" ]; then
   echo ""
-  echo "--- OWASP Top 10 for LLM Security Test Matrix ---"
+  echo "=== OWASP Top 10 for LLM Security Test Matrix ==="
   echo "1. LLM01 - Direct Prompt Injection: System override instructions"
   echo "2. LLM02 - Sensitive Information Disclosure: Internal credentials & secret leakage"
   echo "3. LLM03 - Adversarial Jailbreak: Unaligned roleplay & safety boundary bypass"
@@ -190,6 +190,6 @@ if passed_count < len(test_cases):
 EOF
 
 echo ""
-echo "=================================================================="
+echo "================================================================================"
 echo " [OK] LLM Guardrails & Security Audit Completed!"
-echo "=================================================================="
+echo "================================================================================"

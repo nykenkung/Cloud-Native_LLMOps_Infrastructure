@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [17] LiteLLM API Gateway
 #  OpenAI-Compatible Multi-Model Router, CNPG Database & Prometheus Metrics
 #
 #  Usage: ./17-LiteLLM-Gateway.sh {-install|-test|-restart|-uninstall}
-# =====================================================================
+# ================================================================================
 set -e
 
 if [ -z "$KUBECONFIG" ]; then

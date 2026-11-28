@@ -11,19 +11,19 @@ fi
 
 fail_exit() { echo -e "$1"; exit 1; }
 
-echo "=================================================================="
+echo "================================================================================"
 echo " [109] Storage CSI, Data Persistence & Self-Healing Benchmark"
 echo " Testing: JuiceFS POSIX I/O, PostgreSQL CNPG, Qdrant PVC & Failover"
-echo "=================================================================="
+echo "================================================================================"
 
 # Check cluster connectivity first
 if ! kubectl get nodes >/dev/null 2>&1; then
   fail_exit "[FAIL] Cannot connect to Kubernetes cluster via KUBECONFIG=${KUBECONFIG:-/etc/rancher/k3s/k3s.yaml}"
 fi
 
-# --- 1. JuiceFS Distributed CSI Storage & I/O Performance ---
+# 1. JuiceFS Distributed CSI Storage & I/O Performance
 echo ""
-echo "--- 1. JuiceFS Distributed CSI Storage & I/O Verification ---"
+echo "=== 1. JuiceFS Distributed CSI Storage & I/O Verification ==="
 
 JUICEFS_SC=$(kubectl get sc cloudflare-juicefs-sc -o jsonpath='{.metadata.name}' 2>/dev/null || echo "")
 if [ -n "$JUICEFS_SC" ]; then
@@ -46,9 +46,9 @@ else
   fail_exit "[FAIL] JuiceFS PVC 'llamacpp-model-pvc' status is not Bound ($LLAMA_PVC)."
 fi
 
-# --- 2. PostgreSQL CloudNativePG High-Availability & Cluster Integrity ---
+# 2. PostgreSQL CloudNativePG High-Availability & Cluster Integrity
 echo ""
-echo "--- 2. CloudNativePG PostgreSQL Enterprise Database Clusters ---"
+echo "=== 2. CloudNativePG PostgreSQL Enterprise Database Clusters ==="
 
 # 2.0 JuiceFS Metadata Database Cluster
 JFS_PG=$(kubectl get cluster -n kube-system cloudflare-juicefs-postgres -o jsonpath='{.status.phase}' 2>/dev/null || echo "Unknown")
@@ -86,9 +86,9 @@ else
   fail_exit "[FAIL] Open-WebUI PostgreSQL cluster not ready ($WEBUI_READY/$WEBUI_INSTANCES instances ready)."
 fi
 
-# --- 3. Qdrant Vector Database Persistent Storage ---
+# 3. Qdrant Vector Database Persistent Storage
 echo ""
-echo "--- 3. Qdrant Vector Database Persistent Volume (PVC) ---"
+echo "=== 3. Qdrant Vector Database Persistent Volume (PVC) ==="
 
 QDRANT_PVC=$(kubectl get pvc -n qdrant -o jsonpath='{.items[0].status.phase}' 2>/dev/null || echo "None")
 QDRANT_CAP=$(kubectl get pvc -n qdrant -o jsonpath='{.items[0].status.capacity.storage}' 2>/dev/null || echo "Unknown")
@@ -99,9 +99,9 @@ else
   fail_exit "[FAIL] Qdrant PVC status is not Bound ($QDRANT_PVC)."
 fi
 
-# --- 4. Workload Self-Healing & Pod Resiliency Health Audit ---
+# 4. Workload Self-Healing & Pod Resiliency Health Audit
 echo ""
-echo "--- 4. Kubernetes Workload Self-Healing & Pod Resiliency Audit ---"
+echo "=== 4. Kubernetes Workload Self-Healing & Pod Resiliency Audit ==="
 
 UNHEALTHY_PODS=$(kubectl get pods -A --field-selector=status.phase!=Running,status.phase!=Succeeded --no-headers 2>/dev/null | wc -l)
 TOTAL_PODS=$(kubectl get pods -A --no-headers 2>/dev/null | wc -l)
@@ -114,6 +114,6 @@ else
 fi
 
 echo ""
-echo "=================================================================="
+echo "================================================================================"
 echo " [OK] Storage CSI, Persistence & Self-Healing Benchmark Finished!"
-echo "=================================================================="
+echo "================================================================================"

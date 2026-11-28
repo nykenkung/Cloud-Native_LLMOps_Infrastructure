@@ -11,10 +11,10 @@ fi
 
 fail_exit() { echo -e "$1"; exit 1; }
 
-echo "=================================================================="
+echo "================================================================================"
 echo " [101] AI Stack End-to-End Pipeline Verification"
 echo " Chain: Qdrant -> llama.cpp ROCm -> LiteLLM Gateway -> WebUI"
-echo "=================================================================="
+echo "================================================================================"
 
 # Check cluster connectivity first
 if ! kubectl get nodes >/dev/null 2>&1; then
@@ -27,7 +27,7 @@ LLAMA_API_KEY="${LLAMA_API_KEY:-$(kubectl get secret -n llamacpp-rocm llamacpp-a
 
 # 1. Qdrant Vector Database Test
 echo ""
-echo "--- 1. Testing Qdrant Vector Database ---"
+echo "=== 1. Testing Qdrant Vector Database ==="
 QDRANT_IP=$(kubectl get svc -n qdrant qdrant -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
             kubectl get svc -n qdrant -l app.kubernetes.io/name=qdrant -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
 
@@ -51,7 +51,7 @@ fi
 
 # 2. llama.cpp ROCm Inference Engine Test
 echo ""
-echo "--- 2. Testing llama.cpp ROCm Inference Engine ---"
+echo "=== 2. Testing llama.cpp ROCm Inference Engine ==="
 LLAMA_IP=$(kubectl get svc -n llamacpp-rocm llamacpp-rocm-svc -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
           kubectl get svc -n llamacpp-rocm -l app.kubernetes.io/name=llamacpp-rocm -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
 
@@ -81,7 +81,7 @@ fi
 
 # 3. LiteLLM API Gateway Test
 echo ""
-echo "--- 3. Testing LiteLLM API Gateway & Database ---"
+echo "=== 3. Testing LiteLLM API Gateway & Database ==="
 LITELLM_IP=$(kubectl get svc -n litellm litellm -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
              kubectl get svc -n litellm -l app.kubernetes.io/name=litellm -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
 
@@ -105,7 +105,7 @@ fi
 
 # 4. Open-WebUI Frontend & Ingress Test
 echo ""
-echo "--- 4. Testing Open-WebUI Frontend & Ingress ---"
+echo "=== 4. Testing Open-WebUI Frontend & Ingress ==="
 WEBUI_IP=$(kubectl get svc -n open-webui open-webui-svc -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
           kubectl get svc -n open-webui -l app.kubernetes.io/name=open-webui -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
 
@@ -128,7 +128,7 @@ fi
 
 # 5. Cloudflare Zero Trust Tunnel & Public Endpoint Test
 echo ""
-echo "--- 5. Testing Cloudflare Zero Trust Tunnel & Public Endpoints ---"
+echo "=== 5. Testing Cloudflare Zero Trust Tunnel & Public Endpoints ==="
 CF_PODS=$(kubectl get pods -n cloudflare-kv --field-selector=status.phase=Running --no-headers 2>/dev/null | grep -i "tunnel" | wc -l)
 if [ "$CF_PODS" -ge 1 ]; then
   echo "[OK] Cloudflare Tunnel is Running ($CF_PODS pods active)"
@@ -145,6 +145,6 @@ else
 fi
 
 echo ""
-echo "=================================================================="
+echo "================================================================================"
 echo " [OK] AI Stack End-to-End Pipeline Verification Finished!"
-echo "=================================================================="
+echo "================================================================================"

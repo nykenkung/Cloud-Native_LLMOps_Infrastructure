@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [6] Tailscale Operator
 #  Tailscale Mesh VPN Operator & ProxyGroup Cross-Network Routing
 #
 #  Usage: ./06-Tailscale-Operator.sh {-install|-test|-restart|-uninstall}
-# =====================================================================
+# ================================================================================
 set -e
 
 if [ -z "$KUBECONFIG" ]; then

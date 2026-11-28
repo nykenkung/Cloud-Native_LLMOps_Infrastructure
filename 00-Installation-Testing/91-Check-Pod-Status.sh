@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [91] Check Cluster Deployment & Pod Status
-#  Inspects ClusterSecretStore, Deployments, StatefulSets, and Pods
-# =====================================================================
+#  Inspects ClusterSecretStore, Deployments, StatefulSets, Pods
+# ================================================================================
 set -e
 
 if [ -z "$KUBECONFIG" ]; then
@@ -13,13 +13,13 @@ if [ -z "$KUBECONFIG" ]; then
   fi
 fi
 
-echo ">>> [1/3] ClusterSecretStore:"
+echo "[1/3] ClusterSecretStore:"
 kubectl get clustersecretstore
 echo ""
 
-echo ">>> [2/3] Deployments & StatefulSets (All Namespaces):"
+echo "[2/3] Deployments & StatefulSets (All Namespaces):"
 kubectl get deploy,sts -A
 echo ""
 
-echo ">>> [3/3] Pods (All Namespaces):"
+echo "[3/3] Pods (All Namespaces):"
 kubectl get pods -A

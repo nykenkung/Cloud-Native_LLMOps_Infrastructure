@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [14] Grafana & Prometheus LGTM Stack
 #  Observability Stack, ServiceMonitors, Dashboards & Ingress
 #
 #  Usage: ./14-Grafana-Prometheus-Stack.sh {-install|-test|-restart|-uninstall}
-# =====================================================================
+# ================================================================================
 set -e
 
 if [ -z "$KUBECONFIG" ]; then

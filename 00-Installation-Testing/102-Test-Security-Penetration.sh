@@ -11,10 +11,10 @@ fi
 
 fail_exit() { echo -e "$1"; exit 1; }
 
-echo "=================================================================="
+echo "================================================================================"
 echo " [102] Security Penetration, NetworkPolicy & Falco Audit"
 echo " Testing: Negative Auth, Zero-Trust Microsegmentation & eBPF Threat"
-echo "=================================================================="
+echo "================================================================================"
 
 # Check cluster connectivity first
 if ! kubectl get nodes >/dev/null 2>&1; then
@@ -30,9 +30,9 @@ QDRANT_IP=$(kubectl get svc -n qdrant qdrant -o jsonpath='{.spec.clusterIP}' 2>/
 LLAMA_IP=$(kubectl get svc -n llamacpp-rocm llamacpp-rocm-svc -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
           kubectl get svc -n llamacpp-rocm -l app.kubernetes.io/name=llamacpp-rocm -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
 
-# --- 1. API Negative Authentication & RBAC Pen-Test ---
+# 1. API Negative Authentication & RBAC Pen-Test
 echo ""
-echo "--- 1. API Negative Authentication & RBAC Defense Pen-Test ---"
+echo "=== 1. API Negative Authentication & RBAC Defense Pen-Test ==="
 
 # 1.1 LiteLLM with invalid token
 if [ -n "$LITELLM_IP" ]; then
@@ -45,7 +45,7 @@ if [ -n "$LITELLM_IP" ]; then
     fail_exit "[FAIL] LiteLLM Security Weakness: Returned HTTP $HTTP_CODE for invalid token"
   fi
 else
-  fail_exit "[FAIL] LiteLLM service IP not found — cannot perform auth pen-test"
+  fail_exit "[FAIL] LiteLLM service IP not found, cannot perform auth pen-test"
 fi
 
 # 1.2 Qdrant without API Key
@@ -58,7 +58,7 @@ if [ -n "$QDRANT_IP" ]; then
     fail_exit "[FAIL] Qdrant Security Weakness: Returned HTTP $HTTP_CODE without authentication"
   fi
 else
-  fail_exit "[FAIL] Qdrant service IP not found — cannot perform auth pen-test"
+  fail_exit "[FAIL] Qdrant service IP not found, cannot perform auth pen-test"
 fi
 
 # 1.3 llama.cpp with invalid Bearer token
@@ -72,12 +72,12 @@ if [ -n "$LLAMA_IP" ]; then
     echo "[INFO] llama.cpp Auth Endpoint Response: HTTP $HTTP_CODE"
   fi
 else
-  fail_exit "[FAIL] llama.cpp service IP not found — cannot perform auth pen-test"
+  fail_exit "[FAIL] llama.cpp service IP not found, cannot perform auth pen-test"
 fi
 
-# --- 2. Kubernetes NetworkPolicy Microsegmentation Test ---
+# 2. Kubernetes NetworkPolicy Microsegmentation Test
 echo ""
-echo "--- 2. NetworkPolicy Zero-Trust Microsegmentation Pen-Test ---"
+echo "=== 2. NetworkPolicy Zero-Trust Microsegmentation Pen-Test ==="
 echo "Deploying unprivileged sandbox pod in default namespace to test lateral movement..."
 
 TEST_POD_NAME="security-pen-test-$(date +%s)"
@@ -109,9 +109,9 @@ fi
 # Cleanup test pod
 kubectl delete pod "$TEST_POD_NAME" --grace-period=0 --force >/dev/null 2>&1 || true
 
-# --- 3. API Gateway Malformed Input & Fuzzing Defense Pen-Test ---
+# 3. API Gateway Malformed Input & Fuzzing Defense Pen-Test
 echo ""
-echo "--- 3. API Gateway Malformed Input & Fuzzing Defense Pen-Test ---"
+echo "=== 3. API Gateway Malformed Input & Fuzzing Defense Pen-Test ==="
 
 if [ -n "$LITELLM_IP" ]; then
   # 3.1 SQL Injection payload fuzzing on LiteLLM Gateway
@@ -139,9 +139,9 @@ else
   fail_exit "[FAIL] Ingress Path Traversal Defense failed: /etc/passwd was leaked!"
 fi
 
-# --- 4. Falco eBPF Runtime Security Sensor Audit ---
+# 4. Falco eBPF Runtime Security Sensor Audit
 echo ""
-echo "--- 4. Falco eBPF Runtime Threat Detection Audit ---"
+echo "=== 4. Falco eBPF Runtime Threat Detection Audit ==="
 FALCO_READY=$(kubectl get daemonset -n falco falco -o jsonpath='{.status.numberReady}' 2>/dev/null || echo "0")
 SIDEKICK_READY=$(kubectl get pods -n falco -l app.kubernetes.io/name=falcosidekick --field-selector=status.phase=Running --no-headers 2>/dev/null | wc -l)
 if [ "${FALCO_READY:-0}" -ge 1 ] && [ "${SIDEKICK_READY:-0}" -ge 1 ]; then
@@ -151,6 +151,6 @@ else
 fi
 
 echo ""
-echo "=================================================================="
+echo "================================================================================"
 echo " [OK] Network & Gateway Penetration Test Completed!"
-echo "=================================================================="
+echo "================================================================================"

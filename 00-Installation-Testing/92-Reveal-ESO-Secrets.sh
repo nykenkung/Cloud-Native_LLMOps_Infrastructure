@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [92] Export Consolidated ESO Secrets for GCP Secret Manager (JSON)
-# =====================================================================
+# ================================================================================
 set -euo pipefail
 
 if [ -z "${KUBECONFIG:-}" ]; then
@@ -116,9 +116,9 @@ def get_secret_data(ns, name):
     return secret_cache[key]
 
 
-print(f"""=====================================================================
+print(f"""================================================================================
  [92] Exporting ESO Secrets for '{gcp_secret_name}'
-=====================================================================""", file=sys.stderr, flush=True)
+================================================================================""", file=sys.stderr, flush=True)
 
 result = {}
 missing = []
@@ -174,10 +174,10 @@ if missing:
     for item in missing:
         print(f"  - {item}", file=sys.stderr)
 else:
-    print(f"""=====================================================================
+    print(f"""================================================================================
  [OK] Successfully exported {len(result)} secret keys
  Next Steps: Upload to Google Cloud Secret Manager
-=====================================================================
+================================================================================
  1. Open: https://console.cloud.google.com/security/secret-manager/secrets
  2. Click "Create secret", set Name to: {gcp_secret_name}
     (If '{gcp_secret_name}' already exists, open it and click "New version".)
@@ -186,5 +186,5 @@ else:
  4. Click "Create secret" / "Add new version".
     * Tip: Disable or destroy older versions to stay within the
       GCP Free Tier limit (<= 6 active secret versions).
-=====================================================================""", file=sys.stderr)
+================================================================================""", file=sys.stderr)
 PYEOF

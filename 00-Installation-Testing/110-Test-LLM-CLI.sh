@@ -9,13 +9,13 @@ if [ -z "${KUBECONFIG:-}" ]; then
   fi
 fi
 
-# =====================================================================
+# ================================================================================
 #  [110] Interactive LLM CLI Chat
 #  Select an available model and start a multi-turn Q&A session
 #  Supports: LiteLLM Gateway (/v1) and llama.cpp direct (/v1)
-# =====================================================================
+# ================================================================================
 
-# --- Configuration ---
+# Configuration
 LITELLM_API_KEY="${LITELLM_API_KEY:-$(kubectl get secret -n litellm my-litellm-postgres-config -o jsonpath='{.data.master-key}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
 LLAMA_API_KEY="${LLAMA_API_KEY:-$(kubectl get secret -n llamacpp-rocm llamacpp-api-key -o jsonpath='{.data.api-key}' 2>/dev/null | base64 -d 2>/dev/null || echo '')}"
 MAX_TOKENS=1024
@@ -24,7 +24,7 @@ HISTORY_FILE="${HOME}/.llm-cli-history"
 LITELLM_BASE=""
 LLAMA_BASE=""
 
-# --- Resolve Service Endpoints ---
+# Resolve Service Endpoints
 resolve_endpoints() {
   LITELLM_IP=$(kubectl get svc -n litellm litellm -o jsonpath='{.spec.clusterIP}' 2>/dev/null || \
                kubectl get svc -n litellm -l app.kubernetes.io/name=litellm -o jsonpath='{.items[0].spec.clusterIP}' 2>/dev/null || echo "")
@@ -39,7 +39,7 @@ resolve_endpoints() {
   fi
 }
 
-# --- Health Check ---
+# Health Check
 check_health() {
   local base_url=$1
   local name=$2
@@ -62,7 +62,7 @@ check_health() {
   return 1
 }
 
-# --- Discover Models ---
+# Discover Models
 discover_models() {
   local models=()
   local sources=()
@@ -145,12 +145,12 @@ discover_models() {
   SOURCE_LIST=("${sorted_sources[@]}")
 }
 
-# --- Model Selection Menu ---
+# Model Selection Menu
 select_model() {
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " [110] Interactive LLM CLI Chat"
-  echo "=================================================================="
+  echo "================================================================================"
 
   if [ ${#MODEL_LIST[@]} -eq 0 ]; then
     echo "[FAIL] No models discovered from LiteLLM or llama.cpp."
@@ -205,7 +205,7 @@ select_model() {
   echo "     Endpoint: ${API_BASE}/v1/chat/completions"
 }
 
-# --- Build JSON Payload ---
+# Build JSON Payload
 build_payload() {
   local messages_json=$1
   cat <<EOF
@@ -219,7 +219,7 @@ build_payload() {
 EOF
 }
 
-# --- Send Chat Completion ---
+# Send Chat Completion
 send_chat() {
   local payload=$1
   local tmpfile curl_code http_code resp content
@@ -309,12 +309,12 @@ except Exception as e:
   fi
 }
 
-# --- Interactive Chat Loop ---
+# Interactive Chat Loop
 run_chat() {
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " LLM Interactive Chat Session"
-  echo "=================================================================="
+  echo "================================================================================"
   echo " Model   : ${SELECTED_MODEL}"
   echo " Backend : ${SELECTED_SOURCE} (${API_BASE})"
   echo " Params  : max_tokens=${MAX_TOKENS}, temperature=${TEMPERATURE}"
@@ -326,7 +326,7 @@ run_chat() {
   echo "   /temp    - Change temperature   (e.g. /temp 0.3)"
   echo "   /history - Show conversation turn count"
   echo "   /exit    - Exit the chat session"
-  echo "=================================================================="
+  echo "================================================================================"
   echo ""
 
   # Conversation history as a JSON array string
@@ -446,13 +446,13 @@ print(json.dumps(msgs))
   done
 }
 
-# --- Main ---
+# Main Program
 main() {
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " [110] Interactive LLM CLI Chat"
   echo "   Select an available model and start a multi-turn Q&A session"
-  echo "=================================================================="
+  echo "================================================================================"
   echo ""
   echo "Discovering available AI backends..."
   echo ""
@@ -475,9 +475,9 @@ main() {
   run_chat
 
   echo ""
-  echo "=================================================================="
+  echo "================================================================================"
   echo " [OK] LLM CLI Chat Session Finished."
-  echo "=================================================================="
+  echo "================================================================================"
 }
 
 main "$@"

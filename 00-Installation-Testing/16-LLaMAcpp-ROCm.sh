@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [16] llama.cpp ROCm Inference Engine
 #  AMD ROCm GPU Acceleration, Model Decoupling & Server Metrics
 #
 #  Usage: ./16-LLaMAcpp-ROCm.sh {-install|-test|-restart|-uninstall}
-# =====================================================================
+# ================================================================================
 set -e
 
 if [ -z "$KUBECONFIG" ]; then

@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [8] Ingress-Nginx Controller
 #  Edge Ingress Controller & Local sslip.io HostNetwork Direct Routing
 #
 #  Usage: ./08-Ingress-Nginx.sh {-install|-test|-restart|-uninstall}
-# =====================================================================
+# ================================================================================
 set -e
 
 if [ -z "$KUBECONFIG" ]; then

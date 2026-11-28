@@ -1,10 +1,10 @@
 #!/usr/bin/env bash
-# =====================================================================
+# ================================================================================
 #  [5] External Secrets Operator (ESO)
 #  Kubernetes External Secrets for Zero-Trust Credential Sync (GCP WIF)
 #
 #  Usage: ./05-External-Secrets-Operator.sh {-install|-test|-restart|-uninstall}
-# =====================================================================
+# ================================================================================
 set -e
 
 if [ -z "$KUBECONFIG" ]; then
