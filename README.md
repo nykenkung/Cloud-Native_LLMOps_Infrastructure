@@ -1004,17 +1004,17 @@ To establish zero-trust remote access:
 
 6. **Deploy & Verify `ClusterSecretStore`:**
    First, edit `05-External-Secrets-Operator/Google-Cloud-Platform-CSS.yaml` and replace `projectID` with your own GCP Project ID. You can obtain your Project ID from:
-   * Look at JSON file `05-External-Secrets-Operator/wif-credentials.json` downloaded from GCP Workload Identity Pool in `Phase 5.3`, copy `service_account_impersonation_url` string value between your GCP Service Account `cisc4900-es-accessor@` and `.iam.gserviceaccount.com` to get your `projectID`.
+   * Look at JSON file `05-External-Secrets-Operator/wif-credentials.json` downloaded from GCP Workload Identity Pool in `Phase 5.3`, copy `service_account_impersonation_url` string value between your GCP Service Account `cisc4900-es-accessor@` and `.iam.gserviceaccount.com` to get your `projectID`
    **or**
-   * Open [Google Cloud Console Dashboard](https://console.cloud.google.com/home/dashboard) and showed in `Project info`.
+   * Open [Google Cloud Console Dashboard](https://console.cloud.google.com/home/dashboard) and showed in `Project info`
 
-   Then, apply the `ClusterSecretStore` manifest and verify connectivity to Google Cloud Secret Manager:
+   Then apply the `ClusterSecretStore` manifest and verify connectivity to Google Cloud Secret Manager:
    ```bash
    kubectl apply -f ~/05-External-Secrets-Operator/Google-Cloud-Platform-CSS.yaml
    kubectl get clustersecretstore gcp-secret-store
 
    ```
-   Confirm the output of `ClusterSecretStore` called `gcp-secret-store` shows **`STATUS: Valid`** | **`READY: True`**:
+   Confirm output of `ClusterSecretStore` called `gcp-secret-store` shows **`STATUS: Valid`** and **`READY: True`**:
    <pre>
    <b>NAME               STATUS   CAPABILITIES   READY</b>
    gcp-secret-store   <b>Valid</b>    ReadWrite      <b>True</b>
